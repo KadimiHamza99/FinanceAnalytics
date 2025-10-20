@@ -105,13 +105,34 @@ class FundamentalAnalysis:
         f = self.formatter
         data = []
         
-        # AJOUT DU PRINT POUR AFFICHER TOUTES LES DONNÉES BRUTES
-        print(Fore.CYAN + "=========================================================")
-        print(Fore.CYAN + f"🚨 DONNÉES BRUTES DE YFINANCE POUR {self.ticker_symbol} 🚨")
-        print(Fore.CYAN + "=========================================================" + Fore.RESET)
-        print(self.info)
-        print(Fore.CYAN + "=========================================================" + Fore.RESET)
-        # FIN DE L'AJOUT
+        # # AJOUT DU PRINT POUR AFFICHER TOUTES LES DONNÉES BRUTES
+        # print(Fore.CYAN + "=========================================================")
+        # print(Fore.CYAN + f"🚨 DONNÉES BRUTES DE YFINANCE POUR {self.ticker_symbol} 🚨")
+        # print(Fore.CYAN + "=========================================================" + Fore.RESET)
+        # # print(self.info)
+        # print(Fore.CYAN + "=========================================================" + Fore.RESET)
+        # # FIN DE L'AJOUT
+
+        # === NOUVELLE SECTION : Infos générales de l'entreprise ===
+        company_name = info.get("shortName") or info.get("longName") or self.ticker_symbol
+        country = info.get("country", "N/A")
+        industry = info.get("industry", "N/A")
+        sector = info.get("sector", "N/A")
+        market_cap = info.get("marketCap", "N/A")
+        currency = info.get("currency", "N/A")
+        # Conversion en milliards si disponible
+        if market_cap is not None:
+            market_cap_display = f"{market_cap / 1e9:.2f}M {currency}"
+        else:
+            market_cap_display = "N/A"
+        print(Fore.MAGENTA + "==================== INFOS ENTREPRISE ====================" + Fore.RESET)
+        print(f"Nom : {company_name}")
+        print(f"Ticker : {self.ticker_symbol}")
+        print(f"Pays : {country}")
+        print(f"Secteur : {sector}")
+        print(f"Industrie : {industry}")
+        print(f"Capitalisation boursière : {market_cap_display}")
+        print(Fore.MAGENTA + "==========================================================" + Fore.RESET)
         
         # Récupère les poids selon le secteur
         weights = self.get_sector_weights()
