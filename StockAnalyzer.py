@@ -36,8 +36,8 @@ class StockAnalyzer:
             df_f, sf = fa.run()
             df_f["Note (/10)"] = df_f["Note (/10)"].apply(f.colorize_score)
             print(Fore.CYAN + "\n=== 🔍 ANALYSE FONDAMENTALE ===" + Style.RESET_ALL)
-            p.afficher_table(df_f, ["Indicateur", "Valeur", "Note (/10)", "Poids (%)", "Interprétation"],
-                             center_cols=["Valeur", "Note (/10)", "Poids (%)"])
+            p.afficher_table(df_f, ["Indicateur", "Valeur", "Note (/10)", "Poids (%)", "Interprétation", "Petite Définition"],
+                            center_cols=["Valeur", "Note (/10)", "Poids (%)"])
             print(f"\nScore fondamental : {f.colorize_percent_score(sf)}")
             print("-"*80)
 
@@ -50,7 +50,7 @@ class StockAnalyzer:
             df_t["Note (/10)"] = df_t["Note (/10)"].apply(f.colorize_score)
             print(Fore.MAGENTA + "\n=== 📈 ANALYSE TECHNIQUE ===" + Style.RESET_ALL)
             p.afficher_table(df_t, ["Indicateur", "Valeur", "Note (/10)", "Poids (%)", "Interprétation"],
-                             center_cols=["Valeur", "Note (/10)", "Poids (%)"])
+                            center_cols=["Valeur", "Note (/10)", "Poids (%)"])
             print(f"\nScore technique : {f.colorize_percent_score(st)}")
             print(f"Recommandation : {reco}")
             print("="*80)
@@ -58,7 +58,7 @@ class StockAnalyzer:
             # === SCORE GLOBAL ===
             sg, txt = self.score_final(sf, st)
             print(Style.BRIGHT + Fore.WHITE + Back.BLUE +
-                  f"   🧮 SCORE GLOBAL PONDÉRÉ : {f.colorize_percent_score(sg)}   " +
-                  Style.RESET_ALL)
+                f"   🧮 SCORE GLOBAL PONDÉRÉ : {f.colorize_percent_score(sg)}   " +
+                Style.RESET_ALL)
             print(f"Interprétation finale : {txt}")
             print("="*80)

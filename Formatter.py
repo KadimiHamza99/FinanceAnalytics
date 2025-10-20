@@ -48,3 +48,4 @@ class Formatter:
             return Fore.YELLOW + f"{score:.2f}/100" + Style.RESET_ALL
         else:
             return Fore.RED + f"{score:.2f}/100" + Style.RESET_ALL
+
