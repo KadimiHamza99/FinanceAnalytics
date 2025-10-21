@@ -23,7 +23,7 @@ class StockAnalyzer:
 
     def run(self):
         f, p = self.f, self.p
-        from FundamentalAnalysis import FundamentalAnalysis
+        from AnalyseFondamentale.FundamentalAnalysis import FundamentalAnalysis
         from TechnicalAnalysis import TechnicalAnalysis
 
         for ticker in self.tickers:

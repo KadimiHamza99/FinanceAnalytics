@@ -4,29 +4,15 @@ from StockAnalyzer import StockAnalyzer
 if __name__ == "__main__":
     # Liste par défaut si aucun ticker n'est fourni
     default_tickers = [
-        ##### ENERGY ######
-        "TTE.PA",
-        "BP",
-        "XOM",
-        "EQNR.OL",
-        "ENI.MI",
-        "CVX"
-        # "PRX.AS", 
-        # "BNP.PA", 
-        # "INGA.AS", 
-        # "NN.AS", 
-        # "PHIA.AS", 
-        # "ASML.AS", 
-        # "RNO.PA", 
-        # "VOW3.DE", 
-        # "FRE.DE", 
-        # "VIE.PA", 
-        # "SGO.PA", 
-        # "EOAN.DE", 
-        # "ADS.DE",
-        # "SAP.DE",
-        # "BVI.PA",
-        # "DG.PA"
+        # "GALP.LS",  # Galp Energia 
+
+        # "SAN.PA",   # Sanofi 
+        "NOV.F",   # NOVO NORDISK 
+        # "RMS.PA",   # Hermès  
+
+        # "CAP.PA",   # Capgemini
+
+        # "BNP.PA",   # BNP Paribas 
     ]
 
     parser = argparse.ArgumentParser(description="Analyse des actions.")
