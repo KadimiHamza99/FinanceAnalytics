@@ -68,10 +68,8 @@ class TechnicalAnalysis:
 
         reco = IndicatorEvaluator._global_interpretation(df, score_total)
 
-        # mistralResponse = self.ollama.ask(Utils.askMistralTechnicalAnalysisPrompt(rsi, macd_val, ema200, bb_l, bb_m, bb_h, close))
-
-        Utils.askMistralTechnicalAnalysis(rsi, macd_val, ema200, bb_l, bb_m, bb_h, stoch_k, stoch_d, obv, adx, close)
-        print(f"Prix Actuel : {close}")
+        # Utils.askMistralTechnicalAnalysis(rsi, macd_val, ema200, bb_l, bb_m, bb_h, stoch_k, stoch_d, obv, adx, close)
+        print(f"Prix Actuel en bourse : {close}")
         return df, score_total, reco
 
     def _make_row(self, name, value, note, interp, weight):
