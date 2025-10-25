@@ -4,6 +4,7 @@ from colorama import Fore
 from Formatter import Formatter 
 from AnalyseFondamentale.IndicatorInterpreter import IndicatorInterpreter
 from AnalyseFondamentale.Utils import Utils
+import math
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -54,11 +55,36 @@ class FundamentalAnalysis:
             "Rentabilité par rapport aux actifs")
 
         # === Forward P/E === (PLUS DE CATÉGORIES)
+        sector = self.sector
         forward_pe = info.get("forwardPE")
-        note, interp = self.interpreter.interpret_forward_pe(forward_pe, self.sector)
-        if(forward_pe == None) : forward_pe = "N/A"
-        else: forward_pe = f"{forward_pe:.1f}x"
-        Utils.add_indicator(data, weights,"Forward P/E",forward_pe,note,interp,
+        if forward_pe is None:
+            current_price = info.get("currentPrice")
+            trailing_eps = info.get("trailingEps")
+            earnings_growth = info.get("earningsGrowth")
+            if (current_price is not None and trailing_eps is not None and earnings_growth is not None
+                and trailing_eps != 0 and (current_price > 0)):
+                
+                try:
+                    forward_eps_estimated = trailing_eps * (1 + earnings_growth)
+                    
+                    if forward_eps_estimated > 0:
+                        forward_pe = current_price / forward_eps_estimated
+                    else:
+                        forward_pe = None 
+
+                except (TypeError, ZeroDivisionError):
+                    forward_pe = None 
+
+        note = "N/A"
+        interp = "Donnée non disponible ou non calculable."
+
+        if forward_pe is not None and isinstance(forward_pe, (int, float)) and math.isfinite(forward_pe) and forward_pe > 0:
+            note, interp = self.interpreter.interpret_forward_pe(forward_pe, sector)
+            forward_pe_display = f"{forward_pe:.1f}x"
+        else:
+            forward_pe_display = "N/A"
+
+        Utils.add_indicator(data,  weights,"Forward P/E", forward_pe_display,note,interp,
             "Ratio cours/bénéfices anticipé pour l'année suivante",
             "Valorisation future anticipée de l'action"
         )

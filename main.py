@@ -2,6 +2,7 @@ import argparse
 from StockAnalyzer import StockAnalyzer
 
 if __name__ == "__main__":
+
     # Liste par défaut si aucun ticker n'est fourni
     default_tickers = [
         # "GALP.LS",  # Galp Energia 

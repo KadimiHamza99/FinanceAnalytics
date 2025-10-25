@@ -10,7 +10,7 @@ class StockAnalyzer:
 
     def score_final(self, fond, tech):
         f = self.f
-        score = fond * 0.75 + tech * 0.25
+        score = fond * 0.7 + tech * 0.3
         if score >= 80:
             txt = Fore.GREEN + Style.BRIGHT + "💚 Excellent profil global — Opportunité d'achat (FAIBLE RISQUE)"
         elif score >= 65:
@@ -24,7 +24,7 @@ class StockAnalyzer:
     def run(self):
         f, p = self.f, self.p
         from AnalyseFondamentale.FundamentalAnalysis import FundamentalAnalysis
-        from TechnicalAnalysis import TechnicalAnalysis
+        from AnalyseTechnique.TechnicalAnalysis import TechnicalAnalysis
 
         for ticker in self.tickers:
             print(Style.BRIGHT + Fore.WHITE + "\n" + "="*80)
