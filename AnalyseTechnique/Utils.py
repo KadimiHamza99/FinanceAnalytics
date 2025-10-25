@@ -1,9 +1,8 @@
 import yfinance as yf
 import pandas as pd
 import ta
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-import os
+import subprocess
+from OllamaSession import OllamaSession
 
 class Utils:
 
@@ -58,57 +57,29 @@ class Utils:
         return data.dropna().bfill().ffill()
     
 
+
     @staticmethod
-    def deepSeekPrediction(rsi, macd, ema200, bb_l, bb_h, bb_m, prix_actuel):
-        """
-        Analyse technique ultra-rapide CPU avec modèle léger (~500Mo).
-        """
-        import torch
-        from transformers import AutoTokenizer, AutoModelForCausalLM
-
-        print("⚡ Chargement du modèle léger distilgpt2...")
-
-        model_name = "distilgpt2"  # modèle très léger
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name)
-
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
-
-        model.eval()
-        print("✅ Modèle chargé instantanément!")
+    def askMistralTechnicalAnalysis(rsi, macd, ema200, bb_l, bb_h, bb_m, stoch_k, stoch_d, obv, adx, prix_actuel):
 
         # Prompt structuré pour guider le modèle
-        prompt = (
-            f"You are a financial technical analysis assistant.\n"
-            f"Indicators:\n"
-            f"RSI = {rsi}\n"
-            f"MACD = {macd:.3f}\n"
-            f"EMA200 = {ema200:.2f}\n"
-            f"Bollinger Bands Low = {bb_l:.2f}, Middle = {bb_m:.2f}, High = {bb_h:.2f}\n"
-            f"Current Price = {prix_actuel:.2f}\n\n"
-            f"Provide a concise technical analysis based on these indicators:\n"
-        )
+        prompt = f"""<s>[INST] Tu es un analyste boursier expert en stratégie long terme.
 
-        inputs = tokenizer(prompt, return_tensors="pt")
+            Indicateurs techniques :
+            - RSI: {rsi:.2f}
+            - OBV: {obv:.2f}
+            - ADX: {adx:.2f}
+            - STOCH K/D: {stoch_k:.2f}/{stoch_d:.2f}
+            - MACD: {macd:.3f}
+            - EMA200: {ema200:.2f}
+            - Bollinger: {bb_l:.2f} | {bb_m:.2f} | {bb_h:.2f}
+            - Prix: {prix_actuel:.2f}
 
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=80,
-                temperature=0.7,
-                do_sample=True,
-                top_p=0.9,
-                pad_token_id=tokenizer.eos_token_id
-            )
+            Analyse sévére et objective pour position longue, proposes moi des points d'entrée au niveau des supports calculés.
+            Réponse UNIQUEMENT dans ce format :
 
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            Conclusion : [phrase unique] \n
+            Point d'entrée recommandé : [prix ou plage] [/INST]
+        """
 
-        # Nettoyage du prompt
-        if "analysis:" in response.lower():
-            response = response.split("analysis:")[-1].strip()
-
-        print("\n📊 Analyse technique générée :")
-        print(response)
-
-        return response
+        # OllamaSession.ask("gemma2:2b",prompt)
+        OllamaSession.ask("mistral:7b",prompt)

@@ -1,8 +1,5 @@
-import yfinance as yf
 import pandas as pd
 import numpy as np
-import ta
-from colorama import Fore, Style
 from AnalyseTechnique.IndicatorEvaluator import IndicatorEvaluator
 from AnalyseTechnique.Utils import Utils
 
@@ -71,8 +68,10 @@ class TechnicalAnalysis:
 
         reco = IndicatorEvaluator._global_interpretation(df, score_total)
 
-        # Utils.deepSeekPrediction(rsi, macd_val, ema200, bb_l, bb_m, bb_h, close)
+        # mistralResponse = self.ollama.ask(Utils.askMistralTechnicalAnalysisPrompt(rsi, macd_val, ema200, bb_l, bb_m, bb_h, close))
 
+        Utils.askMistralTechnicalAnalysis(rsi, macd_val, ema200, bb_l, bb_m, bb_h, stoch_k, stoch_d, obv, adx, close)
+        print(f"Prix Actuel : {close}")
         return df, score_total, reco
 
     def _make_row(self, name, value, note, interp, weight):
