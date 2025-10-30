@@ -12,3 +12,4 @@ yfinance
 
 # Mise en couleur dans la console
 colorama
+tabulate
