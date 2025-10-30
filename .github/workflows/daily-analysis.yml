@@ -2,9 +2,9 @@ name: Daily Stock Analysis (from repo)
 
 on:
   schedule:
-    # Cron en UTC ; 07:00 UTC (~08:00 Paris)
+    # Cron en UTC ; ici "0 7 * * *" -> 07:00 UTC (= 08:00 heure de Paris)
     - cron: '0 7 * * *'
-  workflow_dispatch: {}  # lancement manuel
+  workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
 
 jobs:
   analysis:
@@ -21,6 +21,24 @@ jobs:
 
       - name: Install dependencies
         run: |
+          echo "Mise à jour de pip et installation des dépendances..."
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          echo "✅ Installation terminée."
+
+      - name: Run stock analysis and capture output
+        run: |
+          echo "---- Début d'exécution du script ----"
+          mkdir -p output
+          echo "Répertoire courant : $(pwd)"
+          echo "Contenu du dépôt :"
+          ls -l
+          echo "Exécution de main.py..."
+          python main.py --file tickers.txt > output/console.txt 2>&1 || true
+          echo "---- Exécution terminée ----"
+          echo "Contenu du dossier output :"
+          ls -l output || echo "⚠️ Aucun dossier 'output' trouvé."
+          echo "---- Aperçu du log ----"
+          head -n 20 output/console.txt || echo "⚠️ Aucun fichier console.txt trouvé."
+
 
