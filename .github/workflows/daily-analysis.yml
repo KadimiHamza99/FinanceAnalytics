@@ -48,19 +48,19 @@ jobs:
           path: output/console.txt
           if-no-files-found: warn
 
-      # - name: Send result by email (SMTP)
-      #   if: always()  # on envoie le mail même si le script échoue
-      #   uses: dawidd6/action-send-mail@v3
-      #   with:
-      #     server_address: ${{ secrets.SMTP_SERVER }}
-      #     server_port: ${{ secrets.SMTP_PORT }}
-      #     username: ${{ secrets.SMTP_USER }}
-      #     password: ${{ secrets.SMTP_PASS }}
-      #     from: ${{ secrets.EMAIL_FROM }}
-      #     to: ${{ secrets.EMAIL_TO }}
-      #     subject: "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})"
-      #     secure: true
-      #     body: |
-      #       Résultat de l'analyse quotidienne :
+      - name: Send result by email (SMTP)
+        if: always()  # on envoie le mail même si le script échoue
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASS }}
+          from: ${{ secrets.EMAIL_FROM }}
+          to: ${{ secrets.EMAIL_TO }}
+          subject: "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})"
+          secure: true
+          body: |
+            Résultat de l'analyse quotidienne :
 
-      #       $(cat output/console.txt || echo "⚠️ Aucun résultat généré.")
+            $(cat output/console.txt || echo "⚠️ Aucun résultat généré.")
