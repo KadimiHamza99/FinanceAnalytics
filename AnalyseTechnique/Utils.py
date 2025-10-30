@@ -80,4 +80,4 @@ class Utils:
             Point d'entrée recommandé : [prix ou plage] [/INST]
         """
 
-        return OllamaSession.ask(prompt)
+        return OllamaSession.ask("mistral:7b",prompt)
