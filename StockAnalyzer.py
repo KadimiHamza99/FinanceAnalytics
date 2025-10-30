@@ -92,5 +92,5 @@ class StockAnalyzer:
             print("="*80)
 
             if sf > 75:
-                SendNotification.send(f"{company_name} : {llm_reco}")
+                SendNotification.send(f"{company_name} : {llm_reco} \n Le score technique attribué : {st}/100")
 

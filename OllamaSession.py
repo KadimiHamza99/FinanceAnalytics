@@ -16,7 +16,7 @@ class OllamaSession:
                     "prompt": prompt,
                     "stream": False  # Important pour avoir la réponse complète en une fois
                 },
-                timeout=160
+                timeout=180
             )
             
             if response.status_code != 200:
