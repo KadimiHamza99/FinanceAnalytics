@@ -23,6 +23,13 @@ jobs:
       - name: Install Ollama
         run: |
           curl -fsSL https://ollama.com/install.sh | sudo sh
+      - name: Cache Ollama models
+        uses: actions/cache@v3
+        with:
+          path: /usr/share/ollama/.ollama/models
+          key: ollama-models-${{ hashFiles('**/ollama-models-cache-key') }}
+          restore-keys: |
+            ollama-models-
       - name: Start Ollama Server
         run: |
           ollama serve &
