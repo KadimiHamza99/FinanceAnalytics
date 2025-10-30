@@ -181,4 +181,4 @@ class FundamentalAnalysis:
         df["Score pondéré"] = df["Note (/10)"] * df["Poids (%)"] / 10
         score_total = df["Score pondéré"].sum()
 
-        return df, score_total
+        return df, score_total, info.get("shortName") or info.get("longName")

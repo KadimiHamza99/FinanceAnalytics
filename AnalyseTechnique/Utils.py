@@ -1,7 +1,6 @@
 import yfinance as yf
 import pandas as pd
 import ta
-import subprocess
 from OllamaSession import OllamaSession
 
 class Utils:
@@ -80,7 +79,5 @@ class Utils:
             Conclusion : [phrase unique] \n
             Point d'entrée recommandé : [prix ou plage] [/INST]
         """
-
-        # OllamaSession.ask("gemma2:2b",prompt)
-        # OllamaSession.ask("mistral:7b",prompt)
+        
         return OllamaSession.ask_http("mistral:7b",prompt)

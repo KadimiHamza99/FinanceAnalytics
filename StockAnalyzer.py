@@ -39,7 +39,7 @@ class StockAnalyzer:
             # === FONDAMENTALE ===
             try:
                 fa = FundamentalAnalysis(ticker)
-                df_f, sf = fa.run()
+                df_f, sf, company_name = fa.run()
                 df_f["Note (/10)"] = df_f["Note (/10)"].apply(f.colorize_score)
                 print(Fore.CYAN + "\n=== 🔍 ANALYSE FONDAMENTALE ===" + Style.RESET_ALL)
                 p.afficher_table(
@@ -58,7 +58,7 @@ class StockAnalyzer:
             # === TECHNIQUE ===
             try:
                 ta = TechnicalAnalysis(ticker)
-                df_t, st, reco = ta.run()
+                df_t, st, reco, llm_reco = ta.run()
 
                 if df_t is None or df_t.empty:
                     print(Fore.RED + "❌ Données techniques non disponibles." + Style.RESET_ALL)
@@ -92,7 +92,7 @@ class StockAnalyzer:
 
             print("="*80)
 
-            if sg > 65:
-                watch_list_tickers.append(ticker)
+            if sf > 75:
+                watch_list_tickers.append(f"{company_name} : {llm_reco}")
 
         return watch_list_tickers
