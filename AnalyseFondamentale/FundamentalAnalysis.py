@@ -5,7 +5,6 @@ from Formatter import Formatter
 from AnalyseFondamentale.IndicatorInterpreter import IndicatorInterpreter
 from AnalyseFondamentale.Utils import Utils
 import math
-from AnalyseFondamentale.SmartDataValidator import SmartDataValidator
 
 
 import warnings
@@ -24,7 +23,6 @@ class FundamentalAnalysis:
         self.formatter = Formatter()
         self.sector = self.info.get('sector', 'Général')
         self.interpreter = IndicatorInterpreter()
-        self.dataSmartValidator = SmartDataValidator()
 
     def run(self):
         info = self.info
@@ -44,7 +42,6 @@ class FundamentalAnalysis:
         weights = Utils.get_sector_weights(self.sector)
 
         # === ROE === (PLUS DE CATÉGORIES)
-        # roe = self.dataSmartValidator.validate_indicator(self.ticker_symbol, info.get("shortName") or info.get("longName"), "Return on equity", info.get("returnOnEquity"))
         roe = info.get("returnOnEquity")
         note, interp = self.interpreter.interpret_roe(roe, self.sector)
         Utils.add_indicator(data, weights, "ROE", f.format_pourcentage(roe), note, interp, 
@@ -52,7 +49,6 @@ class FundamentalAnalysis:
             "Rentabilité des capitaux propres")
 
         # === ROA === (PLUS DE CATÉGORIES)
-        # roa = self.dataSmartValidator.validate_indicator(self.ticker_symbol, info.get("shortName") or info.get("longName"), "Return on assets", info.get("returnOnAssets"))
         roa = info.get("returnOnAssets")
         note, interp = self.interpreter.interpret_roa(roa, self.sector)
         Utils.add_indicator(data, weights,"ROA", f.format_pourcentage(roa), note, interp, 
@@ -102,8 +98,7 @@ class FundamentalAnalysis:
             "PER sur 12 mois")
 
         # === Beta === (PLUS DE CATÉGORIES)
-        # beta = info.get("beta")
-        beta = self.dataSmartValidator.validate_indicator(self.ticker_symbol, info.get("shortName") or info.get("longName"), "Beta coefficient", info.get("Beta"))
+        beta = info.get("beta")
         note, interp = self.interpreter.interpret_beta(beta, self.sector)
         Utils.add_indicator(data, weights,"Beta", f"{beta:.2f}" if beta else "N/A", note, interp,
             "Beta - Mesure la volatilité de l'action par rapport au marché (indice de référence S&P 500). "

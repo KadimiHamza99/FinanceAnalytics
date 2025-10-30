@@ -83,4 +83,4 @@ class Utils:
 
         # OllamaSession.ask("gemma2:2b",prompt)
         # OllamaSession.ask("mistral:7b",prompt)
-        OllamaSession.ask_http("mistral:7b",prompt)
+        return OllamaSession.ask_http("mistral:7b",prompt)

@@ -68,7 +68,7 @@ class TechnicalAnalysis:
 
         reco = IndicatorEvaluator._global_interpretation(df, score_total)
 
-        # Utils.askMistralTechnicalAnalysis(rsi, macd_val, ema200, bb_l, bb_m, bb_h, stoch_k, stoch_d, obv, adx, close)
+        # print(Utils.askMistralTechnicalAnalysis(rsi, macd_val, ema200, bb_l, bb_m, bb_h, stoch_k, stoch_d, obv, adx, close))
         print(f"Prix Actuel en bourse : {close}")
         return df, score_total, reco
 
