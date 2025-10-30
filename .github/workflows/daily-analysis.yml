@@ -1,0 +1,66 @@
+name: Daily Stock Analysis (from repo)
+
+on:
+  schedule:
+    # Cron en UTC ; ici "0 7 * * *" -> 07:00 UTC (= 08:00 heure de Paris)
+    - cron: '0 7 * * *'
+  workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
+
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          echo "Mise à jour de pip et installation des dépendances..."
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          echo "✅ Installation terminée."
+
+      - name: Run stock analysis and capture output
+        run: |
+          echo "---- Début d'exécution du script ----"
+          mkdir -p output
+          echo "Répertoire courant : $(pwd)"
+          echo "Contenu du dépôt :"
+          ls -l
+          echo "Exécution de main.py..."
+          python main.py --file tickers.txt > output/console.txt 2>&1 || true
+          echo "---- Exécution terminée ----"
+          echo "Contenu du dossier output :"
+          ls -l output || echo "⚠️ Aucun dossier 'output' trouvé."
+          echo "---- Aperçu du log ----"
+          head -n 20 output/console.txt || echo "⚠️ Aucun fichier console.txt trouvé."
+
+      - name: Upload analysis log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-analysis-log
+          path: output/console.txt
+          if-no-files-found: warn
+
+      # - name: Send result by email (SMTP)
+      #   if: always()  # on envoie le mail même si le script échoue
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: ${{ secrets.SMTP_SERVER }}
+      #     server_port: ${{ secrets.SMTP_PORT }}
+      #     username: ${{ secrets.SMTP_USER }}
+      #     password: ${{ secrets.SMTP_PASS }}
+      #     from: ${{ secrets.EMAIL_FROM }}
+      #     to: ${{ secrets.EMAIL_TO }}
+      #     subject: "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})"
+      #     secure: true
+      #     body: |
+      #       Résultat de l'analyse quotidienne :
+
+      #       $(cat output/console.txt || echo "⚠️ Aucun résultat généré.")
