@@ -1,4 +1,5 @@
 from colorama import Fore, Style, Back
+from SendNotification import SendNotification
 
 class StockAnalyzer:
     def __init__(self, tickers):
@@ -25,8 +26,6 @@ class StockAnalyzer:
         f, p = self.f, self.p
         from AnalyseFondamentale.FundamentalAnalysis import FundamentalAnalysis
         from AnalyseTechnique.TechnicalAnalysis import TechnicalAnalysis
-
-        watch_list_tickers = []
 
         for ticker in self.tickers:
             print(Style.BRIGHT + Fore.WHITE + "\n" + "="*80)
@@ -93,6 +92,5 @@ class StockAnalyzer:
             print("="*80)
 
             if sf > 75:
-                watch_list_tickers.append(f"{company_name} : {llm_reco}")
+                SendNotification.send(f"{company_name} : {llm_reco}")
 
-        return watch_list_tickers

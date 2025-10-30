@@ -41,8 +41,5 @@ if __name__ == "__main__":
 
     app = StockAnalyzer(tickers)
 
-    recommandationMessages = app.run()
-    if(recommandationMessages is not None) :
-        for recommandationMessage in recommandationMessages:
-            SendNotification.send(recommandationMessage)
+    app.run()
     
