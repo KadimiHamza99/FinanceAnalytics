@@ -1,6 +1,7 @@
 import argparse
 from StockAnalyzer import StockAnalyzer
 import os
+from SendNotification import SendNotification
 
 if __name__ == "__main__":
 
@@ -39,4 +40,9 @@ if __name__ == "__main__":
             print(f"⚠️ Fichier '{args.file}' introuvable, utilisation des tickers par défaut.")
 
     app = StockAnalyzer(tickers)
-    app.run()
+
+    notifTickers = app.run()
+    if(notifTickers is not None) :
+        for notifTicker in notifTickers:
+            SendNotification.send(notifTicker)
+    

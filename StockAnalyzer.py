@@ -26,6 +26,8 @@ class StockAnalyzer:
         from AnalyseFondamentale.FundamentalAnalysis import FundamentalAnalysis
         from AnalyseTechnique.TechnicalAnalysis import TechnicalAnalysis
 
+        watch_list_tickers = []
+
         for ticker in self.tickers:
             print(Style.BRIGHT + Fore.WHITE + "\n" + "="*80)
             print(f"--- 📊 Analyse détaillée de {ticker} ---")
@@ -62,3 +64,8 @@ class StockAnalyzer:
                 Style.RESET_ALL)
             print(f"Interprétation finale : {txt}")
             print("="*80)
+
+            if(sg > 65) :
+                watch_list_tickers.append(ticker)
+        return watch_list_tickers
+

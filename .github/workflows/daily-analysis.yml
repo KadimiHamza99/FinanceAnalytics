@@ -24,21 +24,3 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run stock analysis and capture output
-        run: |
-          mkdir -p output
-          python main.py --file tickers.txt > output/console.txt 2>&1 || true
-
-      - name: Upload analysis log as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: stock-analysis-log
-          path: output/console.txt
-          if-no-files-found: warn
-
-      - name: Create GitHub issue with analysis log
-        uses: peter-evans/create-issue-from-file@v4
-        with:
-          title: "📊 Daily Stock Analysis - Run #${{ github.run_number }}"
-          content-filepath: output/console.txt
-          labels: "daily-report"
