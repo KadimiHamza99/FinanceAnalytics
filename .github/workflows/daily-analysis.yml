@@ -2,9 +2,9 @@ name: Daily Stock Analysis (from repo)
 
 on:
   schedule:
-    # Cron en UTC ; ici "0 7 * * *" -> 07:00 UTC (= 08:00 heure de Paris)
+    # Cron en UTC ; 07:00 UTC (~08:00 Paris)
     - cron: '0 7 * * *'
-  workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
+  workflow_dispatch: {}  # lancement manuel
 
 jobs:
   analysis:
@@ -21,25 +21,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "Mise à jour de pip et installation des dépendances..."
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          echo "✅ Installation terminée."
 
       - name: Run stock analysis and capture output
         run: |
-          echo "---- Début d'exécution du script ----"
           mkdir -p output
-          echo "Répertoire courant : $(pwd)"
-          echo "Contenu du dépôt :"
-          ls -l
-          echo "Exécution de main.py..."
           python main.py --file tickers.txt > output/console.txt 2>&1 || true
-          echo "---- Exécution terminée ----"
-          echo "Contenu du dossier output :"
-          ls -l output || echo "⚠️ Aucun dossier 'output' trouvé."
-          echo "---- Aperçu du log ----"
-          head -n 20 output/console.txt || echo "⚠️ Aucun fichier console.txt trouvé."
 
       - name: Upload analysis log as artifact
         uses: actions/upload-artifact@v4
@@ -48,18 +36,9 @@ jobs:
           path: output/console.txt
           if-no-files-found: warn
 
-      - name: Send result via Resend API
-        if: always()
-        run: |
-          echo "Envoi du rapport via Resend..."
-          CURL_BODY=$(jq -n \
-            --arg from "hamzakadimi1999@gmail.com" \
-            --arg to "hamzakadimi1999@gmail.com" \
-            --arg subj "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})" \
-            --arg text "$(cat output/console.txt || echo '⚠️ Aucun résultat généré.')" \
-            '{ from: $from, to: [$to], subject: $subj, html: ("<pre>"+$text+"</pre>") }'
-          )
-          curl -X POST https://api.resend.com/emails \
-            -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            --data "$CURL_BODY"
+      - name: Create GitHub issue with analysis log
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: "📊 Daily Stock Analysis - Run #${{ github.run_number }}"
+          content-filepath: output/console.txt
+          labels: "daily-report"
