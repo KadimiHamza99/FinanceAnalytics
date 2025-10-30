@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      # ✅ Cache pip (basé sur le contenu de requirements.txt)
+      # ✅ Cache pip
       - name: Cache Python dependencies
         uses: actions/cache@v4
         with:
@@ -34,7 +34,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           echo "✅ Installation terminée."
 
-      # ✅ Cache Ollama installation et modèles
+      # ✅ Cache Ollama et modèles
       - name: Cache Ollama and models
         uses: actions/cache@v4
         with:
@@ -74,5 +74,20 @@ jobs:
           echo "---- Exécution terminée ----"
           echo "Contenu du dossier output :"
           ls -l output || echo "⚠️ Aucun dossier 'output' trouvé."
-          echo "---- Aperçu du log ----"
+          echo "---- Aperçu du log (20 premières lignes) ----"
           head -n 20 output/console.txt || echo "⚠️ Aucun fichier console.txt trouvé."
+
+      # ✅ Affiche le log complet dans les logs GitHub Actions
+      - name: Show full Python log
+        if: always()
+        run: |
+          echo "---- LOG PYTHON COMPLET ----"
+          cat output/console.txt || echo "⚠️ Aucun log trouvé."
+
+      # ✅ Sauvegarde le log complet comme artefact téléchargeable
+      - name: Upload logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-logs
+          path: output/console.txt
