@@ -55,7 +55,7 @@ jobs:
           server_address: smtp.sendgrid.net
           server_port: 587
           username: apikey
-          password: "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"
+          password: "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"
           from: ${{ secrets.EMAIL_FROM }}
           to: ${{ secrets.EMAIL_TO }}
           subject: "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})"
