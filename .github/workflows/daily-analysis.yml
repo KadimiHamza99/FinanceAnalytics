@@ -59,7 +59,7 @@ jobs:
           from: ${{ secrets.EMAIL_FROM }}
           to: ${{ secrets.EMAIL_TO }}
           subject: "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})"
-          secure: true
+          secure: false
           body: |
             Résultat de l'analyse quotidienne :
 
