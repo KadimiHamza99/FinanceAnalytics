@@ -48,19 +48,18 @@ jobs:
           path: output/console.txt
           if-no-files-found: warn
 
-      - name: Send results via SendGrid
+      - name: Send result via Resend API
         if: always()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.sendgrid.net
-          server_port: 587
-          username: apikey
-          password: ${{ secrets.SENDGRID_PASS }}
-          from: hamzakadimi1999@gmail.com
-          to: hamzakadimi1999@gmail.com
-          subject: "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})"
-          body: |
-            Résultat de l'analyse quotidienne :
-
-            $(cat output/console.txt || echo "⚠️ Aucun résultat généré.")
-          secure: false
+        run: |
+          echo "Envoi du rapport via Resend..."
+          CURL_BODY=$(jq -n \
+            --arg from "hamzakadimi1999@gmail.com" \
+            --arg to "hamzakadimi1999@gmail.com" \
+            --arg subj "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})" \
+            --arg text "$(cat output/console.txt || echo '⚠️ Aucun résultat généré.')" \
+            '{ from: $from, to: [$to], subject: $subj, html: ("<pre>"+$text+"</pre>") }'
+          )
+          curl -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            --data "$CURL_BODY"
