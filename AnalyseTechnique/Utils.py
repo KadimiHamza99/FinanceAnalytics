@@ -79,5 +79,5 @@ class Utils:
             Conclusion : [phrase unique] \n
             Point d'entrée recommandé : [prix ou plage] [/INST]
         """
-        
-        return OllamaSession.ask_http("mistral:7b",prompt)
+
+        return OllamaSession.ask(prompt)

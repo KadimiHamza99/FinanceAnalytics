@@ -2,49 +2,66 @@ name: Daily Stock Analysis (from repo)
 on:
   schedule:
     # Cron en UTC ; ici "0 7 * * *" -> 07:00 UTC (= 08:00 heure de Paris)
-    - cron: '0 7 * * *'
+    - cron: '0 9 * * *'
   workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
+
 jobs:
   analysis:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      # ✅ Cache pip (basé sur le contenu de requirements.txt)
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           echo "Mise à jour de pip et installation des dépendances..."
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           echo "✅ Installation terminée."
+
+      # ✅ Cache Ollama installation et modèles
+      - name: Cache Ollama and models
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.ollama
+          key: ${{ runner.os }}-ollama-mistral-7b
+          restore-keys: |
+            ${{ runner.os }}-ollama-
+
       - name: Install Ollama
         run: |
-          curl -fsSL https://ollama.com/install.sh | sudo sh
-      - name: Cache Ollama models
-        uses: actions/cache@v3
-        with:
-          path: /usr/share/ollama/.ollama/models
-          key: ollama-models-${{ hashFiles('**/ollama-models-cache-key') }}
-          restore-keys: |
-            ollama-models-
-      - name: Start Ollama Server
-        run: |
-          ollama serve &
-          sleep 5
-          # Attendre que le serveur Ollama soit prêt
-          for i in {1..10}; do
-            if curl -s http://localhost:11434; then
-              echo "Ollama is ready"
-              break
-            fi
-            echo "Waiting for Ollama to be ready..."
-            sleep 5
-          done
+          if ! command -v ollama &> /dev/null; then
+            echo "Installation d’Ollama..."
+            curl -fsSL https://ollama.com/install.sh | sudo sh
+          else
+            echo "Ollama déjà installé, passage à la suite."
+          fi
+
       - name: Pull Mistral model
-        run: ollama pull mistral:7b
+        run: |
+          if [ ! -d ~/.ollama/models/mistral ]; then
+            echo "Téléchargement du modèle Mistral..."
+            ollama pull mistral:7b
+          else
+            echo "Modèle Mistral déjà présent dans le cache."
+          fi
+
       - name: Run stock analysis and capture output
         run: |
           echo "---- Début d'exécution du script ----"
