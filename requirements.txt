@@ -1,0 +1,14 @@
+# requirements.txt
+
+# Manipulation et analyse de données
+pandas
+numpy
+
+# Analyse technique
+ta
+
+# Téléchargement de données boursières
+yfinance
+
+# Mise en couleur dans la console
+colorama
