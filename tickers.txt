@@ -1,4 +1,7 @@
 AI.PA
-
-
-
+AIR.PA
+ALO.PA
+CS.PA
+CA.PA
+BNP.PA
+EL.PA
