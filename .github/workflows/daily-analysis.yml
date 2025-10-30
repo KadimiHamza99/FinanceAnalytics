@@ -56,8 +56,8 @@ jobs:
           server_port: 587
           username: apikey
           password: ${{ secrets.SENDGRID_PASS }}
-          from: ${{ secrets.EMAIL_FROM }}
-          to: ${{ secrets.EMAIL_TO }}
+          from: hamzakadimi1999@gmail.com
+          to: hamzakadimi1999@gmail.com
           subject: "📊 Daily Stock Analysis - Run #${{ github.run_number }} (${{ github.repository }})"
           body: |
             Résultat de l'analyse quotidienne :
