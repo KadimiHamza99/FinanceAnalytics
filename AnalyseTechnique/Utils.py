@@ -76,7 +76,7 @@ class Utils:
             Analyse sévére et objective pour position longue, proposes moi des points d'entrée au niveau des supports calculés.
             Réponse UNIQUEMENT dans ce format :
 
-            [phrase unique] \n
+            Conseil : [phrase unique] \n
             Point d'entrée recommandé : [prix ou plage] [/INST]
         """
 
