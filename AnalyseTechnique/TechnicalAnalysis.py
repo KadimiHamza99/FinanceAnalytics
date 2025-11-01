@@ -68,13 +68,11 @@ class TechnicalAnalysis:
         score_total = df["Score pondéré"].sum()
 
         reco = IndicatorEvaluator._global_interpretation(df, score_total)
-        
+
         if os.getenv('GITHUB_ACTIONS') == 'true':
             llm_reco = Utils.askMistralTechnicalAnalysis("mistral:7b", rsi, macd_val, ema200, bb_l, bb_m, bb_h, stoch_k, stoch_d, obv, adx, close) + f"\nPrix Actuel en bourse : {close}"
-            print(f"Prix Actuel en bourse : {close}")
         else:
             llm_reco = "Analyse technique LLM non disponible en local."
-            print(f"Prix Actuel en bourse : {close}")
         
         print(f"Prix Actuel en bourse : {close}")
         return df, score_total, reco, llm_reco
