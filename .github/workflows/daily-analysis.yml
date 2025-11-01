@@ -1,6 +1,7 @@
 name: Daily Stock Analysis (from repo)
 on:
   schedule:
+    # Cron en UTC ; ici "0 3 * * *" -> 03:00 UTC (= 04:00 heure de Paris)
     - cron: '0 3 * * *'
   workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
 jobs:
@@ -28,6 +29,9 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           echo "✅ Installation terminée."
+      # ✅ Créer le répertoire de cache pour Ollama
+      - name: Create Ollama cache directory
+        run: mkdir -p ~/.ollama
       # ✅ Cache Ollama et modèles
       - name: Cache Ollama and models
         uses: actions/cache@v4
