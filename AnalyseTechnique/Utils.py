@@ -58,7 +58,7 @@ class Utils:
 
 
     @staticmethod
-    def askMistralTechnicalAnalysis(rsi, macd, ema200, bb_l, bb_h, bb_m, stoch_k, stoch_d, obv, adx, prix_actuel):
+    def askMistralTechnicalAnalysis(model, rsi, macd, ema200, bb_l, bb_h, bb_m, stoch_k, stoch_d, obv, adx, prix_actuel):
 
         # Prompt structuré pour guider le modèle
         prompt = f"""<s>[INST] Tu es un analyste boursier expert en stratégie long terme.
@@ -80,4 +80,4 @@ class Utils:
             Point d'entrée recommandé : [prix ou plage] [/INST]
         """
 
-        return OllamaSession.ask("mistral:7b",prompt)
+        return OllamaSession.ask(model, prompt)

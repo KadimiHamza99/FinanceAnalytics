@@ -1,22 +1,18 @@
 name: Daily Stock Analysis (from repo)
 on:
   schedule:
-    # Cron en UTC ; ici "0 7 * * *" -> 07:00 UTC (= 08:00 heure de Paris)
     - cron: '0 3 * * *'
   workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
-
 jobs:
   analysis:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       # ✅ Cache pip
       - name: Cache Python dependencies
         uses: actions/cache@v4
@@ -26,14 +22,12 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       - name: Install dependencies
         run: |
           echo "Mise à jour de pip et installation des dépendances..."
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           echo "✅ Installation terminée."
-
       # ✅ Cache Ollama et modèles
       - name: Cache Ollama and models
         uses: actions/cache@v4
@@ -43,7 +37,6 @@ jobs:
           key: ${{ runner.os }}-ollama-mistral-7b
           restore-keys: |
             ${{ runner.os }}-ollama-
-
       - name: Install Ollama
         run: |
           if ! command -v ollama &> /dev/null; then
@@ -52,7 +45,6 @@ jobs:
           else
             echo "Ollama déjà installé, passage à la suite."
           fi
-
       - name: Pull Mistral model
         run: |
           if [ ! -d ~/.ollama/models/mistral ]; then
@@ -61,7 +53,6 @@ jobs:
           else
             echo "Modèle Mistral déjà présent dans le cache."
           fi
-
       - name: Run stock analysis and capture output
         run: |
           echo "---- Début d'exécution du script ----"
@@ -76,14 +67,12 @@ jobs:
           ls -l output || echo "⚠️ Aucun dossier 'output' trouvé."
           echo "---- Aperçu du log (20 premières lignes) ----"
           head -n 20 output/console.txt || echo "⚠️ Aucun fichier console.txt trouvé."
-
       # ✅ Affiche le log complet dans les logs GitHub Actions
       - name: Show full Python log
         if: always()
         run: |
           echo "---- LOG PYTHON COMPLET ----"
           cat output/console.txt || echo "⚠️ Aucun log trouvé."
-
       # ✅ Sauvegarde le log complet comme artefact téléchargeable
       - name: Upload logs as artifact
         if: always()
