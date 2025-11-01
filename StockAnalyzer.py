@@ -38,7 +38,7 @@ class StockAnalyzer:
             # === FONDAMENTALE ===
             try:
                 fa = FundamentalAnalysis(ticker)
-                df_f, sf, company_name = fa.run()
+                df_f, sf, company_name, market_cap = fa.run()
                 df_f["Note (/10)"] = df_f["Note (/10)"].apply(f.colorize_score)
                 print(Fore.CYAN + "\n=== 🔍 ANALYSE FONDAMENTALE ===" + Style.RESET_ALL)
                 p.afficher_table(
@@ -91,6 +91,6 @@ class StockAnalyzer:
 
             print("="*80)
 
-            if sf > 70 and st > 50:
+            if sf > 75 and st > 50 and market_cap > 5_000_000_000:
                 SendNotification.send(f"{company_name} : {llm_reco} \n Le score technique attribué : {st}/100")
 

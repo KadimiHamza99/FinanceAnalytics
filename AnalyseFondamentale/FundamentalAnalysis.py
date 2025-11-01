@@ -76,7 +76,7 @@ class FundamentalAnalysis:
                 except (TypeError, ZeroDivisionError):
                     forward_pe = None 
 
-        note = "N/A"
+        note = 3
         interp = "Donnée non disponible ou non calculable."
 
         if forward_pe is not None and isinstance(forward_pe, (int, float)) and math.isfinite(forward_pe) and forward_pe > 0:
@@ -181,4 +181,4 @@ class FundamentalAnalysis:
         df["Score pondéré"] = df["Note (/10)"] * df["Poids (%)"] / 10
         score_total = df["Score pondéré"].sum()
 
-        return df, score_total, info.get("shortName") or info.get("longName")
+        return df, score_total, info.get("shortName") or info.get("longName"), info.get("marketCap", None)
