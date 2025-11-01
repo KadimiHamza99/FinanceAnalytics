@@ -1,4 +1,1 @@
 NOV.F
-CS.PA
-BN.PA
-TTE.PA

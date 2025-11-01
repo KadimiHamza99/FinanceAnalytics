@@ -43,32 +43,29 @@ class OllamaSession:
 
     @staticmethod
     def ask(model: str, prompt: str) -> str:
-        print(f"Chargement du modèle LLM {model} en cours ...")
+        print(f"Interrogation du modèle LLM {model} en cours ...")
+
         try:
-            # Exécution du modèle via Ollama (local)
-            result = subprocess.run(
-                ["ollama", "run", model],
-                input=prompt,              # ⚠️ envoyer une string, pas des bytes
-                capture_output=True,
-                text=True,       # important : text=True pour gérer str
-                encoding="utf-8",          
-                timeout=160
+            # Utilisation de la commande Ollama en ligne de commande
+            process = subprocess.Popen(
+                ["ollama", "run", model, prompt],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding='utf-8',
+                errors='replace'
             )
+            stdout, stderr = process.communicate(timeout=620)
 
-            if result.returncode != 0:
-                print("❌ Erreur Ollama :", result.stderr)
-                return "Erreur : impossible d'obtenir une réponse du modèle."
+            if process.returncode != 0:
+                return f"Erreur : {stderr}"
 
-            response = result.stdout.strip()
-
-            print("\n📊 Analyse technique générée :")
-            print(response)
-
-            return response
-
+            response_text = stdout.strip()
+            print(response_text)
+            return response_text
         except subprocess.TimeoutExpired:
-            print("⏰ Timeout : le modèle a mis trop de temps à répondre.")
-            return "Erreur : délai dépassé."
+            process.kill()
+            return f"Erreur : délai dépassé après 620 secondes."
         except Exception as e:
             print("❌ Erreur inattendue :", e)
             return str(e)
