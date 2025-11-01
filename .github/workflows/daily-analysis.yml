@@ -57,6 +57,10 @@ jobs:
           else
             echo "Modèle Mistral déjà présent dans le cache."
           fi
+      - name: Verify Ollama installation
+        run: |
+          ollama --version
+          ollama list
       - name: Run stock analysis and capture output
         run: |
           echo "---- Début d'exécution du script ----"

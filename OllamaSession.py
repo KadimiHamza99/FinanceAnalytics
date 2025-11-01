@@ -55,7 +55,7 @@ class OllamaSession:
                 encoding='utf-8',
                 errors='replace'
             )
-            stdout, stderr = process.communicate(timeout=620)
+            stdout, stderr = process.communicate(timeout=1200)
 
             if process.returncode != 0:
                 return f"Erreur : {stderr}"
