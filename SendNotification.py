@@ -4,7 +4,7 @@ class SendNotification:
 
     @staticmethod
     def send(output = "HAMZA KADIMI"):
-        topic = "FinanceAnalytics_kadev99"  # choisissez un nom de topic pas trop trivial
+        topic = "KADIMIAnalysis"  # choisissez un nom de topic pas trop trivial
 
         url = f"https://ntfy.sh/{topic}"
         response = requests.post(url, data=output.encode('utf‑8'))

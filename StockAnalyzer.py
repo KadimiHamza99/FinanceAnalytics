@@ -91,6 +91,12 @@ class StockAnalyzer:
 
             print("="*80)
 
-            if sf > 75 and st > 50 and market_cap > 5_000_000_000:
-                SendNotification.send(f"{company_name} : {llm_reco} \n Le score technique attribué : {st}/100")
+            if sf > 75 and st > 50 and market_cap > 1_500_000_000:
+                message = (
+                    f"🚀 {company_name} ({ticker}) — {llm_reco}\n\n"
+                    f"📊 Score Technique : {st}/100\n"
+                    f"✅ Score Fondamental : {sf}/100\n\n"
+                )
+
+                SendNotification.send(message)
 
