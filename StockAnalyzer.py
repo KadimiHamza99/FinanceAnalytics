@@ -10,8 +10,8 @@ class StockAnalyzer:
         self.p = TablePrinter()
 
     
-    def score_final(self, sf, st, sn):
-        score = 0.45 * sf + 0.35 * st + 0.20 * sn
+    def score_final(self, sf, st):
+        score = 0.7 * sf + 0.3 * st
         if score >= 80:
             txt = Fore.GREEN + Style.BRIGHT + "💚 Excellent profil global — Opportunité d'achat (FAIBLE RISQUE)"
         elif score >= 65:
@@ -79,25 +79,12 @@ class StockAnalyzer:
             print("="*80)
 
             # === ACTUALITÉS ===
-            try:
-                from AnalyseDActualite.NewsAnalysis import NewsAnalysis
-                na = NewsAnalysis(ticker)
-                df_n, sn = na.run(company_name)
-
-                print(Fore.YELLOW + "\n=== 🗞️ ANALYSE DES ACTUALITÉS ===" + Style.RESET_ALL)
-                if df_n:
-                    print(f"Score actualités : {f.colorize_percent_score(sn)}")
-                    print(df_n["Interprétation"])
-                else:
-                    print("Aucune actualité récente trouvée.")
-            except Exception as e:
-                print(Fore.RED + f"⚠️ Erreur lors de l'analyse des actualités : {e}" + Style.RESET_ALL)
-                sn = 50  # neutre
+            ##CODE POUR ANALYSE DES ACTUALITÉS À AJOUTER ICI##
 
 
             # === SCORE GLOBAL ===
             try:
-                sg, txt = self.score_final(sf, st, sn)
+                sg, txt = self.score_final(sf, st)
                 print(Style.BRIGHT + Fore.WHITE + Back.BLUE +
                     f"   🧮 SCORE GLOBAL PONDÉRÉ : {f.colorize_percent_score(sg)}   " +
                     Style.RESET_ALL)
@@ -108,7 +95,7 @@ class StockAnalyzer:
 
             print("="*80)
 
-            if ((sf > 75) and (st > 50)) or (sg > 70) and (market_cap > 1_500_000_000):
+            if ((sf > 75) and (st > 55)) or (sg > 75):
                 message = (
                     f"🚀 {company_name} ({ticker}) — {llm_reco}\n\n"
                     f"📊 Score Technique : {st}/100\n"
