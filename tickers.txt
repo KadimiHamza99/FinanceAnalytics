@@ -2,7 +2,6 @@
 DSY.PA
 CAP.PA
 ATO.PA
-SOW.DE
 SAP.DE
 ASML.AS
 REY.MI
@@ -94,10 +93,12 @@ HEI.DE
 
 # Immobilier coté
 URW.AS
-LI.PA
+#*************#
 GFC.PA
-ICAD.PA
 COV.PA
+LI.PA
+#*************#
+ICAD.PA
 VNA.DE
 AEDA.BR
 MRL.MC

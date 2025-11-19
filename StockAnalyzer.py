@@ -1,5 +1,6 @@
 from colorama import Fore, Style, Back
 from SendNotification import SendNotification
+from AnalyseDActualite.NewsAnalysis import NewsAnalysis
 
 class StockAnalyzer:
     def __init__(self, tickers):
@@ -11,7 +12,7 @@ class StockAnalyzer:
 
     
     def score_final(self, sf, st):
-        score = 0.7 * sf + 0.3 * st
+        score = 0.75 * sf + 0.25 * st
         if score >= 80:
             txt = Fore.GREEN + Style.BRIGHT + "💚 Excellent profil global — Opportunité d'achat (FAIBLE RISQUE)"
         elif score >= 65:
@@ -80,7 +81,11 @@ class StockAnalyzer:
 
             # === ACTUALITÉS ===
             ##CODE POUR ANALYSE DES ACTUALITÉS À AJOUTER ICI##
-
+            # newsAnalysis = NewsAnalysis(ticker)
+            # news_interpretation, score = newsAnalysis.run(company_name)
+            # print(Fore.YELLOW + "\n=== 📰 ANALYSE DES ACTUALITÉS RÉCENTES ===" + Style.RESET_ALL)
+            # print(f"Score des actualités : {f.colorize_percent_score(news_interpretation['Score'])}")
+            # print(f"Interprétation des actualités : {news_interpretation['Interprétation']}")
 
             # === SCORE GLOBAL ===
             try:
@@ -95,12 +100,24 @@ class StockAnalyzer:
 
             print("="*80)
 
-            if ((sf > 75) and (st > 55)) or (sg > 75):
+            if ((sf > 75) and (st > 40)):
                 message = (
                     f"🚀 {company_name} ({ticker}) — {llm_reco}\n\n"
                     f"📊 Score Technique : {st}/100\n"
                     f"✅ Score Fondamental : {sf}/100\n\n"
                 )
-
-                SendNotification.send(message)
-
+                SendNotification.send(message, canal="normal")
+            elif (sf > 85):
+                message = (
+                    f"🌟 {company_name} ({ticker}) — Opportunité d'achat à considérer\n\n"
+                    f"📊 Score Technique : {st}/100\n"
+                    f"✅ Score Fondamental : {sf}/100\n\n"
+                )
+                SendNotification.send(message, canal="high")
+            elif (st < 30) and (sf < 50):
+                message = (
+                    f"⚠️ {company_name} ({ticker}) — Profil à risque élevé, à éviter\n\n"
+                    f"📊 Score Technique : {st}/100\n"
+                    f"✅ Score Fondamental : {sf}/100\n\n"
+                )
+                SendNotification.send(message, canal="low")

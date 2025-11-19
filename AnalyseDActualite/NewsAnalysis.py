@@ -4,6 +4,7 @@ from scipy.special import softmax
 import numpy as np
 import torch
 import requests
+from datetime import datetime
 from bs4 import BeautifulSoup
 
 
@@ -32,22 +33,47 @@ class NewsAnalysis:
         """
         Récupère les articles complets récents liés à une entreprise.
         1. Recherche des actualités via DuckDuckGo (DDGS)
-        2. Télécharge et extrait le texte complet de chaque article
-        Retourne : [{title, url, content}]
+        2. Télécharge et extrait le texte complet + date si possible
+        3. Trie les articles par date décroissante
+        Retourne : [{title, url, content, date}]
         """
         articles = []
         headers = {'User-Agent': 'Mozilla/5.0'}
         query = f"{company_name} zonebourse"
 
+        def extract_date_from_html(soup):
+            """Essaie de trouver une date dans les métadonnées HTML."""
+            date = None
+            # Rechercher dans les balises meta
+            for tag in soup.find_all("meta"):
+                for attr in ["name", "property", "itemprop"]:
+                    if tag.get(attr) and "date" in tag.get(attr).lower():
+                        content = tag.get("content")
+                        if content:
+                            try:
+                                date = datetime.fromisoformat(content.replace("Z", "+00:00"))
+                                return date
+                            except Exception:
+                                pass
+            return None
+
         try:
             with DDGS() as ddgs:
-                results = ddgs.news(query, max_results=10)
+                results = ddgs.news(query, max_results=15)
                 for res in results:
                     url = res.get("url")
                     title = res.get("title", "").strip()
+                    raw_date = res.get("date")  # souvent ISO, si dispo
 
                     if not url:
                         continue
+
+                    article_date = None
+                    if raw_date:
+                        try:
+                            article_date = datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
+                        except Exception:
+                            pass
 
                     try:
                         response = requests.get(url, headers=headers, timeout=10)
@@ -56,25 +82,25 @@ class NewsAnalysis:
 
                         soup = BeautifulSoup(response.text, "html.parser")
 
-                        # Supprime les balises non pertinentes
+                        # Supprime les balises inutiles
                         for tag in soup(["script", "style", "noscript", "header", "footer", "nav", "form", "aside"]):
                             tag.extract()
 
-                       # Récupère le texte principal
+                        # Récupère le texte principal
                         content = soup.get_text(separator=" ", strip=True)
+                        content = ' '.join(content.split())[:1000]
 
-                        # Nettoyage du texte
-                        content = ' '.join(content.split())
+                        # Si pas de date, tenter d’en extraire une du HTML
+                        if not article_date:
+                            article_date = extract_date_from_html(soup)
 
-                        # Tronquer à 500 caractères maximum
-                        content = content[:500]
-
-                        # Ajouter l'article (même si court)
-                        articles.append({
-                            "title": title,
-                            "url": url,
-                            "content": content
-                        })
+                        if(not content or len(content) > 100):
+                            articles.append({
+                                "title": title,
+                                "url": url,
+                                "content": content,
+                                "date": article_date
+                            })
 
                     except Exception as e:
                         print(f"Erreur pour {url}: {e}")
@@ -82,13 +108,15 @@ class NewsAnalysis:
         except Exception as e:
             print(f"Erreur lors de la récupération des actualités : {e}")
 
+        # Trier par date décroissante (les plus récents en premier)
+        articles.sort(key=lambda x: x["date"] or datetime.min, reverse=True)
+
         return articles
 
     # ============================================================
 
     def _sentiment_finbert(self, text):
         """Retourne un score de sentiment entre -1 et +1 basé sur FinBERT-Tone."""
-        print("texte pour analyse de sentiment :", text)
         # --- Vérification du type d’entrée ---
         if not isinstance(text, str):
             if isinstance(text, dict) and "content" in text:
@@ -103,8 +131,8 @@ class NewsAnalysis:
             translated = self.translator(text, max_length=512)[0]["translation_text"]
         except Exception:
             translated = text  # fallback (si déjà anglais)
-        
-        print(f"Texte traduit pour analyse : {translated[:100]}...")
+
+        print(f"Texte traduit : {translated}")
 
         # 2️⃣ Inférence FinBERT
         tokens = self.tokenizer(translated, return_tensors="pt", truncation=True, padding=True)
@@ -136,12 +164,14 @@ class NewsAnalysis:
         """Exécute l'analyse complète et renvoie un score entre 0 et 100."""
         news = self._get_recent_news(company_name)
         print(f"📰 {len(news)} actualités récentes trouvées pour {company_name}")
-        # print(news)
         if not news:
             print(f"⚠️ Aucune actualité trouvée pour {company_name}")
             return {"Score": 50, "Interprétation": "⚪ Aucune actualité récente"}, 50
 
         sentiments = [self._sentiment_finbert(n) for n in news]
+        print("Sentiments des actualités : ")
+        for i, sentiment in enumerate(sentiments, 1):
+            print(f" {i}. Score: {sentiment['score']:.3f}, Label: {sentiment['label']}, Probs: {sentiment['probs']}")
         avg_sentiment = sum(sentiment["score"] for sentiment in sentiments) / len(sentiments)
         print(f"Score moyen de sentiment: {avg_sentiment}")
         score = round((np.tanh(avg_sentiment * 1.5) + 1) * 50, 2)  # [-1,1] → [0,100]

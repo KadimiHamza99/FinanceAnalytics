@@ -2,7 +2,7 @@ name: Daily Stock Analysis (from repo)
 on:
   schedule:
     # Cron en UTC ; ici "0 3 * * *" -> 03:00 UTC (= 04:00 heure de Paris)
-    - cron: '0 3 * * 3'
+    - cron: '0 8 * * *'
   workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
 jobs:
   analysis:
