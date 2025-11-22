@@ -1,20 +1,46 @@
 name: Daily Stock Analysis (from repo)
+
 on:
   schedule:
-    # Cron en UTC ; ici "0 3 * * *" -> 03:00 UTC (= 04:00 heure de Paris)
-    - cron: '0 8 * * *'
-  workflow_dispatch: {}  # permet un lancement manuel depuis l'interface GitHub
+    - cron: '0 8 * * *'  # 08:00 UTC
+  workflow_dispatch: {}
+
 jobs:
   analysis:
     runs-on: ubuntu-latest
+
     steps:
+
+      # ------------------------------------------
+      # 1) LIBÉRER LE DISQUE POUR ÉVITER L’ERREUR
+      # ------------------------------------------
+      - name: Free disk space
+        run: |
+          echo "Disk before cleanup:"
+          df -h
+
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/hostedtoolcache || true
+          sudo docker system prune -af || true
+
+          echo "Disk after cleanup:"
+          df -h
+
+      # ------------------------------------------
+      # 2) CLONAGE DU REPO
+      # ------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # ------------------------------------------
+      # 3) PYTHON + CACHE PIP
+      # ------------------------------------------
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      # ✅ Cache pip
+
       - name: Cache Python dependencies
         uses: actions/cache@v4
         with:
@@ -23,65 +49,53 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           echo "Mise à jour de pip et installation des dépendances..."
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           echo "✅ Installation terminée."
-      # ✅ Créer le répertoire de cache pour Ollama
-      - name: Create Ollama cache directory
-        run: mkdir -p ~/.ollama
-      # ✅ Cache Ollama et modèles
-      - name: Cache Ollama and models
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.ollama
-          key: ${{ runner.os }}-ollama-mistral-7b
-          restore-keys: |
-            ${{ runner.os }}-ollama-
+
+      # ------------------------------------------
+      # 4) INSTALLATION D’OLLAMA (SANS CACHE)
+      # ------------------------------------------
       - name: Install Ollama
         run: |
-          if ! command -v ollama &> /dev/null; then
-            echo "Installation d’Ollama..."
-            curl -fsSL https://ollama.com/install.sh | sudo sh
-          else
-            echo "Ollama déjà installé, passage à la suite."
-          fi
+          echo "Installation d’Ollama..."
+          curl -fsSL https://ollama.com/install.sh | sudo sh
+
       - name: Pull Mistral model
         run: |
-          if [ ! -d ~/.ollama/models/mistral ]; then
-            echo "Téléchargement du modèle Mistral..."
-            ollama pull mistral:7b
-          else
-            echo "Modèle Mistral déjà présent dans le cache."
-          fi
+          echo "Téléchargement du modèle Mistral (sans cache)..."
+          ollama pull mistral:7b
+
       - name: Verify Ollama installation
         run: |
           ollama --version
           ollama list
+
+      # ------------------------------------------
+      # 5) EXÉCUTION DU SCRIPT PYTHON
+      # ------------------------------------------
       - name: Run stock analysis and capture output
         run: |
           echo "---- Début d'exécution du script ----"
           mkdir -p output
-          echo "Répertoire courant : $(pwd)"
-          echo "Contenu du dépôt :"
-          ls -l
-          echo "Exécution de main.py..."
           python main.py --file tickers.txt > output/console.txt 2>&1 || true
           echo "---- Exécution terminée ----"
-          echo "Contenu du dossier output :"
           ls -l output || echo "⚠️ Aucun dossier 'output' trouvé."
-          echo "---- Aperçu du log (20 premières lignes) ----"
           head -n 20 output/console.txt || echo "⚠️ Aucun fichier console.txt trouvé."
-      # ✅ Affiche le log complet dans les logs GitHub Actions
+
+      # ------------------------------------------
+      # 6) LOGS COMPLÉMENTS
+      # ------------------------------------------
       - name: Show full Python log
         if: always()
         run: |
           echo "---- LOG PYTHON COMPLET ----"
           cat output/console.txt || echo "⚠️ Aucun log trouvé."
-      # ✅ Sauvegarde le log complet comme artefact téléchargeable
+
       - name: Upload logs as artifact
         if: always()
         uses: actions/upload-artifact@v4
