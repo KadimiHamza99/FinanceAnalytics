@@ -16,5 +16,7 @@ tabulate
 
 spicy
 feedparser
-
+bs4
 ddgs
+torch
+transformers
