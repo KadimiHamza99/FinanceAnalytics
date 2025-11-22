@@ -1,6 +1,6 @@
 from colorama import Fore, Style, Back
 from SendNotification import SendNotification
-from AnalyseDActualite.NewsAnalysis import NewsAnalysis
+# from AnalyseDActualite.NewsAnalysis import NewsAnalysis
 
 class StockAnalyzer:
     def __init__(self, tickers):
