@@ -107,17 +107,17 @@ class StockAnalyzer:
                     f"✅ Score Fondamental : {sf}/100\n\n"
                 )
                 SendNotification.send(message, canal="normal")
-            elif (sf > 85):
+            elif ((sf > 75) and (st > 60)):
                 message = (
                     f"🌟 {company_name} ({ticker}) — Opportunité d'achat à considérer\n\n"
                     f"📊 Score Technique : {st}/100\n"
                     f"✅ Score Fondamental : {sf}/100\n\n"
                 )
                 SendNotification.send(message, canal="high")
-            elif (st < 30) and (sf < 50):
-                message = (
-                    f"⚠️ {company_name} ({ticker}) — Profil à risque élevé, à éviter\n\n"
-                    f"📊 Score Technique : {st}/100\n"
-                    f"✅ Score Fondamental : {sf}/100\n\n"
-                )
-                SendNotification.send(message, canal="low")
+            # elif (st < 30) and (sf < 50):
+            #     message = (
+            #         f"⚠️ {company_name} ({ticker}) — Profil à risque élevé, à éviter\n\n"
+            #         f"📊 Score Technique : {st}/100\n"
+            #         f"✅ Score Fondamental : {sf}/100\n\n"
+            #     )
+            #     SendNotification.send(message, canal="low")
