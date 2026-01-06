@@ -650,3 +650,440 @@ class IndicatorInterpreter:
 
         grade_str = f"{rec_mean:.1f}/5"
         return grade_str, note, interp
+    
+
+    @staticmethod
+    def interpret_operating_margin(op_margin, sector="General"):
+        """Interprète la marge opérationnelle"""
+        if op_margin is None:
+            return 5, "Données indisponibles"
+        
+        margin_pct = op_margin * 100
+        sector_group = Utils._get_sector_group(sector)
+        
+        if sector_group == "Technology":
+            if margin_pct > 25: return 10, f"Marge opérationnelle exceptionnelle ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 18: return 9, f"Excellente efficacité opérationnelle ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 12: return 8, f"Bonne marge opérationnelle ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 8: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 4: return 6, f"Marge faible ({margin_pct:.1f}%) 📊"
+            elif margin_pct > 0: return 4, f"Marge très faible ({margin_pct:.1f}%) ⚠️"
+            return 2, f"Pertes opérationnelles ({margin_pct:.1f}%) 🔴"
+        
+        elif sector_group == "Healthcare":
+            if margin_pct > 22: return 10, f"Marge exceptionnelle pharma ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 15: return 9, f"Excellente marge ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 10: return 8, f"Bonne marge ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 6: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 3: return 5, f"Marge faible ({margin_pct:.1f}%) ⚠️"
+            elif margin_pct > 0: return 3, f"Marge très faible ({margin_pct:.1f}%) 🔴"
+            return 1, f"Pertes opérationnelles ({margin_pct:.1f}%) 🚨"
+        
+        elif sector_group == "Financial Services":
+            if margin_pct > 40: return 10, f"Marge exceptionnelle ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 30: return 9, f"Excellente efficacité ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 22: return 8, f"Bonne marge ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 15: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 10: return 5, f"Marge faible ({margin_pct:.1f}%) 📊"
+            elif margin_pct > 0: return 3, f"Marge très faible ({margin_pct:.1f}%) ⚠️"
+            return 1, f"Pertes ({margin_pct:.1f}%) 🔴"
+        
+        elif sector_group == "Energy":
+            if margin_pct > 18: return 10, f"Marge exceptionnelle ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 12: return 9, f"Excellente marge ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 8: return 8, f"Bonne marge ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 5: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 2: return 5, f"Marge faible ({margin_pct:.1f}%) ⚠️"
+            elif margin_pct > 0: return 3, f"Marge très faible ({margin_pct:.1f}%) 🔴"
+            return 1, f"Pertes ({margin_pct:.1f}%) 🚨"
+        
+        else:  # General
+            if margin_pct > 20: return 10, f"Marge exceptionnelle ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 14: return 9, f"Excellente marge ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 10: return 8, f"Bonne marge ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 6: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 3: return 5, f"Marge faible ({margin_pct:.1f}%) 📊"
+            elif margin_pct > 0: return 3, f"Marge très faible ({margin_pct:.1f}%) ⚠️"
+            return 1, f"Pertes ({margin_pct:.1f}%) 🔴"
+
+
+    @staticmethod
+    def interpret_gross_margin(gross_margin, sector="General"):
+        """Interprète la marge brute"""
+        if gross_margin is None:
+            return 5, "Données indisponibles"
+        
+        margin_pct = gross_margin * 100
+        sector_group = Utils._get_sector_group(sector)
+        
+        if sector_group == "Energy":
+            if margin_pct > 45: return 10, f"Marge brute exceptionnelle ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 35: return 9, f"Excellente marge brute ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 28: return 8, f"Bonne marge brute ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 20: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 15: return 5, f"Marge faible ({margin_pct:.1f}%) 📊"
+            elif margin_pct > 0: return 3, f"Marge très faible ({margin_pct:.1f}%) ⚠️"
+            return 1, f"Marge négative ({margin_pct:.1f}%) 🔴"
+        
+        elif sector_group in ["Consumer Cyclical", "Consumer Defensive"]:
+            if margin_pct > 50: return 10, f"Marge brute exceptionnelle ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 40: return 9, f"Excellente marge ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 32: return 8, f"Bonne marge ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 25: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 18: return 5, f"Marge faible ({margin_pct:.1f}%) 📊"
+            elif margin_pct > 0: return 3, f"Marge très faible ({margin_pct:.1f}%) ⚠️"
+            return 1, f"Marge négative ({margin_pct:.1f}%) 🔴"
+        
+        else:  # General et Basic Materials
+            if margin_pct > 45: return 10, f"Marge brute exceptionnelle ({margin_pct:.1f}%) 💎"
+            elif margin_pct > 35: return 9, f"Excellente marge ({margin_pct:.1f}%) 🚀"
+            elif margin_pct > 28: return 8, f"Bonne marge ({margin_pct:.1f}%) ✅"
+            elif margin_pct > 20: return 7, f"Marge correcte ({margin_pct:.1f}%) 👍"
+            elif margin_pct > 15: return 5, f"Marge faible ({margin_pct:.1f}%) 📊"
+            elif margin_pct > 0: return 3, f"Marge très faible ({margin_pct:.1f}%) ⚠️"
+            return 1, f"Marge négative ({margin_pct:.1f}%) 🔴"
+
+
+    @staticmethod
+    def interpret_earnings_growth(growth, sector="General"):
+        """Interprète la croissance des bénéfices"""
+        if growth is None:
+            return 5, "Données indisponibles"
+        
+        growth_pct = growth * 100
+        
+        if growth_pct < -30:
+            return 1, f"Effondrement des bénéfices ({growth_pct:.1f}%) 🚨"
+        elif growth_pct < -20:
+            return 2, f"Forte baisse des bénéfices ({growth_pct:.1f}%) 🔴"
+        elif growth_pct < -10:
+            return 3, f"Baisse importante ({growth_pct:.1f}%) ⚠️"
+        elif growth_pct < -5:
+            return 4, f"Baisse modérée ({growth_pct:.1f}%) 📊"
+        elif growth_pct < 0:
+            return 5, f"Légère baisse ({growth_pct:.1f}%) 😐"
+        elif growth_pct < 5:
+            return 6, f"Croissance faible ({growth_pct:.1f}%) 👍"
+        elif growth_pct < 15:
+            return 7, f"Croissance modérée ({growth_pct:.1f}%) ✅"
+        elif growth_pct < 25:
+            return 8, f"Bonne croissance ({growth_pct:.1f}%) 🚀"
+        elif growth_pct < 50:
+            return 9, f"Forte croissance ({growth_pct:.1f}%) 💎"
+        else:
+            return 10, f"Croissance exceptionnelle ({growth_pct:.1f}%) 🔥"
+
+
+    @staticmethod
+    def interpret_quick_ratio(ratio, sector="General"):
+        """Interprète le quick ratio (liquidité immédiate)"""
+        if ratio is None:
+            return 5, "Données indisponibles"
+        
+        sector_group = Utils._get_sector_group(sector)
+        
+        if sector_group == "Financial Services":
+            if ratio > 1.2: return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 0.9: return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 0.7: return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 0.5: return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.4: return 5, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.3: return 3, f"Liquidité faible ({ratio:.2f}) ⚠️"
+            return 1, f"Liquidité critique ({ratio:.2f}) 🔴"
+        
+        elif sector_group in ["Technology", "Healthcare"]:
+            if ratio > 3.0: return 10, f"Excellente liquidité ({ratio:.2f}) 💎"
+            elif ratio > 2.0: return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 1.5: return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 1.0: return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.8: return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.5: return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
+            return 2, f"Liquidité critique ({ratio:.2f}) 🔴"
+        
+        else:  # General
+            if ratio > 2.0: return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 1.5: return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 1.2: return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 1.0: return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.7: return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.5: return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
+            return 2, f"Liquidité critique ({ratio:.2f}) 🔴"
+
+
+    @staticmethod
+    def interpret_ocf_ratio(ratio, sector="General"):
+        """Interprète le ratio Operating Cash Flow / Current Liabilities"""
+        if ratio is None:
+            return 5, "Données indisponibles"
+        
+        if ratio > 2.5: return 10, f"Excellent flux de trésorerie ({ratio:.2f}x) 💎"
+        elif ratio > 2.0: return 9, f"Très bon flux ({ratio:.2f}x) 🚀"
+        elif ratio > 1.5: return 8, f"Bon flux de trésorerie ({ratio:.2f}x) ✅"
+        elif ratio > 1.0: return 7, f"Flux correct ({ratio:.2f}x) 👍"
+        elif ratio > 0.7: return 6, f"Flux acceptable ({ratio:.2f}x) 📊"
+        elif ratio > 0.5: return 5, f"Flux faible ({ratio:.2f}x) 😐"
+        elif ratio > 0.3: return 3, f"Flux très faible ({ratio:.2f}x) ⚠️"
+        return 1, f"Flux insuffisant ({ratio:.2f}x) 🔴"
+
+
+    @staticmethod
+    def interpret_debt_ebitda(ratio, sector="General"):
+        """Interprète le ratio Dette/EBITDA"""
+        if ratio is None:
+            return 5, "Données indisponibles"
+        
+        sector_group = Utils._get_sector_group(sector)
+        
+        if sector_group in ["Technology", "Healthcare"]:
+            if ratio < 1.0: return 10, f"Endettement très faible ({ratio:.1f}x) 💎"
+            elif ratio < 2.0: return 9, f"Endettement faible ({ratio:.1f}x) 🚀"
+            elif ratio < 3.0: return 8, f"Endettement modéré ({ratio:.1f}x) ✅"
+            elif ratio < 4.0: return 7, f"Endettement correct ({ratio:.1f}x) 👍"
+            elif ratio < 5.5: return 5, f"Endettement élevé ({ratio:.1f}x) 📊"
+            elif ratio < 7.0: return 3, f"Endettement très élevé ({ratio:.1f}x) ⚠️"
+            return 1, f"Endettement critique ({ratio:.1f}x) 🔴"
+        
+        elif sector_group in ["Utilities", "Real Estate"]:
+            if ratio < 3.0: return 10, f"Endettement faible ({ratio:.1f}x) 💎"
+            elif ratio < 4.5: return 9, f"Endettement modéré ({ratio:.1f}x) 🚀"
+            elif ratio < 6.0: return 8, f"Endettement acceptable ({ratio:.1f}x) ✅"
+            elif ratio < 7.5: return 7, f"Endettement correct ({ratio:.1f}x) 👍"
+            elif ratio < 9.0: return 5, f"Endettement élevé ({ratio:.1f}x) 📊"
+            elif ratio < 11.0: return 3, f"Endettement très élevé ({ratio:.1f}x) ⚠️"
+            return 1, f"Endettement critique ({ratio:.1f}x) 🔴"
+        
+        elif sector_group == "Energy":
+            if ratio < 1.5: return 10, f"Endettement très faible ({ratio:.1f}x) 💎"
+            elif ratio < 2.5: return 9, f"Endettement faible ({ratio:.1f}x) 🚀"
+            elif ratio < 3.5: return 8, f"Endettement modéré ({ratio:.1f}x) ✅"
+            elif ratio < 5.0: return 7, f"Endettement correct ({ratio:.1f}x) 👍"
+            elif ratio < 6.5: return 5, f"Endettement élevé ({ratio:.1f}x) 📊"
+            elif ratio < 8.0: return 3, f"Endettement très élevé ({ratio:.1f}x) ⚠️"
+            return 1, f"Endettement critique ({ratio:.1f}x) 🔴"
+        
+        else:  # General
+            if ratio < 1.5: return 10, f"Endettement très faible ({ratio:.1f}x) 💎"
+            elif ratio < 2.5: return 9, f"Endettement faible ({ratio:.1f}x) 🚀"
+            elif ratio < 3.5: return 8, f"Endettement modéré ({ratio:.1f}x) ✅"
+            elif ratio < 5.0: return 7, f"Endettement correct ({ratio:.1f}x) 👍"
+            elif ratio < 6.5: return 5, f"Endettement élevé ({ratio:.1f}x) 📊"
+            elif ratio < 8.0: return 3, f"Endettement très élevé ({ratio:.1f}x) ⚠️"
+            return 1, f"Endettement critique ({ratio:.1f}x) 🔴"
+
+
+    @staticmethod
+    def interpret_peg_ratio(peg, sector="General"):
+        """Interprète le PEG ratio (PE / croissance)"""
+        if peg is None:
+            return 5, "Données indisponibles"
+        
+        if peg <= 0:
+            return 2, f"PEG invalide ({peg:.2f}) - croissance négative ⚠️"
+        elif peg < 0.5:
+            return 10, f"Action très sous-évaluée (PEG: {peg:.2f}) 💎"
+        elif peg < 0.8:
+            return 9, f"Action sous-évaluée (PEG: {peg:.2f}) 🚀"
+        elif peg < 1.0:
+            return 8, f"Bonne valorisation (PEG: {peg:.2f}) ✅"
+        elif peg < 1.3:
+            return 7, f"Valorisation correcte (PEG: {peg:.2f}) 👍"
+        elif peg < 1.7:
+            return 6, f"Valorisation acceptable (PEG: {peg:.2f}) 📊"
+        elif peg < 2.0:
+            return 5, f"Légèrement surévaluée (PEG: {peg:.2f}) 😐"
+        elif peg < 2.5:
+            return 4, f"Surévaluée (PEG: {peg:.2f}) ⚠️"
+        elif peg < 3.0:
+            return 3, f"Très surévaluée (PEG: {peg:.2f}) 🔴"
+        else:
+            return 1, f"Excessivement surévaluée (PEG: {peg:.2f}) 🚨"
+        
+    @staticmethod
+    def interpret_debt_to_assets(ratio, sector="General"):
+        """Interprète le ratio Dette / Actifs totaux"""
+        if ratio is None:
+            return 5, "Données indisponibles"
+        
+        ratio_pct = ratio * 100
+        sector_group = Utils._get_sector_group(sector)
+        
+        # Secteurs financiers (leverage élevé normal)
+        if sector_group == "Financial Services":
+            if ratio_pct < 30: return 10, f"Endettement très faible ({ratio_pct:.1f}%) 💎"
+            elif ratio_pct < 45: return 9, f"Endettement faible ({ratio_pct:.1f}%) 🚀"
+            elif ratio_pct < 60: return 8, f"Endettement modéré ({ratio_pct:.1f}%) ✅"
+            elif ratio_pct < 70: return 7, f"Endettement acceptable ({ratio_pct:.1f}%) 👍"
+            elif ratio_pct < 80: return 5, f"Endettement élevé ({ratio_pct:.1f}%) 📊"
+            elif ratio_pct < 88: return 3, f"Endettement très élevé ({ratio_pct:.1f}%) ⚠️"
+            return 1, f"Endettement excessif ({ratio_pct:.1f}%) 🔴"
+        
+        # Utilities, Real Estate (leverage modéré à élevé normal)
+        elif sector_group in ["Utilities", "Real Estate"]:
+            if ratio_pct < 25: return 10, f"Endettement très faible ({ratio_pct:.1f}%) 💎"
+            elif ratio_pct < 40: return 9, f"Endettement faible ({ratio_pct:.1f}%) 🚀"
+            elif ratio_pct < 55: return 8, f"Endettement modéré ({ratio_pct:.1f}%) ✅"
+            elif ratio_pct < 65: return 7, f"Endettement acceptable ({ratio_pct:.1f}%) 👍"
+            elif ratio_pct < 75: return 5, f"Endettement élevé ({ratio_pct:.1f}%) 📊"
+            elif ratio_pct < 82: return 3, f"Endettement très élevé ({ratio_pct:.1f}%) ⚠️"
+            return 1, f"Endettement excessif ({ratio_pct:.1f}%) 🔴"
+        
+        # Technology, Healthcare (faible endettement attendu)
+        elif sector_group in ["Technology", "Healthcare"]:
+            if ratio_pct < 15: return 10, f"Endettement très faible ({ratio_pct:.1f}%) 💎"
+            elif ratio_pct < 25: return 9, f"Endettement faible ({ratio_pct:.1f}%) 🚀"
+            elif ratio_pct < 35: return 8, f"Endettement modéré ({ratio_pct:.1f}%) ✅"
+            elif ratio_pct < 45: return 7, f"Endettement acceptable ({ratio_pct:.1f}%) 👍"
+            elif ratio_pct < 55: return 5, f"Endettement élevé ({ratio_pct:.1f}%) 📊"
+            elif ratio_pct < 65: return 3, f"Endettement très élevé ({ratio_pct:.1f}%) ⚠️"
+            return 1, f"Endettement excessif ({ratio_pct:.1f}%) 🔴"
+        
+        # Autres secteurs (General)
+        else:
+            if ratio_pct < 20: return 10, f"Endettement très faible ({ratio_pct:.1f}%) 💎"
+            elif ratio_pct < 30: return 9, f"Endettement faible ({ratio_pct:.1f}%) 🚀"
+            elif ratio_pct < 40: return 8, f"Endettement modéré ({ratio_pct:.1f}%) ✅"
+            elif ratio_pct < 50: return 7, f"Endettement acceptable ({ratio_pct:.1f}%) 👍"
+            elif ratio_pct < 60: return 6, f"Endettement moyen ({ratio_pct:.1f}%) 📊"
+            elif ratio_pct < 70: return 5, f"Endettement élevé ({ratio_pct:.1f}%) 😐"
+            elif ratio_pct < 80: return 3, f"Endettement très élevé ({ratio_pct:.1f}%) ⚠️"
+            return 1, f"Endettement excessif ({ratio_pct:.1f}%) 🔴"
+
+
+    @staticmethod
+    def interpret_book_value(book_value, current_price, sector="General"):
+        """Interprète la valeur comptable par action (book value)"""
+        if book_value is None or current_price is None:
+            return 5, "Données indisponibles"
+        
+        # Calculer le ratio Prix / Valeur comptable
+        pb_ratio = current_price / book_value if book_value > 0 else None
+        
+        if pb_ratio is None:
+            return 2, f"Valeur comptable négative ({book_value:.2f}) 🚨"
+        
+        sector_group = Utils._get_sector_group(sector)
+        
+        # Pour les secteurs financiers et immobilier, le P/B est plus pertinent
+        if sector_group in ["Financial Services", "Real Estate"]:
+            if pb_ratio < 0.5:
+                return 10, f"Forte décote vs actifs ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 💎"
+            elif pb_ratio < 0.8:
+                return 9, f"Décote significative ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 🚀"
+            elif pb_ratio < 1.0:
+                return 8, f"Légère décote ({book_value:.2f}€, P/B: {pb_ratio:.2f}) ✅"
+            elif pb_ratio < 1.3:
+                return 7, f"Proche de la valeur comptable ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 👍"
+            elif pb_ratio < 1.7:
+                return 6, f"Légère prime ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 📊"
+            elif pb_ratio < 2.5:
+                return 5, f"Prime modérée ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 😐"
+            else:
+                return 3, f"Prime élevée ({book_value:.2f}€, P/B: {pb_ratio:.2f}) ⚠️"
+        
+        # Pour les autres secteurs (notamment tech)
+        else:
+            if pb_ratio < 0.7:
+                return 10, f"Forte marge de sécurité ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 💎"
+            elif pb_ratio < 1.0:
+                return 9, f"Bonne marge de sécurité ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 🚀"
+            elif pb_ratio < 1.5:
+                return 8, f"Marge de sécurité correcte ({book_value:.2f}€, P/B: {pb_ratio:.2f}) ✅"
+            elif pb_ratio < 2.5:
+                return 7, f"Valorisation raisonnable ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 👍"
+            elif pb_ratio < 4.0:
+                return 6, f"Valorisation élevée ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 📊"
+            elif pb_ratio < 6.0:
+                return 5, f"Valorisation très élevée ({book_value:.2f}€, P/B: {pb_ratio:.2f}) 😐"
+            else:
+                return 3, f"Valorisation excessive ({book_value:.2f}€, P/B: {pb_ratio:.2f}) ⚠️"
+            
+    @staticmethod
+    def interpret_interest_coverage(coverage, sector="General"):
+        """Interprète le ratio de couverture des intérêts (EBIT / Interest Expense)"""
+        if coverage is None:
+            return 5, "Données indisponibles"
+        
+        sector_group = Utils._get_sector_group(sector)
+        
+        # Secteurs à forte intensité capitalistique (endettement normal)
+        if sector_group in ["Utilities", "Real Estate", "Energy"]:
+            if coverage > 8.0: return 10, f"Excellente couverture des intérêts ({coverage:.1f}x) 💎"
+            elif coverage > 5.0: return 9, f"Très bonne couverture ({coverage:.1f}x) 🚀"
+            elif coverage > 3.5: return 8, f"Bonne couverture ({coverage:.1f}x) ✅"
+            elif coverage > 2.5: return 7, f"Couverture correcte ({coverage:.1f}x) 👍"
+            elif coverage > 2.0: return 6, f"Couverture acceptable ({coverage:.1f}x) 📊"
+            elif coverage > 1.5: return 5, f"Couverture faible ({coverage:.1f}x) 😐"
+            elif coverage > 1.0: return 3, f"Couverture très faible ({coverage:.1f}x) ⚠️"
+            elif coverage > 0: return 2, f"Couverture critique ({coverage:.1f}x) 🔴"
+            return 1, f"Incapacité à couvrir les intérêts 🚨"
+        
+        # Secteurs Technology, Healthcare (endettement faible attendu)
+        elif sector_group in ["Technology", "Healthcare"]:
+            if coverage > 15.0: return 10, f"Excellente couverture ({coverage:.1f}x) 💎"
+            elif coverage > 10.0: return 9, f"Très bonne couverture ({coverage:.1f}x) 🚀"
+            elif coverage > 7.0: return 8, f"Bonne couverture ({coverage:.1f}x) ✅"
+            elif coverage > 5.0: return 7, f"Couverture correcte ({coverage:.1f}x) 👍"
+            elif coverage > 3.0: return 6, f"Couverture acceptable ({coverage:.1f}x) 📊"
+            elif coverage > 2.0: return 5, f"Couverture faible ({coverage:.1f}x) 😐"
+            elif coverage > 1.2: return 3, f"Couverture très faible ({coverage:.1f}x) ⚠️"
+            elif coverage > 0: return 2, f"Couverture critique ({coverage:.1f}x) 🔴"
+            return 1, f"Incapacité à couvrir les intérêts 🚨"
+        
+        # Autres secteurs (General)
+        else:
+            if coverage > 10.0: return 10, f"Excellente couverture des intérêts ({coverage:.1f}x) 💎"
+            elif coverage > 6.0: return 9, f"Très bonne couverture ({coverage:.1f}x) 🚀"
+            elif coverage > 4.0: return 8, f"Bonne couverture ({coverage:.1f}x) ✅"
+            elif coverage > 3.0: return 7, f"Couverture correcte ({coverage:.1f}x) 👍"
+            elif coverage > 2.0: return 6, f"Couverture acceptable ({coverage:.1f}x) 📊"
+            elif coverage > 1.5: return 5, f"Couverture faible ({coverage:.1f}x) 😐"
+            elif coverage > 1.0: return 3, f"Couverture très faible ({coverage:.1f}x) ⚠️"
+            elif coverage > 0: return 2, f"Couverture critique ({coverage:.1f}x) 🔴"
+            return 1, f"Incapacité à couvrir les intérêts 🚨"
+
+
+    @staticmethod
+    def interpret_equity_ratio(ratio, sector="General"):
+        """Interprète le ratio de capitaux propres (Equity / Total Assets)"""
+        if ratio is None:
+            return 5, "Données indisponibles"
+        
+        ratio_pct = ratio * 100
+        sector_group = Utils._get_sector_group(sector)
+        
+        # Secteurs financiers et immobilier (leverage élevé normal)
+        if sector_group in ["Financial Services", "Real Estate"]:
+            if ratio_pct > 20: return 10, f"Excellente indépendance financière ({ratio_pct:.1f}%) 💎"
+            elif ratio_pct > 15: return 9, f"Très bonne structure ({ratio_pct:.1f}%) 🚀"
+            elif ratio_pct > 12: return 8, f"Bonne structure financière ({ratio_pct:.1f}%) ✅"
+            elif ratio_pct > 10: return 7, f"Structure correcte ({ratio_pct:.1f}%) 👍"
+            elif ratio_pct > 8: return 6, f"Structure acceptable ({ratio_pct:.1f}%) 📊"
+            elif ratio_pct > 6: return 5, f"Capitaux propres faibles ({ratio_pct:.1f}%) 😐"
+            elif ratio_pct > 4: return 3, f"Structure fragile ({ratio_pct:.1f}%) ⚠️"
+            elif ratio_pct > 0: return 2, f"Structure très fragile ({ratio_pct:.1f}%) 🔴"
+            return 1, f"Capitaux propres négatifs 🚨"
+        
+        # Utilities et Energy (leverage modéré normal)
+        elif sector_group in ["Utilities", "Energy"]:
+            if ratio_pct > 50: return 10, f"Excellente indépendance ({ratio_pct:.1f}%) 💎"
+            elif ratio_pct > 40: return 9, f"Très bonne structure ({ratio_pct:.1f}%) 🚀"
+            elif ratio_pct > 35: return 8, f"Bonne structure ({ratio_pct:.1f}%) ✅"
+            elif ratio_pct > 30: return 7, f"Structure correcte ({ratio_pct:.1f}%) 👍"
+            elif ratio_pct > 25: return 6, f"Structure acceptable ({ratio_pct:.1f}%) 📊"
+            elif ratio_pct > 20: return 5, f"Capitaux propres faibles ({ratio_pct:.1f}%) 😐"
+            elif ratio_pct > 15: return 3, f"Structure fragile ({ratio_pct:.1f}%) ⚠️"
+            elif ratio_pct > 0: return 2, f"Structure très fragile ({ratio_pct:.1f}%) 🔴"
+            return 1, f"Capitaux propres négatifs 🚨"
+        
+        # Autres secteurs (General, Tech, Healthcare, etc.)
+        else:
+            if ratio_pct > 65: return 10, f"Excellente indépendance financière ({ratio_pct:.1f}%) 💎"
+            elif ratio_pct > 55: return 9, f"Très bonne structure ({ratio_pct:.1f}%) 🚀"
+            elif ratio_pct > 45: return 8, f"Bonne structure financière ({ratio_pct:.1f}%) ✅"
+            elif ratio_pct > 40: return 7, f"Structure correcte ({ratio_pct:.1f}%) 👍"
+            elif ratio_pct > 35: return 6, f"Structure acceptable ({ratio_pct:.1f}%) 📊"
+            elif ratio_pct > 30: return 5, f"Capitaux propres faibles ({ratio_pct:.1f}%) 😐"
+            elif ratio_pct > 25: return 4, f"Dépendance élevée à la dette ({ratio_pct:.1f}%) ⚠️"
+            elif ratio_pct > 20: return 3, f"Structure fragile ({ratio_pct:.1f}%) 🔴"
+            elif ratio_pct > 0: return 2, f"Structure très fragile ({ratio_pct:.1f}%) 🚨"
+            return 1, f"Capitaux propres négatifs - insolvabilité 💀"

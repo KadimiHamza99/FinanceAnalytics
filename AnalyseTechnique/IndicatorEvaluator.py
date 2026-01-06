@@ -15,6 +15,7 @@ class IndicatorEvaluator:
             "OBV": 5,
             "EMA200": 21,
             "ADX": 5,
+            "Fibonacci": 10,  # Nouveau poids pour Fibonacci
         }
 
     # --- RSI ---
@@ -22,11 +23,11 @@ class IndicatorEvaluator:
         if rsi < 22:
             return 10, "🟢 RSI < 20 → Marché en panique totale 😱. Niveau historiquement bas, opportunité exceptionnelle 💎."
         elif rsi < 28:
-            return 9, "🟢 RSI 20–28 → Forte sous-évaluation, marché dominé par la peur. Signal d’entrée solide ✅."
+            return 9, "🟢 RSI 20–28 → Forte sous-évaluation, marché dominé par la peur. Signal d'entrée solide ✅."
         elif rsi < 30:
-            return 8, "🟢 RSI 28–35 → Sous-évaluation technique claire, zone d’achat intéressante 👀."
+            return 8, "🟢 RSI 28–35 → Sous-évaluation technique claire, zone d'achat intéressante 👀."
         elif rsi < 35:
-            return 7, "🟢 RSI 28–35 → Sous-évaluation technique claire, zone d’achat intéressante 👀."
+            return 7, "🟢 RSI 28–35 → Sous-évaluation technique claire, zone d'achat intéressante 👀."
         elif rsi < 45:
             return 6, "🟡 RSI 35–45 → Faiblesse modérée, surveiller une reprise confirmée."
         elif rsi < 50:
@@ -45,7 +46,7 @@ class IndicatorEvaluator:
         elif k < 25:
             return 8, "🟢 Stochastique < 25 → Marché survendu, probabilité élevée de rebond 📈."
         elif 25 <= k <= 40:
-            return 6, "🟡 Stochastique bas mais stabilisé → zone d’observation."
+            return 6, "🟡 Stochastique bas mais stabilisé → zone d'observation."
         elif 40 < k <= 65:
             return 4, "⚪ Stochastique neutre → peu exploitable."
         elif 65 < k <= 80:
@@ -60,12 +61,13 @@ class IndicatorEvaluator:
         elif close < bb_low:
             return 8, "🟢 Cours sous la bande basse → marché survendu, rebond probable ⚡."
         elif close < bb_mid:
-            return 6, "🟡 Cours sous la moyenne → phase de repli, bonne zone d’accumulation progressive 📊."
+            return 6, "🟡 Cours sous la moyenne → phase de repli, bonne zone d'accumulation progressive 📊."
         elif close < bb_high:
             return 4, "⚪ Cours entre moyenne et bande haute → marché équilibré."
         else:
             return 2, "🔴 Cours au-dessus de la bande haute → euphorie du marché 🚨."
 
+    # --- MACD ---
     def evaluate_macd(self, macd_val, signal_val):
         """
         Interprétation du MACD centrée sur la détection de retournements haussiers précoces.
@@ -78,12 +80,11 @@ class IndicatorEvaluator:
         elif macd_val > signal_val and macd_val < 0:
             return 7, "🟢 MACD haussier proche de zéro → reprise en cours, encore un peu de prudence 👀."
         elif macd_val > signal_val:
-            return 5, "🟡 MACD haussier positif → tendance déjà engagée, peu de marge d’entrée 🏁."
+            return 5, "🟡 MACD haussier positif → tendance déjà engagée, peu de marge d'entrée 🏁."
         elif macd_val < signal_val and macd_val < -0.3:
             return 3, "🟠 MACD baissier sous zéro → marché toujours sous pression, patience 🕰️."
         else:
             return 2, "🔴 MACD positif mais en affaiblissement → risque de retournement baissier ⚠️."
-
 
     # --- OBV ---
     def evaluate_obv(self, recent, previous):
@@ -107,7 +108,7 @@ class IndicatorEvaluator:
         elif discount < -10:
             return 9, f"🟢 Prix {abs(discount):.1f}% sous EMA200 → forte sous-évaluation, opportunité sérieuse ✅."
         elif discount < -5:
-            return 7, f"🟢 Prix {abs(discount):.1f}% sous EMA200 → décote intéressante, zone d’accumulation potentielle."
+            return 7, f"🟢 Prix {abs(discount):.1f}% sous EMA200 → décote intéressante, zone d'accumulation potentielle."
         elif discount < -2.5:
             return 6, f"🟡 Prix légèrement sous EMA200 → neutre à légèrement favorable."
         elif discount < 0:
@@ -122,7 +123,7 @@ class IndicatorEvaluator:
     # --- ADX ---
     def evaluate_adx(self, adx):
         if adx < 10:
-            return 8, "🟢 ADX < 10 → marché très calme, souvent proche d’un plancher ⏳."
+            return 8, "🟢 ADX < 10 → marché très calme, souvent proche d'un plancher ⏳."
         elif 10 <= adx < 20:
             return 7, "🟢 ADX 10–20 → tendance faible mais en formation 🌱."
         elif 20 <= adx < 30:
@@ -131,9 +132,74 @@ class IndicatorEvaluator:
             return 3, "🟠 ADX 30–40 → tendance forte, possible entrée tardive."
         else:
             return 1, "🔴 ADX > 40 → tendance violente, peu de marge pour un achat."
+
+    # --- FIBONACCI ---
+    def evaluate_fibonacci(self, price, levels, support, resistance):
+        """
+        Évalue la position du prix par rapport aux niveaux de Fibonacci.
+        Philosophie moyen-terme : privilégier les zones de retracement 38.2%-50% pour des entrées 
+        progressives avec bon ratio risque/récompense sur 6-24 mois.
         
+        Args:
+            price: Prix actuel
+            levels: Dictionnaire des niveaux de Fibonacci
+            support: Niveau de support identifié
+            resistance: Niveau de résistance identifié
+            
+        Returns:
+            tuple: (note sur 10, interprétation)
+        """
+        if not support or not resistance:
+            return 5.0, "⚪ Fibonacci neutre → niveaux non déterminés, attendre clarification 🔍."
+        
+        # Calcul de la position relative dans le range
+        total_range = resistance - support
+        price_position = (price - support) / total_range if total_range > 0 else 0.5
+        
+        # Identification du niveau Fibonacci le plus proche
+        fib_levels_sorted = [
+            ("Fib 23.6%", 0.236),
+            ("Fib 38.2%", 0.382),
+            ("Fib 50%", 0.5),
+            ("Fib 61.8%", 0.618),
+            ("Fib 78.6%", 0.786),
+        ]
+        
+        # Déterminer le niveau le plus proche
+        closest_level = None
+        min_distance = float('inf')
+        for level_name, level_value in fib_levels_sorted:
+            distance = abs(price_position - level_value)
+            if distance < min_distance:
+                min_distance = distance
+                closest_level = level_name
+        
+        # Évaluation optimisée pour investisseur moyen-terme
+        if price_position <= 0.20:  # En dessous de Fib 23.6%
+            return 9, "🟢 Prix sous Fib 23.6% → zone de capitulation 💎. Opportunité rare mais volatile, renforcement progressif recommandé sur 2-3 mois ⚡."
+        
+        elif price_position <= 0.30:  # Proche de Fib 23.6% - 30%
+            return 10, f"🟢 Prix à {closest_level} → zone idéale moyen-terme 🎯. Support historique fort, excellent point d'entrée avec horizon 12-24 mois 📊✨."
+        
+        elif price_position <= 0.382:  # Au niveau Fib 38.2%
+            return 9, f"🟢 Prix à {closest_level} → zone privilégiée pour accumulation progressive 👀. Ratio risque/récompense optimal, idéal pour DCA sur 3-6 mois 📈."
+        
+        elif price_position <= 0.45:  # Entre 38.2% et 50%
+            return 8, f"🟢 Prix vers {closest_level} → zone d'équilibre stratégique ⚖️. Bon compromis entre sécurité et potentiel, entrée échelonnée conseillée 🎯."
+        
+        elif price_position <= 0.55:  # Au niveau Fib 50%
+            return 7, f"🟡 Prix à {closest_level} → zone neutre-favorable 🔶. Point médian, attendre confirmation ou renforcer progressivement si convictions fortes 💪."
+        
+        elif price_position <= 0.618:  # Vers Fib 61.8%
+            return 5, f"🟡 Prix à {closest_level} → zone de prudence 🕰️. Potentiel limité à court terme, privilégier une correction vers 38.2%-50% avant d'entrer 📉."
+        
+        elif price_position <= 0.75:  # Entre 61.8% et 78.6%
+            return 3, f"🟠 Prix vers {closest_level} → zone de résistance technique 📍. Position défavorable moyen-terme, attendre repli significatif ⚠️."
+        
+        else:  # Au dessus de 78.6%
+            return 1, f"🔴 Prix au-dessus de Fib 78.6% → zone de surachat majeur 🚨. Éviter toute entrée, risque de correction >20% à moyen terme 🛑."
 
-
+    # --- INTERPRÉTATION GLOBALE ---
     def _global_interpretation(df, score):
         """Interprétation globale affinée du score total, adaptée à la détection de sous-évaluation."""
         bullish_signals = sum(df["Note (/10)"] >= 7)
@@ -141,17 +207,17 @@ class IndicatorEvaluator:
         if score >= 90:
             msg = Fore.GREEN + "💎 Exceptionnel : forte sous-évaluation confirmée 🔥 — opportunité rare à saisir."
         elif score >= 80:
-            msg = Fore.GREEN + "🟢 Très bon niveau : marché nettement en décote, configuration favorable à l’achat."
+            msg = Fore.GREEN + "🟢 Très bon niveau : marché nettement en décote, configuration favorable à l'achat."
         elif score >= 70:
             msg = Fore.CYAN + "🔵 Sous-évaluation modérée : tendance de reprise à confirmer par le volume ou le MACD."
         elif score >= 60:
-            msg = Fore.LIGHTBLUE_EX + "🔷 Neutre-haussier : signaux mitigés, attendre confirmation d’un retournement clair."
+            msg = Fore.LIGHTBLUE_EX + "🔷 Neutre-haussier : signaux mitigés, attendre confirmation d'un retournement clair."
         elif score >= 50:
             msg = Fore.YELLOW + "🟠 Marché équilibré : peu de marge de sécurité, à surveiller sans se précipiter."
         elif score >= 40:
             msg = Fore.MAGENTA + "🟣 Légère surévaluation : prudence, possible consolidation avant reprise."
         else:
-            msg = Fore.RED + "🔴 Surévaluation marquée : tendance défavorable, aucun signal d’entrée."
+            msg = Fore.RED + "🔴 Surévaluation marquée : tendance défavorable, aucun signal d'entrée."
 
         # ✅ Renforcement du message si plusieurs indicateurs convergent
         if bullish_signals >= 3 and score >= 70:
@@ -161,4 +227,3 @@ class IndicatorEvaluator:
             msg += Fore.RED + "\n⚠️ Peu ou pas de signaux positifs → risque élevé de poursuite baissière."
 
         return msg + Style.RESET_ALL
-

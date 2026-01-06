@@ -14,90 +14,163 @@ class Utils:
         """
 
         sector_weights = {
-
             'Technology': {
-                'ROE': 12, 'ROA': 6, 'Forward P/E': 12,
-                'Trailing PE': 5, 'FCF Yield': 20, 'Marge nette': 10,
-                'Beta': 5, 'Dette/Equity': 6, 'Avis Analystes': 13, 'Position 52W': 11
+                # Rentabilité (35) - Priorité : marges et croissance
+                'ROE': 7, 'ROA': 4, 'Marge nette': 7, 'Marge opérationnelle': 6, 'Croissance bénéfices': 6, 'FCF Yield': 5,
+                # Liquidité (7)
+                'Current Ratio': 2, 'Quick Ratio': 2, 'Operating Cash Flow': 3,
+                # Solvabilité (10)
+                'Dette/Equity': 3, 'Dette/EBITDA': 3, 'Dette/Actifs': 2, 'Valeur comptable': 2,
+                # Valorisation (33) - Priorité : Forward PE et PEG
+                'Forward P/E': 9, 'Trailing PE': 3, 'Price to Book': 3, 'PEG Ratio': 8, 'Dividend Yield': 3, 'Payout ratio': 7,
+                # Risque & Marché (15)
+                'Beta': 4, 'Position 52W': 6, 'Avis Analystes': 5
             },  # total = 100
-            # Justif: FCF + ROE + Forward P/E prioritaires (croissance & cash), analystes & momentum influents.
 
             'Healthcare': {
-                'ROE': 10, 'ROA': 6, 'Forward P/E': 9,
-                'Trailing PE': 6, 'FCF Yield': 18, 'Marge nette': 14,
-                'Beta': 4, 'Dette/Equity': 8, 'Avis Analystes': 10, 'Position 52W': 15
+                # Rentabilité (37) - Priorité : marges élevées pour R&D
+                'ROE': 7, 'ROA': 5, 'Marge nette': 9, 'Marge opérationnelle': 7, 'Croissance bénéfices': 5, 'FCF Yield': 4,
+                # Liquidité (10)
+                'Current Ratio': 4, 'Quick Ratio': 3, 'Operating Cash Flow': 3,
+                # Solvabilité (13)
+                'Dette/Equity': 5, 'Dette/EBITDA': 4, 'Dette/Actifs': 2, 'Valeur comptable': 2,
+                # Valorisation (26)
+                'Forward P/E': 7, 'Trailing PE': 4, 'Price to Book': 3, 'PEG Ratio': 5, 'Dividend Yield': 3, 'Payout ratio': 4,
+                # Risque & Marché (14)
+                'Beta': 3, 'Position 52W': 6, 'Avis Analystes': 5
             },  # total = 100
-            # Ajustement: +5 FCF (R&D & besoin de cash) +5 Position52W (momentum et news cliniques peuvent changer les cours).
-            # Justif: marges & FCF pour financer R&D; momentum/analystes influent fortement sur annonces.
 
             'Financial Services': {
-                'ROE': 22, 'ROA': 10, 'Price to Book': 20, 'Dividend Yield': 10,
-                'Payout ratio': 10, 'Dette/Equity': 7, 'Avis Analystes': 7,
-                'Beta': 4, 'Forward P/E': 6, 'Trailing PE': 4
+                # Rentabilité (33) - Priorité : ROE et ROA dominants
+                'ROE': 15, 'ROA': 8, 'Marge nette': 5, 'Marge opérationnelle': 5,
+                # Liquidité (4)
+                'Current Ratio': 2, 'Quick Ratio': 2,
+                # Solvabilité (15)
+                'Dette/Equity': 5, 'Dette/EBITDA': 4, 'Dette/Actifs': 3, 'Valeur comptable': 3,
+                # Valorisation (38) - Priorité : P/B et dividendes
+                'Price to Book': 14, 'Dividend Yield': 9, 'Payout ratio': 6, 'Forward P/E': 4, 'Trailing PE': 3, 'PEG Ratio': 2,
+                # Risque & Marché (10)
+                'Beta': 3, 'Position 52W': 3, 'Avis Analystes': 4
             },  # total = 100
-            # Justif: ROE & P/B dominants pour banques/assurances; dividendes & payout importants; bilan/levier surveillés.
 
             'Energy': {
-                'ROE': 8, 'ROA': 3, 'FCF Yield': 20, 'Dividend Yield': 14,
-                'Payout ratio': 6, 'Trailing PE': 5, 'Forward P/E': 6,
-                'Beta': 5, 'Dette/Equity': 13, 'Current Ratio': 7,
-                'Position 52W': 6, 'Avis Analystes': 7
+                # Rentabilité (24) - Équilibré entre marges et cash
+                'ROE': 4, 'ROA': 3, 'Marge nette': 4, 'Marge opérationnelle': 5, 'Marge brute': 5, 'FCF Yield': 3,
+                # Liquidité (14) - Important pour cycles
+                'Current Ratio': 6, 'Quick Ratio': 3, 'Operating Cash Flow': 5,
+                # Solvabilité (22) - Critique secteur capitalistique
+                'Dette/Equity': 7, 'Dette/EBITDA': 6, 'Dette/Actifs': 5, 'Valeur comptable': 4,
+                # Valorisation (28) - Dividendes clés
+                'Dividend Yield': 8, 'Forward P/E': 5, 'Trailing PE': 4, 'Price to Book': 3, 'Payout ratio': 4, 'PEG Ratio': 4,
+                # Risque & Marché (12)
+                'Beta': 4, 'Position 52W': 4, 'Avis Analystes': 4
             },  # total = 100
-            # Justif: FCF crucial (capex), dette & dividende clefs, valorisation cyclique moins structurante.
 
             'Consumer Cyclical': {
-                'ROE': 9, 'ROA': 6, 'Forward P/E': 11,
-                'Trailing PE': 6, 'FCF Yield': 13, 'Marge nette': 11,
-                'Beta': 5, 'Dette/Equity': 6, 'Current Ratio': 7,
-                'Position 52W': 12, 'Avis Analystes': 14
+                # Rentabilité (32)
+                'ROE': 7, 'ROA': 5, 'Marge nette': 8, 'Marge opérationnelle': 6, 'Croissance bénéfices': 4, 'FCF Yield': 2,
+                # Liquidité (12)
+                'Current Ratio': 5, 'Quick Ratio': 3, 'Operating Cash Flow': 4,
+                # Solvabilité (13)
+                'Dette/Equity': 5, 'Dette/EBITDA': 4, 'Dette/Actifs': 2, 'Valeur comptable': 2,
+                # Valorisation (25)
+                'Forward P/E': 8, 'Trailing PE': 4, 'Price to Book': 3, 'PEG Ratio': 4, 'Dividend Yield': 3, 'Payout ratio': 3,
+                # Risque & Marché (18) - Sentiment important
+                'Beta': 5, 'Position 52W': 7, 'Avis Analystes': 6
             },  # total = 100
-            # Ajustement: +3 Position52W, +4 Avis Analystes, +3 FCF → reflète plus l'importance du sentiment & du cash.
-            # Justif: secteur cyclique → sentiment/analystes & momentum sont des signaux avancés; FCF utile pour résistance.
 
             'Consumer Defensive': {
-                'ROE': 8, 'ROA': 7, 'Marge nette': 16, 'Dividend Yield': 15,
-                'Payout ratio': 10, 'FCF Yield': 10, 'Trailing PE': 6,
-                'Beta': 4, 'Dette/Equity': 7, 'Current Ratio': 7,
-                'Position 52W': 5, 'Avis Analystes': 5
+                # Rentabilité (31) - Marges critiques
+                'ROE': 6, 'ROA': 5, 'Marge nette': 10, 'Marge opérationnelle': 6, 'FCF Yield': 4,
+                # Liquidité (10)
+                'Current Ratio': 5, 'Quick Ratio': 3, 'Operating Cash Flow': 2,
+                # Solvabilité (14)
+                'Dette/Equity': 5, 'Dette/EBITDA': 4, 'Dette/Actifs': 3, 'Valeur comptable': 2,
+                # Valorisation (35) - Dividendes prioritaires
+                'Dividend Yield': 12, 'Payout ratio': 6, 'Forward P/E': 5, 'Trailing PE': 4, 'Price to Book': 3, 'PEG Ratio': 5,
+                # Risque & Marché (10)
+                'Beta': 3, 'Position 52W': 3, 'Avis Analystes': 4
             },  # total = 100
-            # Justif: stabilité, marges et dividendes prioritaires; faible sensibilité au beta/momentum.
 
             'Communication Services': {
-                'ROE': 10, 'ROA': 10, 'Forward P/E': 10,
-                'Trailing PE': 5, 'FCF Yield': 14, 'Marge nette': 12,
-                'Beta': 5, 'Avis Analystes': 12, 'Position 52W': 10,
-                'Dette/Equity': 6, 'Price to Book': 6
+                # Rentabilité (34)
+                'ROE': 7, 'ROA': 7, 'Marge nette': 8, 'Marge opérationnelle': 6, 'Croissance bénéfices': 3, 'FCF Yield': 3,
+                # Liquidité (8)
+                'Current Ratio': 3, 'Quick Ratio': 3, 'Operating Cash Flow': 2,
+                # Solvabilité (13)
+                'Dette/Equity': 5, 'Dette/EBITDA': 4, 'Dette/Actifs': 2, 'Valeur comptable': 2,
+                # Valorisation (30)
+                'Forward P/E': 7, 'Trailing PE': 4, 'Price to Book': 5, 'PEG Ratio': 6, 'Dividend Yield': 4, 'Payout ratio': 4,
+                # Risque & Marché (15)
+                'Beta': 4, 'Position 52W': 6, 'Avis Analystes': 5
             },  # total = 100
-            # Ajustement: +4 Position52W, +3 PriceToBook, +3 ROA → pour corriger la somme et mieux représenter les télécoms vs streaming.
-            # Justif: mix croissance/stabilité; FCF & analystes essentiels; ROA/PriceToBook légèrement plus importants localement.
 
             'Industrials': {
-                'ROE': 9, 'ROA': 7, 'Marge nette': 10, 'FCF Yield': 11,
-                'Trailing PE': 6, 'Forward P/E': 8,
-                'Dividend Yield': 7, 'Payout ratio': 5, 'Beta': 5,
-                'Dette/Equity': 9, 'Current Ratio': 8,
-                'Avis Analystes': 7, 'Position 52W': 8
+                # Rentabilité (30)
+                'ROE': 7, 'ROA': 5, 'Marge nette': 7, 'Marge opérationnelle': 6, 'Croissance bénéfices': 3, 'FCF Yield': 2,
+                # Liquidité (12)
+                'Current Ratio': 5, 'Quick Ratio': 3, 'Operating Cash Flow': 4,
+                # Solvabilité (15) - Dette importante
+                'Dette/Equity': 6, 'Dette/EBITDA': 5, 'Dette/Actifs': 2, 'Valeur comptable': 2,
+                # Valorisation (28)
+                'Forward P/E': 7, 'Trailing PE': 5, 'Price to Book': 4, 'Dividend Yield': 4, 'Payout ratio': 3, 'PEG Ratio': 5,
+                # Risque & Marché (15)
+                'Beta': 4, 'Position 52W': 6, 'Avis Analystes': 5
             },  # total = 100
-            # Ajustement: +3 Position52W, +2 FCF, +1 Dividend Yield → pour atteindre 100 et mieux capter le momentum cyclique.
-            # Justif: dette & cash-flow importants; momentum/position 52W signale reprise / contraction cyclique.
 
             'Real Estate': {
-                'ROE': 7, 'ROA': 4, 'FCF Yield': 12, 'Dividend Yield': 15,
-                'Payout ratio': 10, 'Price to Book': 18, 'Trailing PE': 4,
-                'Beta': 5, 'Dette/Equity': 12, 'Current Ratio': 5,
-                'Position 52W': 4, 'Avis Analystes': 4
+                # Rentabilité (17)
+                'ROE': 4, 'ROA': 3, 'Marge nette': 4, 'Marge opérationnelle': 4, 'FCF Yield': 2,
+                # Liquidité (9)
+                'Current Ratio': 4, 'Quick Ratio': 2, 'Operating Cash Flow': 3,
+                # Solvabilité (24) - Critique immobilier
+                'Dette/Equity': 8, 'Dette/EBITDA': 7, 'Dette/Actifs': 5, 'Valeur comptable': 4,
+                # Valorisation (42) - P/B et dividendes dominants
+                'Price to Book': 15, 'Dividend Yield': 13, 'Payout ratio': 5, 'Forward P/E': 4, 'Trailing PE': 3, 'PEG Ratio': 2,
+                # Risque & Marché (8)
+                'Beta': 3, 'Position 52W': 3, 'Avis Analystes': 2
             },  # total = 100
-            # Justif: P/B & rendement locatif dominent; dette & FCF critiques; faible dépendance au court terme.
+
+            'Utilities': {
+                # Rentabilité (21)
+                'ROE': 5, 'ROA': 4, 'Marge nette': 5, 'Marge opérationnelle': 5, 'FCF Yield': 2,
+                # Liquidité (8)
+                'Current Ratio': 4, 'Quick Ratio': 2, 'Operating Cash Flow': 2,
+                # Solvabilité (26) - Dette structurelle élevée
+                'Dette/Equity': 9, 'Dette/EBITDA': 8, 'Dette/Actifs': 5, 'Valeur comptable': 4,
+                # Valorisation (37) - Dividendes critiques
+                'Dividend Yield': 14, 'Payout ratio': 5, 'Price to Book': 6, 'Forward P/E': 5, 'Trailing PE': 4, 'PEG Ratio': 3,
+                # Risque & Marché (8)
+                'Beta': 3, 'Position 52W': 3, 'Avis Analystes': 2
+            },  # total = 100
+
+            'Basic Materials': {
+                # Rentabilité (28)
+                'ROE': 6, 'ROA': 5, 'Marge nette': 6, 'Marge opérationnelle': 6, 'Croissance bénéfices': 3, 'FCF Yield': 2,
+                # Liquidité (12)
+                'Current Ratio': 5, 'Quick Ratio': 3, 'Operating Cash Flow': 4,
+                # Solvabilité (17)
+                'Dette/Equity': 6, 'Dette/EBITDA': 5, 'Dette/Actifs': 4, 'Valeur comptable': 2,
+                # Valorisation (28)
+                'Forward P/E': 6, 'Trailing PE': 5, 'Price to Book': 5, 'Dividend Yield': 5, 'PEG Ratio': 4, 'Payout ratio': 3,
+                # Risque & Marché (15)
+                'Beta': 5, 'Position 52W': 6, 'Avis Analystes': 4
+            },  # total = 100
 
             'Général': {
-                'ROE': 9, 'ROA': 7, 'Forward P/E': 7,
-                'Trailing PE': 5, 'Price to Book': 6, 'Marge nette': 9,
-                'FCF Yield': 10, 'Dette/Equity': 8, 'Current Ratio': 6,
-                'Beta': 5, 'Avis Analystes': 10, 'Dividend Yield': 5,
-                'Payout ratio': 3, 'Position 52W': 10
+                # Rentabilité (30)
+                'ROE': 7, 'ROA': 5, 'Marge nette': 7, 'Marge opérationnelle': 5, 'Croissance bénéfices': 4, 'FCF Yield': 2,
+                # Liquidité (10)
+                'Current Ratio': 4, 'Quick Ratio': 3, 'Operating Cash Flow': 3,
+                # Solvabilité (14)
+                'Dette/Equity': 5, 'Dette/EBITDA': 5, 'Dette/Actifs': 2, 'Valeur comptable': 2,
+                # Valorisation (31)
+                'Forward P/E': 6, 'Trailing PE': 4, 'Price to Book': 5, 'Dividend Yield': 5, 'Payout ratio': 3, 'PEG Ratio': 5, 'FCF Yield': 3,
+                # Risque & Marché (15)
+                'Beta': 4, 'Position 52W': 6, 'Avis Analystes': 5
             }  # total = 100
-            # Justif: profil neutre, équilibre entre rentabilité, valorisation et perception marché.
         }
+
 
         for sector_key in sector_weights:
             if sector_key.lower() in str(sector).lower():

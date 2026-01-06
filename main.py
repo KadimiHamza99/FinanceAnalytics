@@ -7,15 +7,11 @@ if __name__ == "__main__":
 
     # Liste par défaut si aucun ticker n'est fourni
     default_tickers = [
-        "MC.PA",
-        "KER.PA",
-        "RMS.PA",
-        "STLA.AS",
-        "RNO.PA",
-        "ML.PA",
-        "AC.PA",
-        "BFIT.AS",
-        "ZAL.DE"
+        "DG.PA",  # Vinci
+        "CS.PA",
+        "BNP.PA",
+        "OR.PA",
+        "CA.PA"
     ]
 
     parser = argparse.ArgumentParser(description="Analyse des actions.")

@@ -1,5 +1,6 @@
 from colorama import Fore, Style, Back
 from SendNotification import SendNotification
+import pandas as pd
 # from AnalyseDActualite.NewsAnalysis import NewsAnalysis
 
 class StockAnalyzer:
@@ -39,15 +40,39 @@ class StockAnalyzer:
             # === FONDAMENTALE ===
             try:
                 fa = FundamentalAnalysis(ticker)
-                df_f, sf, company_name, market_cap = fa.run()
-                df_f["Note (/10)"] = df_f["Note (/10)"].apply(f.colorize_score)
+                data_by_category, df_f, sf, company_name, market_cap, scores_by_category = fa.run()
+                
                 print(Fore.CYAN + "\n=== 🔍 ANALYSE FONDAMENTALE ===" + Style.RESET_ALL)
-                p.afficher_table(
-                    df_f,
-                    ["Indicateur", "Valeur", "Note (/10)", "Poids (%)", "Interprétation"],
-                    center_cols=["Valeur", "Note (/10)", "Poids (%)"]
-                )
-                print(f"\nScore fondamental : {f.colorize_percent_score(sf)}")
+                
+                # Affichage par catégorie
+                for category, data in data_by_category.items():
+                    if data:  # Afficher seulement si la catégorie contient des données
+                        df_cat = pd.DataFrame(data)
+                        df_cat["Note (/10)"] = df_cat["Note (/10)"].apply(f.colorize_score)
+                        
+                        # Emoji selon la catégorie
+                        emoji_map = {
+                            "Rentabilité": "💰",
+                            "Liquidité": "💧",
+                            "Solvabilité": "🏦",
+                            "Valorisation": "📈",
+                            "Risque & Marché": "⚡"
+                        }
+                        emoji = emoji_map.get(category, "📊")
+                        
+                        print(f"\n{Fore.YELLOW}{emoji} {category.upper()}{Style.RESET_ALL}")
+                        print(f"Score catégorie : {f.colorize_percent_score(scores_by_category[category])}")
+                        
+                        p.afficher_table(
+                            df_cat,
+                            ["Indicateur", "Valeur", "Note (/10)", "Poids (%)", "Interprétation", "Définition"],
+                            center_cols=["Valeur", "Note (/10)", "Poids (%)"]
+                        )
+                
+                print(f"\n{Fore.GREEN}{'='*80}{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}Score fondamental global : {f.colorize_percent_score(sf)}{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}{'='*80}{Style.RESET_ALL}")
+                
             except Exception as e:
                 print(Fore.RED + f"⚠️ Erreur lors de l'analyse fondamentale de {ticker} : {e}" + Style.RESET_ALL)
                 print("→ Passage à l'analyse technique...\n")
@@ -58,7 +83,7 @@ class StockAnalyzer:
             # === TECHNIQUE ===
             try:
                 ta = TechnicalAnalysis(ticker)
-                df_t, st, reco, llm_reco = ta.run()
+                df_t, st, reco, llm_reco, fibo = ta.run()
 
                 if df_t is None or df_t.empty:
                     print(Fore.RED + "❌ Données techniques non disponibles." + Style.RESET_ALL)
@@ -100,24 +125,19 @@ class StockAnalyzer:
 
             print("="*80)
 
-            if ((sf > 75) and (st > 40)):
+            if ((sf > 70) and (st > 40)):
                 message = (
                     f"🚀 {company_name} ({ticker}) — {llm_reco}\n\n"
                     f"📊 Score Technique : {st}/100\n"
                     f"✅ Score Fondamental : {sf}/100\n\n"
+                    f"🔗 Fibonaci Analysis : {fibo["analysis"]}"
                 )
                 SendNotification.send(message, canal="normal")
-            elif ((sf > 75) and (st > 60)):
+            elif ((sf > 70) and (st > 60)):
                 message = (
                     f"🌟 {company_name} ({ticker}) — Opportunité d'achat à considérer\n\n"
                     f"📊 Score Technique : {st}/100\n"
                     f"✅ Score Fondamental : {sf}/100\n\n"
+                    f"🔗 Fibonaci Analysis : {fibo["analysis"]}"
                 )
                 SendNotification.send(message, canal="high")
-            # elif (st < 30) and (sf < 50):
-            #     message = (
-            #         f"⚠️ {company_name} ({ticker}) — Profil à risque élevé, à éviter\n\n"
-            #         f"📊 Score Technique : {st}/100\n"
-            #         f"✅ Score Fondamental : {sf}/100\n\n"
-            #     )
-            #     SendNotification.send(message, canal="low")
