@@ -7,11 +7,7 @@ if __name__ == "__main__":
 
     # Liste par défaut si aucun ticker n'est fourni
     default_tickers = [
-        "DG.PA",  # Vinci
-        "CS.PA",
-        "BNP.PA",
-        "OR.PA",
-        "CA.PA"
+        "CS.PA"
     ]
 
     parser = argparse.ArgumentParser(description="Analyse des actions.")

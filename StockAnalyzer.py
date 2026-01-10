@@ -10,6 +10,7 @@ class StockAnalyzer:
         from TablePrinter import TablePrinter
         self.f = Formatter()
         self.p = TablePrinter()
+        self.portfolio = {"CS.PA", "TTE.PA", "NOV.F", "SAN.PA", "AI.PA"}
 
     
     def score_final(self, sf, st):
@@ -125,19 +126,47 @@ class StockAnalyzer:
 
             print("="*80)
 
-            if ((sf > 70) and (st > 40)):
+            if ticker in self.portfolio:
+                print(
+                    Style.BRIGHT + Fore.WHITE + Back.GREEN +
+                    f"   📢 Objectif de sortie : {ticker}   " +
+                    Style.RESET_ALL
+                )
+
+                fibo_targets = "\n".join(
+                    f"Vendre à {item['level']:.2f} EUR → {item['gain_potential']:.2f}%"
+                    for item in fibo['analysis']['targets']
+                )
+
                 message = (
-                    f"🚀 {company_name} ({ticker}) — {llm_reco}\n\n"
-                    f"📊 Score Technique : {st}/100\n"
-                    f"✅ Score Fondamental : {sf}/100\n\n"
-                    f"🔗 Fibonaci Analysis : {fibo["analysis"]}"
+                    f"📢 {company_name} ({ticker}) — Prix actuel {llm_reco:.2f} EUR\n\n"
+                    f"📊 Score Technique : {st:.2f}/100\n"
+                    f"🔗 Score Fibonacci : {fibo['analysis']['score']:.2f}/10\n"
+                    f"✅ Score Fondamental : {sf:.2f}/100\n\n"
+                    "🔗 Fibonacci Analysis :\n"
+                    f"{fibo_targets}"
+                )
+
+                SendNotification.send(message, canal="portfolio")
+
+            elif (sf > 70) and (st > 40):
+                message = (
+                    f"🚀 {company_name} ({ticker}) — {llm_reco:.2f} EUR\n\n"
+                    f"📊 Score Technique : {st:.2f}/100\n"
+                    f"🔗 Score Fibonacci : {fibo['analysis']['score']:.2f}/10\n"
+                    f"🔗 Potential : {fibo['analysis']['targets'][-1]['gain_potential']:.2f}%\n"
+                    f"✅ Score Fondamental : {sf:.2f}/100\n\n"
+                    # f" Fibonacci Analysis : {fibo['analysis']}"
                 )
                 SendNotification.send(message, canal="normal")
-            elif ((sf > 70) and (st > 60)):
+
+            elif (sf > 70) and (st > 60):
                 message = (
-                    f"🌟 {company_name} ({ticker}) — Opportunité d'achat à considérer\n\n"
-                    f"📊 Score Technique : {st}/100\n"
-                    f"✅ Score Fondamental : {sf}/100\n\n"
-                    f"🔗 Fibonaci Analysis : {fibo["analysis"]}"
+                    f"🌟 {company_name} ({ticker}) — {llm_reco:.2f} EUR — Opportunité d'achat à considérer\n\n"
+                    f"📊 Score Technique : {st:.2f}/100\n"
+                    f"🔗 Score Fibonacci : {fibo['analysis']['score']:.2f}/10\n"
+                    f"🔗 Potential : {fibo['analysis']['targets'][-1]['gain_potential']:.2f}%\n"
+                    f"✅ Score Fondamental : {sf:.2f}/100\n\n"
+                    # f"🔗 Fibonacci Analysis : {fibo['analysis']}"
                 )
                 SendNotification.send(message, canal="high")

@@ -360,41 +360,72 @@ class IndicatorInterpreter:
 
     @staticmethod
     def interpret_current_ratio(cr, sector="General"):
+        """
+        Interprète le current ratio avec contexte sectoriel
+        
+        Règle générale:
+        - CR > 2.0 : Excellente liquidité
+        - CR 1.5-2.0 : Bonne liquidité
+        - CR 1.0-1.5 : Liquidité acceptable
+        - CR < 1.0 : Risque de liquidité
+        """
         if cr is None:
             return 4, "Données indisponibles"
         
         sector_group = Utils._get_sector_group(sector)
-
+        
+        # Secteurs spéciaux
         if sector_group == "Financial Services":
-            if cr > 1.5: return 10, "Très forte liquidité 💎"
-            elif cr > 1.2: return 9, "Forte liquidité 🚀"
-            elif cr > 1.0: return 8, "Bonne liquidité ✅"
-            elif cr > 0.8: return 7, "Correcte 👍"
-            elif cr > 0.6: return 6, "Acceptable 📊"
-            elif cr > 0.4: return 5, "Faible 😐"
-            elif cr > 0.3: return 4, "Problème ⚠️"
+            # Banques/Assurances : structure bilancielle unique
+            if cr > 1.3: return 10, "Liquidité très forte 💎"
+            elif cr > 1.1: return 9, "Forte liquidité 🚀"
+            elif cr > 0.9: return 8, "Bonne liquidité ✅"
+            elif cr > 0.7: return 6, "Correcte 👍"
+            elif cr > 0.5: return 4, "Faible ⚠️"
+            elif cr > 0.3: return 3, "Problème grave 🔴"
+            else: return 2, "Critique 🚨"
+        
+        elif sector_group == "Retail":
+            # Commerce : rotation rapide, stocks élevés
+            if cr > 2.5: return 10, "Liquidité exceptionnelle 💎"
+            elif cr > 2.0: return 9, "Excellente 🚀"
+            elif cr > 1.5: return 8, "Très bonne ✅"
+            elif cr > 1.2: return 7, "Bonne 👍"
+            elif cr > 1.0: return 6, "Correcte 📊"
+            elif cr > 0.8: return 4, "Faible ⚠️"
             else: return 3, "Critique 🔴"
-
+        
         elif sector_group in ["Technology", "Healthcare"]:
-            if cr > 4.0: return 10, "Liquidité très forte 💎"
-            elif cr > 3.0: return 9, "Excellente 🚀"
-            elif cr > 2.0: return 8, "Bonne ✅"
-            elif cr > 1.5: return 7, "Correcte 👍"
-            elif cr > 1.2: return 6, "Acceptable 📊"
-            elif cr > 1.0: return 5, "Faible 😐"
-            elif cr > 0.8: return 4, "Problème ⚠️"
-            else: return 3, "Critique 🔴"
-
-        else:
-            if cr > 3.5: return 10, "Très forte liquidité 💎"
+            # Tech/Pharma : liquidité élevée normale
+            if cr > 3.0: return 10, "Liquidité exceptionnelle 💎"
             elif cr > 2.5: return 9, "Excellente 🚀"
-            elif cr > 1.8: return 8, "Bonne ✅"
-            elif cr > 1.5: return 7, "Correcte 👍"
-            elif cr > 1.2: return 6, "Acceptable 📊"
-            elif cr > 1.0: return 5, "Faible 😐"
-            elif cr > 0.8: return 4, "Problème ⚠️"
-            elif cr > 0.6: return 3, "Grave problème 💀"
-            else: return 2, "Situation critique 🚨"
+            elif cr > 2.0: return 8, "Très bonne ✅"
+            elif cr > 1.5: return 7, "Bonne 👍"
+            elif cr > 1.2: return 6, "Correcte 📊"
+            elif cr > 1.0: return 5, "Acceptable 😐"
+            elif cr > 0.8: return 4, "Faible ⚠️"
+            else: return 3, "Critique 🔴"
+        
+        elif sector_group in ["Utilities", "Telecom"]:
+            # Services publics : cash-flows prévisibles
+            if cr > 2.0: return 10, "Liquidité très forte 💎"
+            elif cr > 1.5: return 9, "Excellente 🚀"
+            elif cr > 1.2: return 8, "Bonne ✅"
+            elif cr > 1.0: return 7, "Correcte 👍"
+            elif cr > 0.8: return 6, "Acceptable 📊"
+            elif cr > 0.6: return 4, "Faible ⚠️"
+            else: return 3, "Critique 🔴"
+        
+        else:  # Manufacturing, Services, etc.
+            if cr > 3.0: return 10, "Liquidité exceptionnelle 💎"
+            elif cr > 2.5: return 9, "Excellente 🚀"
+            elif cr > 2.0: return 8, "Très bonne ✅"
+            elif cr > 1.5: return 7, "Bonne 👍"
+            elif cr > 1.2: return 6, "Correcte 📊"
+            elif cr > 1.0: return 5, "Acceptable 😐"
+            elif cr > 0.8: return 4, "Faible ⚠️"
+            elif cr > 0.6: return 3, "Problème grave 🔴"
+            else: return 2, "Critique 🚨"
 
 
     # --- Rentabilité / marges ---
@@ -776,38 +807,128 @@ class IndicatorInterpreter:
 
     @staticmethod
     def interpret_quick_ratio(ratio, sector="General"):
-        """Interprète le quick ratio (liquidité immédiate)"""
+        """
+        Interprète le quick ratio (liquidité immédiate sans stocks)
+        
+        Règle générale:
+        - QR > 1.5 : Excellente liquidité immédiate
+        - QR 1.0-1.5 : Bonne liquidité
+        - QR 0.7-1.0 : Liquidité acceptable
+        - QR < 0.7 : Risque de liquidité court terme
+        
+        Note: Quick Ratio est plus strict que Current Ratio (exclut stocks)
+        """
         if ratio is None:
             return 5, "Données indisponibles"
         
         sector_group = Utils._get_sector_group(sector)
         
         if sector_group == "Financial Services":
-            if ratio > 1.2: return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
-            elif ratio > 0.9: return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
-            elif ratio > 0.7: return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
-            elif ratio > 0.5: return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
-            elif ratio > 0.4: return 5, f"Liquidité acceptable ({ratio:.2f}) 📊"
-            elif ratio > 0.3: return 3, f"Liquidité faible ({ratio:.2f}) ⚠️"
-            return 1, f"Liquidité critique ({ratio:.2f}) 🔴"
+            # Banques/Assurances : liquidité immédiate critique
+            if ratio > 1.0: 
+                return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 0.8: 
+                return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 0.6: 
+                return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 0.5: 
+                return 6, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.4: 
+                return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
+            elif ratio > 0.3: 
+                return 3, f"Liquidité préoccupante ({ratio:.2f}) 🔴"
+            else: 
+                return 2, f"Liquidité critique ({ratio:.2f}) 🚨"
+        
+        elif sector_group in ["Retail", "Manufacturing"]:
+            # Commerce/Industrie : Stocks importants, quick ratio naturellement plus bas
+            if ratio > 1.5: 
+                return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 1.0: 
+                return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 0.8: 
+                return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 0.6: 
+                return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.5: 
+                return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.4: 
+                return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
+            elif ratio > 0.3: 
+                return 3, f"Liquidité préoccupante ({ratio:.2f}) 🔴"
+            else: 
+                return 2, f"Liquidité critique ({ratio:.2f}) 🚨"
         
         elif sector_group in ["Technology", "Healthcare"]:
-            if ratio > 3.0: return 10, f"Excellente liquidité ({ratio:.2f}) 💎"
-            elif ratio > 2.0: return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
-            elif ratio > 1.5: return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
-            elif ratio > 1.0: return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
-            elif ratio > 0.8: return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
-            elif ratio > 0.5: return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
-            return 2, f"Liquidité critique ({ratio:.2f}) 🔴"
+            # Tech/Pharma : Peu de stocks, quick ratio élevé attendu
+            if ratio > 2.5: 
+                return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 2.0: 
+                return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 1.5: 
+                return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 1.0: 
+                return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.8: 
+                return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.6: 
+                return 5, f"Liquidité faible ({ratio:.2f}) 😐"
+            elif ratio > 0.4: 
+                return 4, f"Liquidité préoccupante ({ratio:.2f}) ⚠️"
+            else: 
+                return 3, f"Liquidité critique ({ratio:.2f}) 🔴"
         
-        else:  # General
-            if ratio > 2.0: return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
-            elif ratio > 1.5: return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
-            elif ratio > 1.2: return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
-            elif ratio > 1.0: return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
-            elif ratio > 0.7: return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
-            elif ratio > 0.5: return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
-            return 2, f"Liquidité critique ({ratio:.2f}) 🔴"
+        elif sector_group in ["Services", "Consulting"]:
+            # Services : Quasi pas de stocks, quick ≈ current ratio
+            if ratio > 2.0: 
+                return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 1.5: 
+                return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 1.2: 
+                return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 1.0: 
+                return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.8: 
+                return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.6: 
+                return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
+            else: 
+                return 3, f"Liquidité critique ({ratio:.2f}) 🔴"
+        
+        elif sector_group in ["Utilities", "Telecom"]:
+            # Services publics : Cash-flows stables, seuils modérés
+            if ratio > 1.5: 
+                return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 1.2: 
+                return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 1.0: 
+                return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 0.8: 
+                return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.6: 
+                return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.5: 
+                return 4, f"Liquidité faible ({ratio:.2f}) ⚠️"
+            else: 
+                return 3, f"Liquidité critique ({ratio:.2f}) 🔴"
+        
+        else:  # General / Default
+            if ratio > 2.0: 
+                return 10, f"Excellente liquidité immédiate ({ratio:.2f}) 💎"
+            elif ratio > 1.5: 
+                return 9, f"Très bonne liquidité ({ratio:.2f}) 🚀"
+            elif ratio > 1.2: 
+                return 8, f"Bonne liquidité ({ratio:.2f}) ✅"
+            elif ratio > 1.0: 
+                return 7, f"Liquidité correcte ({ratio:.2f}) 👍"
+            elif ratio > 0.8: 
+                return 6, f"Liquidité acceptable ({ratio:.2f}) 📊"
+            elif ratio > 0.6: 
+                return 5, f"Liquidité faible ({ratio:.2f}) 😐"
+            elif ratio > 0.5: 
+                return 4, f"Liquidité préoccupante ({ratio:.2f}) ⚠️"
+            else: 
+                return 3, f"Liquidité critique ({ratio:.2f}) 🔴"
 
 
     @staticmethod
