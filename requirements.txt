@@ -14,9 +14,5 @@ yfinance
 colorama
 tabulate
 
-spicy
-feedparser
-bs4
-ddgs
-torch
-transformers
+# Requêtes HTTP (notifications et OllamaSession)
+requests

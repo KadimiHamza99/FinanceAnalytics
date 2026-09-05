@@ -4,10 +4,6 @@ from colorama import Fore
 from Formatter import Formatter 
 from AnalyseFondamentale.IndicatorInterpreter import IndicatorInterpreter
 from AnalyseFondamentale.Utils import Utils
-import math
-
-import warnings
-warnings.filterwarnings('ignore')
 
 class FundamentalAnalysis:
     """
@@ -29,7 +25,7 @@ class FundamentalAnalysis:
         self.interpreter = IndicatorInterpreter()
 
     def run(self):
-        info = self.info
+        info = Utils.normalize_financial_info(self.info)
         f = self.formatter
         
         # Dictionnaire pour stocker les données par catégorie
@@ -46,7 +42,7 @@ class FundamentalAnalysis:
 #############################################################
 
 ################### PRINT COMPANY DATA ###########################
-        Utils.print_company_info(self.info, self.ticker_symbol)
+        Utils.print_company_info(info, self.ticker_symbol)
 ##################################################################
         
         # Récupère les poids selon le secteur
@@ -106,7 +102,7 @@ class FundamentalAnalysis:
         # === Free Cash Flow Yield ===
         fcf = info.get("freeCashflow")
         market_cap = info.get("marketCap")
-        if fcf and market_cap and market_cap > 0:
+        if Utils.is_number(fcf) and Utils.is_number(market_cap) and market_cap > 0:
             fcf_yield = fcf / market_cap
             note, interp = self.interpreter.interpret_fcf_yield(fcf_yield, self.sector)
             Utils.add_indicator(data_by_category["Rentabilité"], weights, "FCF Yield", 
@@ -120,7 +116,7 @@ class FundamentalAnalysis:
         current_ratio = info.get("currentRatio")
         note, interp = self.interpreter.interpret_current_ratio(current_ratio, self.sector)
         Utils.add_indicator(data_by_category["Liquidité"], weights, "Current Ratio", 
-            f"{current_ratio:.2f}" if current_ratio else "N/A", note, interp, 
+            f"{current_ratio:.2f}" if current_ratio is not None else "N/A", note, interp, 
             "Capacité à rembourser dettes court terme",
             "Liquidité générale")
 
@@ -128,18 +124,19 @@ class FundamentalAnalysis:
         quick_ratio = info.get("quickRatio")
         note, interp = self.interpreter.interpret_quick_ratio(quick_ratio, self.sector)
         Utils.add_indicator(data_by_category["Liquidité"], weights, "Quick Ratio", 
-            f"{quick_ratio:.2f}" if quick_ratio else "N/A", note, interp, 
+            f"{quick_ratio:.2f}" if quick_ratio is not None else "N/A", note, interp, 
             "Liquidité immédiate (sans stocks)",
             "Test de liquidité stricte")
 
         # === Operating Cash Flow ===
         op_cashflow = info.get("operatingCashflow")
         current_liabilities = info.get("totalCurrentLiabilities")
-        if op_cashflow and current_liabilities and current_liabilities > 0:
+        if (Utils.is_number(op_cashflow) and Utils.is_number(current_liabilities)
+                and current_liabilities > 0):
             ocf_ratio = op_cashflow / current_liabilities
             note, interp = self.interpreter.interpret_ocf_ratio(ocf_ratio, self.sector)
             Utils.add_indicator(data_by_category["Liquidité"], weights, "Operating Cash Flow", 
-                f"{ocf_ratio:.2f}" if ocf_ratio else "N/A", note, interp, 
+                f"{ocf_ratio:.2f}", note, interp, 
                 "Cash opérationnel vs dettes court terme",
                 "Flux de trésorerie opérationnel")
 
@@ -149,61 +146,65 @@ class FundamentalAnalysis:
         debt = info.get("debtToEquity")
         note, interp = self.interpreter.interpret_debt_to_equity(debt, self.sector)
         Utils.add_indicator(data_by_category["Solvabilité"], weights, "Dette/Equity", 
-            f"{debt:.2f}" if debt else "N/A", note, interp, 
+            f"{debt:.2f}" if debt is not None else "N/A", note, interp, 
             "Endettement vs capitaux propres",
             "Levier financier")
 
         # === Dette / EBITDA ===
         total_debt = info.get("totalDebt")
         ebitda = info.get("ebitda")
-        if total_debt and ebitda and ebitda > 0:
+        if Utils.is_number(total_debt) and Utils.is_number(ebitda) and ebitda > 0:
             debt_ebitda = total_debt / ebitda
             note, interp = self.interpreter.interpret_debt_ebitda(debt_ebitda, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Dette/EBITDA", 
-                f"{debt_ebitda:.2f}x" if debt_ebitda else "N/A", note, interp, 
+                f"{debt_ebitda:.2f}x", note, interp, 
                 "Années nécessaires pour rembourser la dette",
                 "Capacité de remboursement")
 
         # === Total Debt / Total Assets (Ratio d'endettement) ===
         total_assets = info.get("totalAssets")
-        if total_debt and total_assets and total_assets > 0:
+        if Utils.is_number(total_debt) and Utils.is_number(total_assets) and total_assets > 0:
             debt_to_assets = total_debt / total_assets
             note, interp = self.interpreter.interpret_debt_to_assets(debt_to_assets, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Dette/Actifs", 
-                f"{debt_to_assets*100:.1f}%" if debt_to_assets else "N/A", note, interp, 
+                f"{debt_to_assets*100:.1f}%", note, interp, 
                 "Part des actifs financée par la dette",
                 "Taux d'endettement global")
 
         # === Book Value (Valeur comptable par action) ===
         book_value = info.get("bookValue")
         current_price = info.get("currentPrice") or info.get("regularMarketPrice")
-        if book_value and current_price and book_value > 0:
+        currency = info.get("currency", "")
+        if (Utils.is_number(book_value) and Utils.is_number(current_price)
+                and book_value > 0 and current_price > 0):
             note, interp = self.interpreter.interpret_book_value(book_value, current_price, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Valeur comptable", 
-                f"{book_value:.2f}€" if book_value else "N/A", note, interp, 
+                f"{book_value:.2f} {currency}".strip(), note, interp, 
                 "Valeur nette par action",
                 "Matelas de sécurité")
 
         # === Interest Coverage (Couverture des intérêts) ===
         ebit = info.get("ebit")
         interest_expense = info.get("interestExpense")
-        if ebit and interest_expense and interest_expense != 0:
+        if (Utils.is_number(ebit) and Utils.is_number(interest_expense)
+                and interest_expense != 0):
             # interestExpense est souvent négatif dans yfinance, on prend la valeur absolue
             interest_coverage = ebit / abs(interest_expense)
             note, interp = self.interpreter.interpret_interest_coverage(interest_coverage, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Couverture intérêts", 
-                f"{interest_coverage:.2f}x" if interest_coverage else "N/A", note, interp, 
+                f"{interest_coverage:.2f}x", note, interp, 
                 "Capacité à payer les intérêts de la dette",
                 "Solvabilité à court terme")
 
         # === Equity Ratio (Ratio de capitaux propres) ===
         total_assets = info.get("totalAssets")
         stockholder_equity = info.get("totalStockholderEquity")
-        if total_assets and stockholder_equity and total_assets > 0:
+        if (Utils.is_number(total_assets) and Utils.is_number(stockholder_equity)
+                and total_assets > 0):
             equity_ratio = stockholder_equity / total_assets
             note, interp = self.interpreter.interpret_equity_ratio(equity_ratio, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Equity Ratio", 
-                f"{equity_ratio*100:.1f}%" if equity_ratio else "N/A", note, interp, 
+                f"{equity_ratio*100:.1f}%", note, interp, 
                 "Part des actifs financée par capitaux propres",
                 "Indépendance financière")
 
@@ -229,7 +230,7 @@ class FundamentalAnalysis:
         note = 3
         interp = "Donnée non disponible ou non calculable."
 
-        if forward_pe is not None and isinstance(forward_pe, (int, float)) and math.isfinite(forward_pe) and forward_pe > 0:
+        if Utils.is_number(forward_pe) and forward_pe > 0:
             note, interp = self.interpreter.interpret_forward_pe(forward_pe, sector)
             forward_pe_display = f"{forward_pe:.1f}x"
         else:
@@ -244,7 +245,7 @@ class FundamentalAnalysis:
         trailing_pe = info.get("trailingPE")
         note, interp = self.interpreter.interpret_trailing_pe(trailing_pe, self.sector)
         Utils.add_indicator(data_by_category["Valorisation"], weights, "Trailing PE", 
-            f"{trailing_pe:.2f}" if trailing_pe else "N/A", note, interp,
+            f"{trailing_pe:.2f}" if trailing_pe is not None else "N/A", note, interp,
             "Valorisation sur bénéfices passés",
             "PER sur 12 mois")
 
@@ -252,7 +253,7 @@ class FundamentalAnalysis:
         pb = info.get("priceToBook")
         note, interp = self.interpreter.interpret_price_to_book(pb, self.sector)
         Utils.add_indicator(data_by_category["Valorisation"], weights, "Price to Book", 
-            f"{pb:.2f}" if pb else "N/A", note, interp, 
+            f"{pb:.2f}" if pb is not None else "N/A", note, interp, 
             "Prix vs valeur comptable",
             "Valorisation des actifs")
 
@@ -260,16 +261,16 @@ class FundamentalAnalysis:
         peg = info.get("trailingPegRatio")
         note, interp = self.interpreter.interpret_peg_ratio(peg, self.sector)
         Utils.add_indicator(data_by_category["Valorisation"], weights, "PEG Ratio", 
-            f"{peg:.2f}" if peg else "N/A", note, interp, 
+            f"{peg:.2f}" if peg is not None else "N/A", note, interp, 
             "PER ajusté de la croissance",
             "Valorisation vs croissance")
 
         # === Dividend Yield ===
         div = info.get("dividendYield")
-        div_value = div if isinstance(div, (int, float)) else None
+        div_value = div if Utils.is_number(div) else None
         note, interp = self.interpreter.interpret_dividend_yield(div_value, self.sector)
         Utils.add_indicator(data_by_category["Valorisation"], weights, "Dividend Yield", 
-            f"{div_value:.2f}%" if div_value else "N/A", note, interp, 
+            f.format_pourcentage(div_value), note, interp, 
             "Rendement du dividende annuel",
             "Revenu passif")
 
@@ -287,7 +288,7 @@ class FundamentalAnalysis:
         beta = info.get("beta")
         note, interp = self.interpreter.interpret_beta(beta, self.sector)
         Utils.add_indicator(data_by_category["Risque & Marché"], weights, "Beta", 
-            f"{beta:.2f}" if beta else "N/A", note, interp,
+            f"{beta:.2f}" if beta is not None else "N/A", note, interp,
             "Volatilité vs marché",
             "Risque systématique")
 
@@ -295,7 +296,8 @@ class FundamentalAnalysis:
         current_price = info.get("regularMarketPrice")
         low_52w = info.get("fiftyTwoWeekLow")
         high_52w = info.get("fiftyTwoWeekHigh")
-        if current_price and low_52w and high_52w and high_52w != low_52w:
+        if (Utils.is_number(current_price) and Utils.is_number(low_52w)
+                and Utils.is_number(high_52w) and high_52w != low_52w):
             position, note, interp = self.interpreter.interpret_52w_position(current_price, low_52w, high_52w, self.sector)
             Utils.add_indicator(data_by_category["Risque & Marché"], weights, "Position 52W", 
                 f"{position:.1f}%", note, interp, 

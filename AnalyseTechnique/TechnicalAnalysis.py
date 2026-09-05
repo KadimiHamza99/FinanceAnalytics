@@ -582,7 +582,8 @@ class TechnicalAnalysis:
         try:
             if fib_data.get("valid", True):
                 results.append(self._make_row("Niveaux Fibonacci", f"{close:.2f}",
-                                            fib_analysis["score"], fib_analysis["interpretation"], 10.0))
+                                            fib_analysis["score"], fib_analysis["interpretation"],
+                                            ev.weights["Fibonacci"]))
         except Exception as e:
             print(f"⚠️ Erreur ajout Fibonacci: {e}")
 
@@ -591,7 +592,14 @@ class TechnicalAnalysis:
 
         df = pd.DataFrame(results)
         df["Score pondéré"] = df["Note (/10)"] * df["Poids (%)"] / 10
-        score_total = df["Score pondéré"].sum()
+        total_weight_used = df["Poids (%)"].sum()
+        if total_weight_used <= 0:
+            return pd.DataFrame(), 0, "❌ Pondérations techniques invalides", None, None
+
+        # Les indicateurs actifs totalisent actuellement 110 points (dont 10
+        # pour Fibonacci). On normalise systématiquement pour conserver un
+        # score comparable sur 100, même lorsqu'un indicateur est indisponible.
+        score_total = df["Score pondéré"].sum() / total_weight_used * 100
 
         try:
             reco = IndicatorEvaluator._global_interpretation(df, score_total)

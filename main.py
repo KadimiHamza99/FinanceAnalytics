@@ -1,9 +1,21 @@
 import argparse
+import sys
 from StockAnalyzer import StockAnalyzer
 import os
 from SendNotification import SendNotification
 
+
+def configure_console_encoding():
+    """Évite qu'un terminal Windows non UTF-8 interrompe l'analyse sur un emoji."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, OSError):
+            pass
+
+
 if __name__ == "__main__":
+    configure_console_encoding()
 
     # Liste par défaut si aucun ticker n'est fourni
     default_tickers = [

@@ -1,3 +1,6 @@
+import math
+from numbers import Real
+
 from colorama import Fore
 
 class Utils:
@@ -158,19 +161,25 @@ class Utils:
             },  # total = 100
 
             'Général': {
-                # Rentabilité (30)
-                'ROE': 7, 'ROA': 5, 'Marge nette': 7, 'Marge opérationnelle': 5, 'Croissance bénéfices': 4, 'FCF Yield': 2,
+                # Rentabilité (33) - FCF Yield regroupe le poids auparavant dupliqué.
+                'ROE': 7, 'ROA': 5, 'Marge nette': 7, 'Marge opérationnelle': 5, 'Croissance bénéfices': 4, 'FCF Yield': 5,
                 # Liquidité (10)
                 'Current Ratio': 4, 'Quick Ratio': 3, 'Operating Cash Flow': 3,
                 # Solvabilité (14)
                 'Dette/Equity': 5, 'Dette/EBITDA': 5, 'Dette/Actifs': 2, 'Valeur comptable': 2,
-                # Valorisation (31)
-                'Forward P/E': 6, 'Trailing PE': 4, 'Price to Book': 5, 'Dividend Yield': 5, 'Payout ratio': 3, 'PEG Ratio': 5, 'FCF Yield': 3,
+                # Valorisation (28)
+                'Forward P/E': 6, 'Trailing PE': 4, 'Price to Book': 5, 'Dividend Yield': 5, 'Payout ratio': 3, 'PEG Ratio': 5,
                 # Risque & Marché (15)
                 'Beta': 4, 'Position 52W': 6, 'Avis Analystes': 5
             }  # total = 100
         }
 
+
+        for sector_key, weights in sector_weights.items():
+            if sum(weights.values()) != 100:
+                raise ValueError(
+                    f"Les pondérations du secteur {sector_key} doivent totaliser 100."
+                )
 
         for sector_key in sector_weights:
             if sector_key.lower() in str(sector).lower():
@@ -236,6 +245,27 @@ class Utils:
                 "Petite Définition": petite_def
             })
 
+    @staticmethod
+    def normalize_financial_info(info: dict) -> dict:
+        """Remplace les nombres non finis de Yahoo Finance par ``None``.
+
+        Les interpréteurs savent traiter une donnée absente, mais un ``NaN``
+        passe les tests ``is None`` et peut être classé à tort comme un très
+        mauvais indicateur.
+        """
+        return {
+            key: (
+                None
+                if isinstance(value, Real) and not math.isfinite(float(value))
+                else value
+            )
+            for key, value in info.items()
+        }
+
+    @staticmethod
+    def is_number(value) -> bool:
+        return isinstance(value, Real) and math.isfinite(float(value))
+
 
     @staticmethod
     def _get_sector_group(sector: str) -> str:
@@ -247,7 +277,9 @@ class Utils:
             return "Healthcare"
         elif any(s in sector_lower for s in ["financial", "bank", "insurance", "finance"]):
             return "Financial Services"
-        elif any(s in sector_lower for s in ["energy", "oil", "gas", "utilities"]):
+        elif "utilities" in sector_lower:
+            return "Utilities"
+        elif any(s in sector_lower for s in ["energy", "oil", "gas"]):
             return "Energy"
         elif any(s in sector_lower for s in ["cyclical", "discretionary"]):
             return "Consumer Cyclical"
