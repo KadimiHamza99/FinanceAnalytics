@@ -53,7 +53,10 @@ class Utils:
         data["EMA200"] = ta.trend.EMAIndicator(close, 200).ema_indicator()
         data["ADX"] = ta.trend.ADXIndicator(high, low, close, 14).adx()
 
-        return data.dropna().bfill().ffill()
+        # Les premières lignes ne disposent pas de toutes les fenêtres de calcul
+        # (notamment l'EMA200). Les remplir avec des valeurs futures introduit
+        # un biais de regard vers l'avenir ; on les écarte donc explicitement.
+        return data.dropna().copy()
     
 
 

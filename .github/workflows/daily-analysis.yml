@@ -58,37 +58,19 @@ jobs:
           echo "✅ Installation terminée."
 
       # ------------------------------------------
-      # 4) INSTALLATION D’OLLAMA (SANS CACHE)
-      # ------------------------------------------
-      - name: Install Ollama
-        run: |
-          echo "Installation d’Ollama..."
-          curl -fsSL https://ollama.com/install.sh | sudo sh
-
-      - name: Pull Mistral model
-        run: |
-          echo "Téléchargement du modèle Mistral (sans cache)..."
-          ollama pull mistral:7b
-
-      - name: Verify Ollama installation
-        run: |
-          ollama --version
-          ollama list
-
-      # ------------------------------------------
-      # 5) EXÉCUTION DU SCRIPT PYTHON
+      # 4) EXÉCUTION DU SCRIPT PYTHON
       # ------------------------------------------
       - name: Run stock analysis and capture output
         run: |
           echo "---- Début d'exécution du script ----"
           mkdir -p output
-          python main.py --file tickers.txt > output/console.txt 2>&1 || true
+          python main.py --file tickers.txt > output/console.txt 2>&1
           echo "---- Exécution terminée ----"
           ls -l output || echo "⚠️ Aucun dossier 'output' trouvé."
           head -n 20 output/console.txt || echo "⚠️ Aucun fichier console.txt trouvé."
 
       # ------------------------------------------
-      # 6) LOGS COMPLÉMENTS
+      # 5) LOGS COMPLÉMENTS
       # ------------------------------------------
       - name: Show full Python log
         if: always()
