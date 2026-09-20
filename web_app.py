@@ -3,12 +3,14 @@
 import json
 import math
 import os
+import re
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
 import pandas as pd
+import yfinance as yf
 
 from AnalyseFondamentale.FundamentalAnalysis import FundamentalAnalysis
 from AnalyseTechnique.TechnicalAnalysis import TechnicalAnalysis
@@ -19,9 +21,25 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_TICKERS = ["CS.PA", "TTE.PA", "SAN.PA"]
 
 
+ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def strip_ansi(value):
+    """Remove terminal color codes from strings so they can display in HTML/JSON."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return ANSI_ESCAPE_RE.sub("", value)
+    return value
+
+
 def json_safe(value):
     """Convert pandas/numpy values and non-finite numbers to JSON values."""
-    if value is None or isinstance(value, (str, bool, int)):
+    if value is None:
+        return value
+    if isinstance(value, str):
+        return strip_ansi(value)
+    if isinstance(value, (bool, int)):
         return value
     if isinstance(value, float):
         return value if math.isfinite(value) else None
@@ -37,6 +55,43 @@ def json_safe(value):
         return json_safe(value.item())
     except (AttributeError, ValueError):
         return str(value)
+
+
+def get_ticker_performance(symbol):
+    """Return price performance for several horizons when available."""
+    try:
+        history = yf.Ticker(symbol).history(period="1y", auto_adjust=True)
+    except Exception:
+        return {"1M": None, "3M": None, "1Y": None}
+    if history is None or history.empty:
+        return {"1M": None, "3M": None, "1Y": None}
+
+    series = history["Close"].dropna()
+    if series.empty:
+        return {"1M": None, "3M": None, "1Y": None}
+
+    tz = series.index.tz
+
+    def pct_change_for(days):
+        try:
+            now = pd.Timestamp.now(tz=tz) if tz is not None else pd.Timestamp.now()
+            cutoff = now - pd.Timedelta(days=days)
+            window = series[series.index >= cutoff]
+            if window.empty or len(window) < 2:
+                return None
+            start = window.iloc[0]
+            end = window.iloc[-1]
+            if pd.isna(start) or start in (None, 0):
+                return None
+            return float(((end - start) / start) * 100)
+        except Exception:
+            return None
+
+    return {
+        "1M": pct_change_for(30),
+        "3M": pct_change_for(90),
+        "1Y": pct_change_for(365),
+    }
 
 
 def analyze_ticker(ticker):
@@ -66,6 +121,11 @@ def analyze_ticker(ticker):
         )
 
     analysis = fibonacci.get("analysis", {}) if fibonacci else {}
+    recommendation = strip_ansi(recommendation)
+    interpretation = strip_ansi(interpretation)
+    if analysis:
+        analysis["interpretation"] = strip_ansi(analysis.get("interpretation"))
+
     return {
         "ticker": symbol,
         "company": company_name or symbol,
@@ -91,6 +151,7 @@ def analyze_ticker(ticker):
             "levels": fibonacci.get("levels", {}) if fibonacci else {},
             "analysis": analysis,
         },
+        "performance": get_ticker_performance(symbol),
     }
 
 
@@ -129,6 +190,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             tickers = list(dict.fromkeys(str(item) for item in tickers))[:10]
             if not tickers:
                 raise ValueError("Ajoutez au moins un ticker.")
+            print(f"🔎 Analyse web lancée : {', '.join(tickers)}")
             results = []
             errors = []
             for ticker in tickers:
@@ -136,6 +198,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     results.append(analyze_ticker(ticker))
                 except Exception as error:
                     errors.append({"ticker": ticker, "message": str(error)})
+            print(
+                f"✅ Analyse web terminée : {len(results)} résultat(s), "
+                f"{len(errors)} erreur(s)"
+            )
             self._send_json({"results": results, "errors": errors})
         except (ValueError, TypeError, json.JSONDecodeError) as error:
             self._send_json({"error": str(error)}, status=400)

@@ -1,13 +1,9 @@
 """Application-level orchestration for stock analyses."""
 
-from colorama import Fore, Style
-
 from AnalyseFondamentale.FundamentalAnalysis import FundamentalAnalysis
 from AnalyseTechnique.TechnicalAnalysis import TechnicalAnalysis
-from Formatter import Formatter
+from core.presentation import Presentation
 from SendNotification import SendNotification
-from StockAnalysisUtils import StockAnalysisUtils
-from TablePrinter import TablePrinter
 
 
 class StockAnalyzer:
@@ -21,8 +17,9 @@ class StockAnalyzer:
         self.tickers = tuple(
             dict.fromkeys(ticker.strip() for ticker in tickers if ticker.strip())
         )
-        self.formatter = Formatter()
-        self.table_printer = TablePrinter()
+        self.presentation = Presentation()
+        self.formatter = self.presentation
+        self.table_printer = self.presentation
 
     @classmethod
     def score_final(cls, fundamental_score, technical_score):
@@ -31,88 +28,45 @@ class StockAnalyzer:
             cls.SCORE_WEIGHTS["fundamental"] * fundamental_score
             + cls.SCORE_WEIGHTS["technical"] * technical_score
         )
-        if score >= 80:
-            interpretation = (
-                Fore.GREEN
-                + Style.BRIGHT
-                + "💚 Excellent profil global — Opportunité d'achat (FAIBLE RISQUE)"
-            )
-        elif score >= 65:
-            interpretation = (
-                Fore.CYAN
-                + Style.BRIGHT
-                + "💙 Bon profil — Potentiel intéressant (RISQUE MODÉRÉ)"
-            )
-        elif score >= 50:
-            interpretation = Fore.YELLOW + "🟠 Profil moyen — À surveiller (RISQUE NORMAL)"
-        else:
-            interpretation = (
-                Fore.RED
-                + Style.BRIGHT
-                + "🔴 Profil faible — Risque élevé (ÉVITER)"
-            )
-        return score, interpretation
+        return score, Presentation.global_interpretation(score)
 
     def _run_fundamental_analysis(self, ticker):
-        """Run and display the fundamental analysis for one ticker."""
+        """Run fundamental analysis without printing its detailed data."""
         try:
             analysis = FundamentalAnalysis(ticker)
             (
-                data_by_category,
+                _,
                 _,
                 score,
                 company_name,
                 _,
-                scores_by_category,
+                _,
             ) = analysis.run()
-            StockAnalysisUtils.print_fundamental_report(
-                data_by_category,
-                scores_by_category,
-                score,
-                self.formatter,
-                self.table_printer,
-            )
             return score, company_name, analysis.info.get("currency", "")
         except Exception as error:
-            print(
-                Fore.RED
-                + f"⚠️ Erreur lors de l'analyse fondamentale de {ticker} : {error}"
-                + Style.RESET_ALL
-            )
-            print("→ Passage à l'analyse technique...\n")
+            print(f"⚠️ Erreur lors de l'analyse fondamentale de {ticker} : {error}")
             return None, ticker, ""
 
     def _run_technical_analysis(self, ticker):
-        """Run and display the technical analysis for one ticker."""
+        """Run technical analysis without printing its detailed data."""
         try:
             dataframe, score, recommendation, price, fibonacci = TechnicalAnalysis(
                 ticker
             ).run()
-            available = StockAnalysisUtils.print_technical_report(
-                dataframe,
-                score,
-                recommendation,
-                self.formatter,
-                self.table_printer,
-            )
             return (
                 (score, recommendation, price, fibonacci)
-                if available
+                if dataframe is not None and not dataframe.empty
                 else (None, "Non disponible", None, None)
             )
         except Exception as error:
-            print(
-                Fore.RED
-                + f"⚠️ Erreur lors de l'analyse technique de {ticker} : {error}"
-                + Style.RESET_ALL
-            )
+            print(f"⚠️ Erreur lors de l'analyse technique de {ticker} : {error}")
             return None, "Non disponible", None, None
 
     def _send_notification(
         self, ticker, company_name, price, currency, fundamental_score, technical_score, fibonacci
     ):
         """Send an alert when the configured portfolio rules are met."""
-        notification = StockAnalysisUtils.build_notification(
+        notification = self.presentation.build_notification(
             ticker,
             company_name,
             price,
@@ -127,36 +81,15 @@ class StockAnalyzer:
             SendNotification.send(message, canal=channel)
 
     def run(self):
-        """Run and print every requested ticker analysis."""
+        """Run every requested ticker with concise progress messages."""
         for ticker in self.tickers:
-            print(Style.BRIGHT + Fore.WHITE + "\n" + "=" * 80)
-            print(f"--- 📊 Analyse détaillée de {ticker} ---")
-            print("=" * 80 + Style.RESET_ALL)
+            print(f"🔎 Analyse de {ticker}...")
 
             fundamental_score, company_name, currency = self._run_fundamental_analysis(
                 ticker
             )
-            print("-" * 80)
             technical_score, _, price, fibonacci = self._run_technical_analysis(ticker)
-            print("=" * 80)
 
-            global_score = None
-            interpretation = None
-            if fundamental_score is not None and technical_score is not None:
-                try:
-                    global_score, interpretation = self.score_final(
-                        fundamental_score, technical_score
-                    )
-                except (TypeError, ValueError) as error:
-                    print(
-                        Fore.RED
-                        + f"⚠️ Erreur lors du calcul du score global : {error}"
-                        + Style.RESET_ALL
-                    )
-            StockAnalysisUtils.print_global_score(
-                global_score, interpretation, self.formatter
-            )
-            print("=" * 80)
             self._send_notification(
                 ticker,
                 company_name,
@@ -166,3 +99,4 @@ class StockAnalyzer:
                 technical_score,
                 fibonacci,
             )
+            print(f"✅ Analyse de {ticker} terminée.")

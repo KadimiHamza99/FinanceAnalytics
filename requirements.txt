@@ -14,5 +14,5 @@ yfinance
 colorama
 tabulate
 
-# Requêtes HTTP (notifications et OllamaSession)
+# Requêtes HTTP pour les notifications
 requests

@@ -1,7 +1,6 @@
 import yfinance as yf
 import pandas as pd
 import ta
-from OllamaSession import OllamaSession
 
 class Utils:
     """Download prices and compute causal indicators for daily data."""
@@ -59,30 +58,3 @@ class Utils:
         # Les fenêtres incomplètes sont écartées pour éviter tout biais de
         # regard vers l'avenir et garantir des signaux comparables.
         return data.dropna().copy()
-    
-
-
-    @staticmethod
-    def askMistralTechnicalAnalysis(model, rsi, macd, ema200, bb_l, bb_h, bb_m, stoch_k, stoch_d, obv, adx, prix_actuel):
-
-        # Prompt structuré pour guider le modèle
-        prompt = f"""<s>[INST] Tu es un analyste boursier expert en stratégie long terme.
-
-            Indicateurs techniques :
-            - RSI: {rsi:.2f}
-            - OBV: {obv:.2f}
-            - ADX: {adx:.2f}
-            - STOCH K/D: {stoch_k:.2f}/{stoch_d:.2f}
-            - MACD: {macd:.3f}
-            - EMA200: {ema200:.2f}
-            - Bollinger: {bb_l:.2f} | {bb_m:.2f} | {bb_h:.2f}
-            - Prix: {prix_actuel:.2f}
-
-            Analyse sévére et objective pour position longue, proposes moi des points d'entrée au niveau des supports calculés.
-            Réponse UNIQUEMENT dans ce format :
-
-            Conseil : [phrase unique] \n
-            Point d'entrée recommandé : [prix ou plage] [/INST]
-        """
-
-        return OllamaSession.ask(model, prompt)

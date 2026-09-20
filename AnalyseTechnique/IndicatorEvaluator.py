@@ -1,4 +1,6 @@
-from colorama import Fore, Style
+from colorama import Fore
+
+from core.presentation import Presentation
 
 class IndicatorEvaluator:
     """
@@ -217,28 +219,28 @@ class IndicatorEvaluator:
         bullish_signals = sum(df["Note (/10)"] >= 7)
 
         if score >= 90:
-            msg = Fore.GREEN + "💎 Configuration technique très favorable, mais à confirmer par le volume et le contexte."
+            msg = Presentation.colorize("💎 Configuration technique très favorable, mais à confirmer par le volume et le contexte.", Fore.GREEN)
         elif score >= 80:
-            msg = Fore.GREEN + "🟢 Configuration favorable : tendance et momentum cohérents, entrée progressive uniquement."
+            msg = Presentation.colorize("🟢 Configuration favorable : tendance et momentum cohérents, entrée progressive uniquement.", Fore.GREEN)
         elif score >= 70:
-            msg = Fore.CYAN + "🔵 Configuration plutôt favorable : attendre une confirmation par le volume ou le MACD."
+            msg = Presentation.colorize("🔵 Configuration plutôt favorable : attendre une confirmation par le volume ou le MACD.", Fore.CYAN)
         elif score >= 60:
-            msg = Fore.LIGHTBLUE_EX + "🔷 Neutre-haussier : signaux mitigés, attendre confirmation d'un retournement clair."
+            msg = Presentation.colorize("🔷 Neutre-haussier : signaux mitigés, attendre confirmation d'un retournement clair.", Fore.LIGHTBLUE_EX)
         elif score >= 50:
-            msg = Fore.YELLOW + "🟠 Marché équilibré : peu de marge de sécurité, à surveiller sans se précipiter."
+            msg = Presentation.colorize("🟠 Marché équilibré : peu de marge de sécurité, à surveiller sans se précipiter.", Fore.YELLOW)
         elif score >= 40:
-            msg = Fore.MAGENTA + "🟣 Signaux techniques fragiles : possible consolidation, prudence."
+            msg = Presentation.colorize("🟣 Signaux techniques fragiles : possible consolidation, prudence.", Fore.MAGENTA)
         else:
-            msg = Fore.RED + "🔴 Configuration défavorable : tendance ou momentum faibles, pas de signal d'entrée."
+            msg = Presentation.colorize("🔴 Configuration défavorable : tendance ou momentum faibles, pas de signal d'entrée.", Fore.RED)
 
         # ✅ Renforcement du message si plusieurs indicateurs convergent
         if bullish_signals >= 3 and score >= 70:
-            msg += Fore.GREEN + "\n✅ Plusieurs indicateurs convergent → signal fort de retournement probable."
+            msg += Presentation.colorize("\n✅ Plusieurs indicateurs convergent → signal fort de retournement probable.", Fore.GREEN)
 
         elif bullish_signals <= 1 and score < 50:
-            msg += Fore.RED + "\n⚠️ Peu ou pas de signaux positifs → risque élevé de poursuite baissière."
+            msg += Presentation.colorize("\n⚠️ Peu ou pas de signaux positifs → risque élevé de poursuite baissière.", Fore.RED)
 
-        return msg + Style.RESET_ALL
+        return msg
 
     @staticmethod
     def integrated_interpretation(score, fibonacci_data):
@@ -248,11 +250,10 @@ class IndicatorEvaluator:
         here as a confirmation and risk filter, not counted a second time.
         """
         if not fibonacci_data or not fibonacci_data.get("valid", False):
-            return (
-                Fore.YELLOW
-                + "🟠 Analyse technique partielle : Fibonacci n'est pas exploitable, "
-                "aucune entrée agressive."
-                + Style.RESET_ALL
+            return Presentation.colorize(
+                "🟠 Analyse technique partielle : Fibonacci n'est pas exploitable, "
+                "aucune entrée agressive.",
+                Fore.YELLOW,
             )
 
         analysis = fibonacci_data["analysis"]
@@ -261,42 +262,37 @@ class IndicatorEvaluator:
         risk_reward = analysis.get("risk_reward")
 
         if trend == "baissier":
-            return (
-                Fore.RED
-                + "🔴 Pas de signal d'achat : tendance baissière confirmée. "
-                "Attendre un retournement et une clôture au-dessus d'une moyenne clé."
-                + Style.RESET_ALL
+            return Presentation.colorize(
+                "🔴 Pas de signal d'achat : tendance baissière confirmée. "
+                "Attendre un retournement et une clôture au-dessus d'une moyenne clé.",
+                Fore.RED,
             )
 
         if fibonacci_score < 4 or (risk_reward and risk_reward["ratio"] < 1):
-            return (
-                Fore.YELLOW
-                + "🟠 Configuration défavorable : la zone Fibonacci n'offre pas "
-                "assez de marge de sécurité."
-                + Style.RESET_ALL
+            return Presentation.colorize(
+                "🟠 Configuration défavorable : la zone Fibonacci n'offre pas "
+                "assez de marge de sécurité.",
+                Fore.YELLOW,
             )
 
         if score >= 70 and fibonacci_score >= 6 and (
             risk_reward is None or risk_reward["ratio"] >= 1.5
         ):
-            return (
-                Fore.GREEN
-                + "🟢 Signal technique confirmé : momentum, tendance et zone "
-                "Fibonacci convergent. Entrée progressive uniquement."
-                + Style.RESET_ALL
+            return Presentation.colorize(
+                "🟢 Signal technique confirmé : momentum, tendance et zone "
+                "Fibonacci convergent. Entrée progressive uniquement.",
+                Fore.GREEN,
             )
 
         if score >= 55 and fibonacci_score >= 5:
-            return (
-                Fore.CYAN
-                + "🔵 Configuration surveillable : signaux partiellement alignés. "
-                "Attendre une confirmation avant toute entrée."
-                + Style.RESET_ALL
+            return Presentation.colorize(
+                "🔵 Configuration surveillable : signaux partiellement alignés. "
+                "Attendre une confirmation avant toute entrée.",
+                Fore.CYAN,
             )
 
-        return (
-            Fore.YELLOW
-            + "🟠 Signal insuffisant : les indicateurs techniques et Fibonacci "
-            "ne convergent pas assez."
-            + Style.RESET_ALL
+        return Presentation.colorize(
+            "🟠 Signal insuffisant : les indicateurs techniques et Fibonacci "
+            "ne convergent pas assez.",
+            Fore.YELLOW,
         )

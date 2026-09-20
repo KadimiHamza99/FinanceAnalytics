@@ -13,7 +13,7 @@ from AnalyseFondamentale.IndicatorInterpreter import IndicatorInterpreter
 from AnalyseFondamentale.Utils import Utils as FundamentalUtils
 from AnalyseTechnique.TechnicalAnalysis import TechnicalAnalysis
 from AnalyseTechnique.Utils import Utils as TechnicalUtils
-from Formatter import Formatter
+from core.presentation import Presentation
 from SendNotification import SendNotification
 
 
@@ -62,7 +62,7 @@ class FundamentalReliabilityTests(unittest.TestCase):
             "recommendationMean": 2.5,
             "numberOfAnalystOpinions": 10,
         }
-        analysis.formatter = Formatter()
+        analysis.formatter = Presentation()
         analysis.sector = "Utilities"
         analysis.interpreter = IndicatorInterpreter()
 

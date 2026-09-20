@@ -11,38 +11,81 @@
       --orange: #d9822b; --shadow: 0 12px 35px rgba(24, 54, 91, .08);
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font: 14px Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
-    .shell { display: grid; grid-template-columns: 245px 1fr; min-height: 100vh; }
-    aside { background: var(--navy); color: #dce8f7; padding: 27px 18px; }
-    .brand { display:flex; align-items:center; gap: 11px; color: white; font-weight: 750; font-size: 17px; margin: 0 10px 48px; }
-    .brand-mark { background: #2578ef; border-radius: 10px; padding: 8px; font-size: 17px; }
-    .nav-label { color: #8096b0; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin: 0 12px 12px; }
-    nav button { width:100%; border:0; background:transparent; color: #b7c9dd; text-align:left; padding: 12px; border-radius: 8px; margin-bottom: 5px; font: inherit; cursor:pointer; }
+    html { font-size: 13px; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 13px Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    .shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    aside { background: var(--navy); color: #dce8f7; padding: 22px 16px; }
+    .brand { display:flex; align-items:center; gap: 9px; color: white; font-weight: 750; font-size: 16px; margin: 0 8px 36px; }
+    .brand-mark { background: #2578ef; border-radius: 10px; padding: 7px; font-size: 16px; }
+    .nav-label { color: #8096b0; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin: 0 10px 12px; }
+    nav button { width:100%; border:0; background:transparent; color: #b7c9dd; text-align:left; padding: 11px 12px; border-radius: 8px; margin-bottom: 5px; font: inherit; cursor:pointer; }
     nav button.active, nav button:hover { color:white; background: #1c4169; }
-    .aside-note { border-top: 1px solid #294968; margin: 30px 10px 0; padding-top: 18px; color:#8da6c0; font-size:12px; line-height:1.6; }
-    main { max-width: 1500px; width:100%; padding: 30px 38px 55px; margin:auto; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap: 18px; margin-bottom:30px; }
-    h1 { font-size: 26px; letter-spacing:-.03em; margin: 0 0 6px; } .subtitle { color:var(--muted); margin:0; }
+    .aside-note { border-top: 1px solid #294968; margin: 24px 8px 0; padding-top: 16px; color:#8da6c0; font-size:12px; line-height:1.5; }
+    main { max-width: 1380px; width:100%; padding: 20px 26px 42px; margin:auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap: 18px; margin-bottom:22px; }
+    h1 { font-size: 24px; letter-spacing:-.03em; margin: 0 0 6px; } .subtitle { color:var(--muted); margin:0; }
     .status { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; }
     .dot { width:8px; height:8px; border-radius:50%; background:var(--green); }
-    .search { display:flex; gap:10px; background:var(--surface); border:1px solid var(--line); padding: 8px; border-radius:12px; box-shadow:var(--shadow); }
-    input { border:0; outline:0; padding: 10px 12px; width:260px; color:var(--ink); font:inherit; }
-    .primary { background:var(--blue); color:white; border:0; border-radius:8px; padding: 0 18px; font-weight:700; cursor:pointer; }
+    .search { display:flex; flex-direction:column; gap:10px; background:var(--surface); border:1px solid var(--line); padding: 10px; border-radius:12px; box-shadow:var(--shadow); }
+    .search-row { display:flex; gap:10px; align-items:center; }
+    input { border:0; outline:0; padding: 9px 12px; width:260px; color:var(--ink); font:inherit; background:#f7f9fc; border-radius:8px; }
+    .input-fill { flex:1; }
+    .primary, .secondary { border:0; border-radius:8px; padding: 0 16px; font-weight:700; cursor:pointer; }
+    .primary { background:var(--blue); color:white; }
+    .secondary { background:#edf4ff; color:var(--blue); }
     .primary:disabled { opacity:.65; cursor:wait; }
-    .overview { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; margin-bottom:24px; }
+    .overview { display:grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap:14px; margin-bottom:20px; }
     .card, .panel { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); }
-    .card { padding:19px; } .card-label { color:var(--muted); font-size:12px; } .card-value { font-size:25px; font-weight:750; margin-top:9px; }
+    .card { padding:16px 18px; } .card-label { color:var(--muted); font-size:12px; } .card-value { font-size:23px; font-weight:750; margin-top:8px; }
     .card-change { color:var(--green); font-size:12px; margin-top:6px; }
-    .layout { display:grid; grid-template-columns: 1.4fr .9fr; gap:18px; }
-    .panel { padding: 22px; margin-bottom:18px; } .panel h2 { font-size:15px; margin:0 0 18px; } .panel-head { display:flex; justify-content:space-between; align-items:center; }
-    .table-wrap { overflow-x:auto; } table { border-collapse:collapse; width:100%; } th, td { padding:11px 8px; border-bottom:1px solid var(--line); text-align:left; font-size:12px; white-space:nowrap; } th { color:var(--muted); font-weight:600; } td:first-child { font-weight:650; }
+    .layout { display:grid; grid-template-columns: 1.45fr .95fr; gap:16px; }
+    .panel { padding: 18px 18px 16px; margin-bottom:16px; } .panel h2 { font-size:15px; margin:0 0 16px; } .panel-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+    .table-wrap { overflow-x:auto; } table { border-collapse:collapse; width:100%; } th, td { padding:9px 8px; border-bottom:1px solid var(--line); text-align:left; font-size:12px; white-space:nowrap; } th { color:var(--muted); font-weight:600; } td:first-child { font-weight:650; }
     .score-pill { display:inline-block; min-width:54px; padding:5px 8px; border-radius:20px; text-align:center; background:#e8f7f1; color:#147553; font-weight:750; }
     .bars { display:grid; gap:14px; } .bar-line { display:grid; grid-template-columns: 125px 1fr 45px; align-items:center; gap:10px; font-size:12px; } .bar { height:8px; background:#edf1f6; border-radius:8px; overflow:hidden; } .bar i { display:block; height:100%; background:linear-gradient(90deg, #1c72e8, #55a0ff); border-radius:8px; }
     .fib-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .metric { background:#f7f9fc; border-radius:9px; padding:11px; } .metric small { color:var(--muted); display:block; margin-bottom:5px; } .metric strong { font-size:15px; }
-    .empty { text-align:center; color:var(--muted); padding: 45px 10px; } .error { background:#fff4f2; color:#ae4438; padding:12px; border-radius:8px; margin-bottom:18px; }
+    .company-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+    .comparison-grid { display:grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap:12px; }
+    .comparison-row { background:#f7f9fc; border:1px solid var(--line); border-radius:10px; padding:12px; }
+    .comparison-row .label { display:block; color:var(--muted); font-size:11px; margin-bottom:6px; }
+    .comparison-row .value { font-size:16px; font-weight:700; }
+    .comparison-row .delta { display:block; font-size:12px; color:var(--green); margin-top:4px; }
+    .metric-label { display:inline-flex; align-items:center; gap:6px; }
+    .metric-help { width:18px; height:18px; border-radius:50%; border:0; background:#edf4ff; color:var(--blue); font-weight:700; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; }
+    .metric-help:hover { background:#dfeeff; }
+    .comparison-values { display:grid; grid-template-columns: 1fr; gap:8px; margin-top:8px; }
+    .compare-value { display:flex; align-items:flex-start; gap:7px; min-width:0; border-radius:10px; padding:8px 9px; background:#f7f9fc; border:1px solid var(--line); font-size:12px; }
+    .compare-value.left { border-left: 3px solid #1769e0; background: linear-gradient(90deg, rgba(23,105,224,0.10), #f7f9fc); }
+    .compare-value.right { border-left: 3px solid #2aa876; background: linear-gradient(90deg, rgba(42,168,118,0.10), #f7f9fc); }
+    .compare-value .marker { width:8px; height:8px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+    .compare-value.left .marker { background:#1769e0; }
+    .compare-value.right .marker { background:#2aa876; }
+    .compare-value strong { display:block; font-size:13px; font-weight:700; line-height:1.3; white-space:normal; word-break:break-word; overflow-wrap:anywhere; }
+    .comparison-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:10px; color:var(--muted); }
+    .legend-dot { display:inline-block; width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .legend-dot.left { background:#1769e0; }
+    .legend-dot.right { background:#2aa876; }
+    .watchlist { display:flex; flex-wrap:wrap; gap:10px; }
+    .watch-item { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:999px; background:#f7f9fc; }
+    .mini-button { border:0; background:var(--blue); color:white; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer; }
+    .filter-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-top:12px; }
+    .field { display:flex; flex-direction:column; gap:8px; }
+    .field label { font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+    .field input, .field select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#f7f9fc; color:var(--ink); font:inherit; }
+    .alert-list { display:flex; flex-wrap:wrap; gap:10px; }
+    .alert-item { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#edf4ff; color:var(--navy); font-size:12px; }
+    .empty { text-align:center; color:var(--muted); padding: 45px 10px; } .error { background:#fff4f2; color:#ae4438; padding:12px; border-radius:8px; margin-bottom:18px; } .success { background:#edfdf7; color:#127d5d; padding:12px; border-radius:8px; margin-bottom:18px; }
     .tag { border-radius:20px; padding:5px 10px; background:#edf4ff; color:var(--blue); font-size:12px; font-weight:700; }
+    @media (min-width: 1600px) {
+      html { font-size: 12.5px; }
+      .shell { grid-template-columns: 210px minmax(0, 1fr); }
+      main { padding: 18px 24px 36px; }
+      .overview { gap: 12px; }
+      .card { padding: 14px 16px; }
+      .card-value { font-size: 21px; }
+    }
     @media(max-width: 950px) { .shell { grid-template-columns:1fr; } aside { padding:14px 18px; } .brand { margin-bottom:15px; } nav { display:flex; gap:6px; overflow:auto; } nav button { white-space:nowrap; } .aside-note, .nav-label { display:none; } main { padding:24px 18px; } .layout { grid-template-columns:1fr; } }
-    @media(max-width: 650px) { .topbar { align-items:flex-start; flex-direction:column; } .search { width:100%; } input { width:100%; } .overview { grid-template-columns:1fr 1fr; } .primary { padding:0 12px; } }
+    @media(max-width: 650px) { .topbar { align-items:flex-start; flex-direction:column; } .search-row { flex-direction:column; } input { width:100%; } .overview { grid-template-columns:1fr 1fr; } .primary, .secondary { padding:0 12px; height:40px; } }
   </style>
 </head>
 <body>
@@ -58,7 +101,17 @@
         <div><h1>Vue d'ensemble</h1><p class="subtitle">Votre cockpit d'analyse boursière</p></div>
         <div class="status"><span class="dot"></span> Service local connecté</div>
       </div>
-      <div class="search"><input id="tickers" value="CS.PA, TTE.PA, SAN.PA" aria-label="Tickers à analyser"><button class="primary" id="analyze">Lancer l'analyse&nbsp; →</button></div>
+      <div class="search">
+        <div class="search-row">
+          <input id="tickers" class="input-fill" value="CS.PA, TTE.PA, SAN.PA" aria-label="Tickers à analyser">
+          <input id="compareTicker" class="input-fill" value="" placeholder="Comparer avec (optionnel)" aria-label="Comparer avec un autre ticker">
+          <button class="primary" id="analyze">Lancer l'analyse&nbsp; →</button>
+        </div>
+        <div class="search-row" style="justify-content:flex-end;">
+          <button class="secondary" id="exportCsv" type="button">Exporter CSV</button>
+          <button class="secondary" id="printPdf" type="button">Imprimer / PDF</button>
+        </div>
+      </div>
       <div id="message"></div>
       <section class="overview" id="overview"><div class="card"><div class="card-label">Sélectionnez un titre</div><div class="card-value">—</div></div><div class="card"><div class="card-label">Score global</div><div class="card-value">—</div></div><div class="card"><div class="card-label">Score fondamental</div><div class="card-value">—</div></div><div class="card"><div class="card-label">Score technique</div><div class="card-value">—</div></div></section>
       <div id="content"><div class="panel empty">Lancez une analyse pour afficher les données de votre service.</div></div>
@@ -66,38 +119,317 @@
   </div>
   <script>
     const $ = (selector) => document.querySelector(selector);
+    const watchlistKey = "financeanalytics-watchlist";
+    const alertsKey = "financeanalytics-alerts";
+    const state = { results: [] };
+
+    const stripAnsi = (text) => String(text ?? "").replace(/\u001b\[[0-9;]*m/g, "");
     const formatScore = (value) => value == null ? "N/A" : `${Number(value).toFixed(1)}/100`;
-    const formatValue = (value) => value == null ? "N/A" : (typeof value === "number" ? value.toFixed(2) : value);
-    function scoreBar(name, value) { return `<div class="bar-line"><span>${name}</span><div class="bar"><i style="width:${Math.max(0, Math.min(100, value || 0))}%"></i></div><strong>${formatScore(value)}</strong></div>`; }
-    function render(result) {
-      const s = result.scores;
-      $("#overview").innerHTML = [
-        ["Titre suivi", result.ticker, result.company],
-        ["Score global", formatScore(s.global), result.interpretation || "Score indisponible"],
-        ["Score fondamental", formatScore(s.fundamental), `${result.sector || "Secteur non renseigné"}`],
-        ["Score technique", formatScore(s.technical), result.recommendation || "Recommandation indisponible"]
-      ].map(([label, value, note]) => `<div class="card"><div class="card-label">${label}</div><div class="card-value">${value}</div><div class="card-change">${note}</div></div>`).join("");
+    const formatValue = (value) => {
+      if (value == null) return "N/A";
+      if (typeof value === "number") {
+        if (Math.abs(value) >= 1000000000) return `${(value / 1000000000).toFixed(2)} Md€`;
+        if (Math.abs(value) >= 1000000) return `${(value / 1000000).toFixed(2)} M€`;
+        return value.toFixed(2);
+      }
+      if (Array.isArray(value)) return value.map(formatValue).join(" – ");
+      if (typeof value === "object") {
+        if (typeof value.ratio === "number") return `${value.ratio.toFixed(2)} : 1`;
+        if (typeof value.ratio === "string") return `${Number(value.ratio).toFixed(2)} : 1`;
+        if (typeof value.reward === "number" && typeof value.risk === "number") return `${(value.reward / value.risk).toFixed(2)} : 1`;
+        return "N/A";
+      }
+      return stripAnsi(value);
+    };
+    const formatPct = (value) => value == null ? "N/A" : `${Number(value).toFixed(1)}%`;
+    const formatText = (value) => stripAnsi(value ?? "");
+    const safeTicker = (value) => (value || "").trim().toUpperCase();
+    const comparisonMetricHelp = {
+      "Forward P/E": "Le PER avancé montre combien on paie pour 1 euro de bénéfice attendu. En gros, c’est le prix de l’action divisée par les bénéfices futurs. Plus c’est bas, plus cela peut être moins cher.",
+      "Trailing PE": "Le PER historique compare le prix actuel à la rentabilité déjà réalisée. Ça aide à voir si l’action est chère ou bon marché par rapport à ses bénéfices passés.",
+      "Price to Book": "Le ratio cours/valeur comptable compare le prix de l’action à la valeur nette de l’entreprise. Un ratio bas peut signifier une action moins chère par rapport à sa valeur intrinsèque.",
+      "PEG Ratio": "Le PEG relie la valorisation au potentiel de croissance. Un PEG bas peut être plus intéressant si la croissance attendue est solide.",
+      "Dividend Yield": "Le rendement du dividende indique le pourcentage de revenu que l’action verse par rapport au cours. C’est le cash que l’action peut rapporter en dividende.",
+      "ROE": "Le rendement des capitaux propres mesure la rentabilité générée par les fonds des actionnaires. Plus c’est élevé, mieux l’entreprise utilise ses capitaux.",
+      "ROA": "Le rendement des actifs mesure combien l’entreprise gagne avec ses actifs. Ça montre l’efficacité opérationnelle globale de l’entreprise.",
+      "EBITDA Margin": "La marge EBITDA correspond au bénéfice avant intérêts, impôts, dépréciation et amortissement. C’est un bon indicateur de rentabilité opérationnelle.",
+      "Operating Margin": "La marge opérationnelle mesure le bénéfice généré par l’activité principale avant impôts et frais financiers. Plus c’est élevé, plus l’activité est rentable.",
+      "Net Margin": "La marge nette est le bénéfice net divisé par le chiffre d’affaires. C’est le pourcentage final que l’entreprise garde après tout.",
+      "Current Ratio": "Le ratio de liquidité mesure si l’entreprise peut payer ses dettes courtes avec ses actifs à court terme. Un ratio élevé est souvent plus rassurant.",
+      "Quick Ratio": "Le ratio rapide est un test de liquidité plus strict, car il exclut les stocks. Il montre si l’entreprise peut payer vite sans vendre ses stocks.",
+      "Debt to Equity": "Le ratio endettement/capitaux propres compare la dette de l’entreprise à ce que les actionnaires ont mis. Plus c’est élevé, plus l’entreprise est endettée.",
+      "Gross Margin": "La marge brute mesure la part de chiffre d’affaires qui reste après les coûts directs de production. Plus c’est élevé, plus l’entreprise garde de la valeur.",
+    };
+    const renderComparisonLabel = (label) => {
+      const help = comparisonMetricHelp[label] || "Indicateur financier comparatif.";
+      return `<span class="metric-label"><span>${label}</span><button class="metric-help" type="button" title="${help.replace(/"/g, '&quot;')}" aria-label="Explication de ${label}">i</button></span>`;
+    };
+
+    function parseTickers(value) {
+      return value.split(",").map(item => item.trim()).filter(Boolean).map(safeTicker);
+    }
+    function scoreBar(name, value) {
+      return `<div class="bar-line"><span>${name}</span><div class="bar"><i style="width:${Math.max(0, Math.min(100, value || 0))}%"></i></div><strong>${formatScore(value)}</strong></div>`;
+    }
+
+    function getWatchlist() {
+      try { return JSON.parse(localStorage.getItem(watchlistKey) || "[]"); } catch { return []; }
+    }
+    function setWatchlist(items) {
+      localStorage.setItem(watchlistKey, JSON.stringify(items));
+    }
+    function getAlerts() {
+      try { return JSON.parse(localStorage.getItem(alertsKey) || "[]"); } catch { return []; }
+    }
+    function setAlerts(items) {
+      localStorage.setItem(alertsKey, JSON.stringify(items));
+    }
+
+    function parseComparableValue(rawValue) {
+      if (rawValue == null || rawValue === "") return null;
+      const text = String(rawValue).trim();
+      const normalized = text.replace(/\s+/g, "").replace(/\u00a0/g, "");
+      if (!normalized) return null;
+      const cleaned = normalized.replace(/[$€£]/g, "").replace(/%/g, "");
+      const asNumber = Number(cleaned.replace(/x$/i, "").replace(",", "."));
+      if (!Number.isFinite(asNumber)) return null;
+      return asNumber;
+    }
+
+    function formatComparableValue(rawValue) {
+      const value = parseComparableValue(rawValue);
+      if (value == null) return "N/A";
+      const text = String(rawValue).trim();
+      if (/x$/i.test(text)) return `${value.toFixed(2)}x`;
+      if (/%$/.test(text)) return `${value.toFixed(1)}%`;
+      return Number(value).toFixed(2);
+    }
+
+    function getComparableMetrics(result) {
+      const metricMap = {};
+      const relevantCategories = ["Valorisation", "Rentabilité", "Liquidité", "Solvabilité", "Risque & Marché"];
+      for (const category of relevantCategories) {
+        const rows = result?.fundamental?.[category] || [];
+        for (const row of rows) {
+          const label = String(row["Indicateur"] || "").trim();
+          if (!label) continue;
+          const lower = label.toLowerCase();
+          if (/(prix|capitalisation|market cap|valeur marchande)/i.test(lower)) continue;
+          metricMap[label] = row["Valeur"];
+        }
+      }
+      return metricMap;
+    }
+
+    function buildComparison(results) {
+      if (!results || results.length < 2) return "";
+      const [left, right] = results.slice(0, 2);
+      const leftMetrics = getComparableMetrics(left);
+      const rightMetrics = getComparableMetrics(right);
+      const labels = Object.keys(leftMetrics).filter((label) => Object.prototype.hasOwnProperty.call(rightMetrics, label));
+      const preferredOrder = [
+        "Forward P/E",
+        "Trailing PE",
+        "Price to Book",
+        "PEG Ratio",
+        "Dividend Yield",
+        "ROE",
+        "ROA",
+        "EBITDA Margin",
+        "Operating Margin",
+        "Net Margin",
+        "Current Ratio",
+        "Quick Ratio",
+        "Debt to Equity",
+        "Gross Margin",
+      ];
+
+      const orderedLabels = [...new Set([...preferredOrder.filter((label) => labels.includes(label)), ...labels])].slice(0, 10);
+      const rows = orderedLabels.map((label) => {
+        const a = leftMetrics[label];
+        const b = rightMetrics[label];
+        const aNum = parseComparableValue(a);
+        const bNum = parseComparableValue(b);
+        if (aNum == null || bNum == null) return "";
+        const delta = bNum - aNum;
+        const deltaLabel = `${delta >= 0 ? "+" : ""}${Number(delta).toFixed(2)}`;
+        const suffix = /x$/i.test(String(a)) || /x$/i.test(String(b)) ? "x" : /%$/.test(String(a)) || /%$/.test(String(b)) ? "%" : "";
+        return `<div class="comparison-row"><span class="label">${renderComparisonLabel(label)}</span><div class="comparison-values"><div class="compare-value left"><span class="marker"></span><strong>${formatComparableValue(a)}</strong></div><div class="compare-value right"><span class="marker"></span><strong>${formatComparableValue(b)}</strong></div></div><span class="delta">Δ ${deltaLabel}${suffix}</span></div>`;
+      }).filter(Boolean).join("");
+
+      const leftName = (left.company || left.ticker || "Entreprise 1").trim();
+      const rightName = (right.company || right.ticker || "Entreprise 2").trim();
+      const legend = `<div class="comparison-legend"><span><span class="legend-dot left"></span> ${leftName}</span><span><span class="legend-dot right"></span> ${rightName}</span></div>`;
+
+      if (!rows) {
+        return `<div class="panel"><div class="panel-head"><h2>Comparaison entre ${leftName} et ${rightName}</h2>${legend}</div><div class="empty">Aucun indicateur financier directement comparable n'a été trouvé pour ces deux titres.</div></div>`;
+      }
+
+      return `<div class="panel"><div class="panel-head"><h2>Comparaison entre ${leftName} et ${rightName}</h2>${legend}</div><div class="comparison-grid">${rows}</div></div>`;
+    }
+
+    function sectorSummary(results) {
+      if (!results || !results.length) return "";
+      const bySector = {};
+      for (const result of results) {
+        const sector = result.sector || "Autre";
+        if (!bySector[sector]) bySector[sector] = { total: 0, count: 0 };
+        bySector[sector].total += Number(result.scores.global || 0);
+        bySector[sector].count += 1;
+      }
+      const rows = Object.entries(bySector).map(([sector, stats]) => {
+        const avg = stats.total / stats.count;
+        return `<div class="comparison-row"><span class="label">${sector}</span><div class="value">${formatScore(avg)}</div><span class="delta">${stats.count} titre(s)</span></div>`;
+      }).join("");
+      return `<div class="panel"><div class="panel-head"><h2>Benchmark sectoriel</h2><span class="tag">Comparatif</span></div><div class="comparison-grid">${rows}</div></div>`;
+    }
+
+    function screenerTable(results) {
+      const minScore = Number($('#screenerMinScore')?.value || 60);
+      const minMarketCap = Number($('#screenerMinCap')?.value || 0) * 1000000;
+      const matches = results.filter((item) => {
+        const score = Number(item.scores.global || 0);
+        const marketCap = Number(item.market_cap || 0);
+        return score >= minScore && marketCap >= minMarketCap;
+      });
+      if (!matches.length) {
+        return '<div class="empty">Aucun titre ne correspond aux filtres du scanner.</div>';
+      }
+      return `<div class="table-wrap"><table><thead><tr><th>Ticker</th><th>Secteur</th><th>Score</th><th>Prix</th><th>Cap. boursière</th></tr></thead><tbody>${matches.map((item) => `<tr><td>${item.ticker}</td><td>${item.sector || "—"}</td><td><span class="score-pill">${formatScore(item.scores.global)}</span></td><td>${formatValue(item.price)}</td><td>${formatValue(item.market_cap)}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+
+    function renderCompanyPanel(result) {
+      const s = result.scores || {};
+      const fib = result.fibonacci || {};
+      const fa = fib.analysis || {};
+      const perf = result.performance || {};
       const fundamentalRows = Object.entries(result.fundamental || {}).flatMap(([category, rows]) => rows.map(row => `<tr><td>${category}</td><td>${row.Indicateur || "—"}</td><td>${row.Valeur || "—"}</td><td><span class="score-pill">${row["Note (/10)"]}/10</span></td></tr>`)).join("");
       const technicalRows = (result.technical || []).map(row => `<tr><td>${row.Indicateur || "—"}</td><td>${formatValue(row.Valeur)}</td><td><span class="score-pill">${row["Note (/10)"]}/10</span></td><td>${row.Interprétation || "—"}</td></tr>`).join("");
-      const fib = result.fibonacci || {}; const fa = fib.analysis || {};
-      $("#content").innerHTML = `<div class="layout">
-        <div><div class="panel"><div class="panel-head"><h2>Indicateurs fondamentaux</h2><span class="tag">${result.ticker}</span></div><div class="table-wrap"><table><thead><tr><th>Catégorie</th><th>Indicateur</th><th>Valeur</th><th>Note</th></tr></thead><tbody>${fundamentalRows || "<tr><td colspan=4>Aucune donnée disponible</td></tr>"}</tbody></table></div></div>
-        <div class="panel"><div class="panel-head"><h2>Lecture technique</h2><span class="tag">${fib.trend || "neutre"}</span></div><div class="table-wrap"><table><thead><tr><th>Indicateur</th><th>Valeur</th><th>Note</th><th>Lecture</th></tr></thead><tbody>${technicalRows || "<tr><td colspan=4>Aucune donnée disponible</td></tr>"}</tbody></table></div></div></div>
-        <div><div class="panel"><h2>Scores par catégorie</h2><div class="bars">${Object.entries(s.categories || {}).map(([name, value]) => scoreBar(name, value)).join("")}</div></div>
-        <div class="panel"><h2>Zones clés & Fibonacci</h2><div class="fib-grid">${[["Cours actuel", result.price],["Support",fa.support],["Résistance",fa.resistance],["Stop-loss",fa.stop_loss],["Zone d'entrée",Array.isArray(fa.entry_zone) ? fa.entry_zone.map(formatValue).join(" – ") : fa.entry_zone],["Ratio R/R",fa.risk_reward]].map(([label,value]) => `<div class="metric"><small>${label}</small><strong>${formatValue(value)}</strong></div>`).join("")}</div><p class="subtitle" style="margin-top:15px">${fa.interpretation || "Analyse Fibonacci non disponible."}</p></div></div></div>`;
+      const perfGrid = [
+        ["1M", perf["1M"]],
+        ["3M", perf["3M"]],
+        ["1Y", perf["1Y"]],
+      ].map(([label, value]) => `<div class="metric"><small>${label}</small><strong>${formatPct(value)}</strong></div>`).join("");
+
+      return `<div class="panel"><div class="panel-head"><h2>${formatText(result.company || result.ticker)}</h2><div style="display:flex;align-items:center;gap:8px"><span class="tag">${result.ticker}</span><button class="secondary" data-ticker="${result.ticker}" data-company="${result.company || result.ticker}" style="height:28px;padding:0 10px;">Ajouter à la veille</button></div></div><div class="layout"><div><div class="panel" style="padding:16px;margin:0 0 18px"><h2 style="margin-bottom:10px">Synthèse</h2><div class="comparison-grid"><div class="comparison-row"><span class="label">Score global</span><div class="value">${formatScore(s.global)}</div></div><div class="comparison-row"><span class="label">Score fondamental</span><div class="value">${formatScore(s.fundamental)}</div></div><div class="comparison-row"><span class="label">Score technique</span><div class="value">${formatScore(s.technical)}</div></div><div class="comparison-row"><span class="label">Prix</span><div class="value">${formatValue(result.price)}</div></div></div></div><div class="panel" style="padding:16px;margin:0 0 18px"><h2 style="margin-bottom:10px">Performance</h2><div class="fib-grid">${perfGrid}</div></div><div class="panel" style="padding:16px;margin:0"><div class="panel-head"><h2>Indicateurs fondamentaux</h2></div><div class="table-wrap"><table><thead><tr><th>Catégorie</th><th>Indicateur</th><th>Valeur</th><th>Note</th></tr></thead><tbody>${fundamentalRows || "<tr><td colspan=4>Aucune donnée disponible</td></tr>"}</tbody></table></div></div></div><div><div class="panel" style="padding:16px;margin:0 0 18px"><h2 style="margin-bottom:10px">Lecture technique</h2><div class="table-wrap"><table><thead><tr><th>Indicateur</th><th>Valeur</th><th>Note</th><th>Lecture</th></tr></thead><tbody>${technicalRows || "<tr><td colspan=4>Aucune donnée disponible</td></tr>"}</tbody></table></div></div><div class="panel" style="padding:16px;margin:0"><h2 style="margin-bottom:10px">Zones clés & Fibonacci</h2><div class="fib-grid">${[["Support",fa.support],["Résistance",fa.resistance],["Stop-loss",fa.stop_loss],["Zone d'entrée",Array.isArray(fa.entry_zone) ? fa.entry_zone.map(formatValue).join(" – ") : fa.entry_zone],["Ratio R/R",fa.risk_reward]].map(([label,value]) => `<div class="metric"><small>${label}</small><strong>${formatValue(value)}</strong></div>`).join("")}</div><p class="subtitle" style="margin-top:15px">${formatText(fa.interpretation || "Analyse Fibonacci non disponible.")}</p></div></div></div></div>`;
     }
+
+    function renderWatchlist() {
+      const items = getWatchlist();
+      if (!items.length) return `<div class="empty">Aucun titre dans votre veille pour le moment.</div>`;
+      return `<div class="watchlist">${items.map(item => `<span class="watch-item">${item.ticker} <strong>${formatScore(item.score)}</strong></span>`).join("")}</div>`;
+    }
+
+    function renderAlertsPanel() {
+      const items = getAlerts();
+      if (!items.length) return `<div class="empty">Aucune alerte active.</div>`;
+      return `<div class="alert-list">${items.map(item => `<span class="alert-item">${item.ticker} ≥ ${formatScore(item.score)}</span>`).join("")}</div>`;
+    }
+
+    function render(results) {
+      state.results = results || [];
+      if (!state.results.length) {
+        $("#content").innerHTML = '<div class="panel empty">Aucune donnée à afficher.</div>';
+        return;
+      }
+
+      const bestScore = [...state.results].sort((a, b) => (b.scores.global || 0) - (a.scores.global || 0))[0];
+      const avgScore = state.results.reduce((sum, item) => sum + (item.scores.global || 0), 0) / state.results.length;
+      $("#overview").innerHTML = [
+        ["Titres suivis", state.results.length, state.results.length > 1 ? "Comparaison active" : "Focus sur 1 titre"],
+        ["Mieux noté", bestScore ? bestScore.ticker : "—", bestScore ? `${formatText(bestScore.company || bestScore.ticker)}` : "Aucune donnée"],
+        ["Score moyen", formatScore(avgScore), "Moyenne des notes globales"],
+        ["Recommandation", state.results.some(r => r.recommendation) ? state.results.map(r => `${r.ticker}: ${formatText(r.recommendation || "N/A")}`).join(" • ") : "Aucune", "Vue de synthèse"],
+      ].map(([label, value, note]) => `<div class="card"><div class="card-label">${label}</div><div class="card-value">${value}</div><div class="card-change">${note}</div></div>`).join("");
+
+      const comparison = buildComparison(state.results);
+      const sector = sectorSummary(state.results);
+      const details = state.results.map(renderCompanyPanel).join("");
+      const screener = `
+        <div class="panel" id="screenerPanel">
+          <div class="panel-head"><h2>Scanner de valeur</h2><span class="tag">Filtres</span></div>
+          <div class="filter-grid">
+            <div class="field"><label for="screenerMinScore">Score global min</label><input id="screenerMinScore" type="number" min="0" max="100" value="60"></div>
+            <div class="field"><label for="screenerMinCap">Cap. min (M€)</label><input id="screenerMinCap" type="number" min="0" value="0"></div>
+          </div>
+          <div id="screenerResults" style="margin-top:14px;">${screenerTable(state.results)}</div>
+        </div>
+      `;
+
+      $("#content").innerHTML = `${comparison}${sector}${screener}${details}<div class="panel"><h2>Veille personnalisée</h2><div id="watchlist-content">${renderWatchlist()}</div></div><div class="panel"><h2>Alertes automatiques</h2><div class="filter-grid"><div class="field"><label for="alertThreshold">Score de déclenchement</label><input id="alertThreshold" type="number" min="0" max="100" value="75"></div></div><button class="primary" id="addAlert" type="button" style="margin-top:12px;">Créer une alerte</button><div id="alertList" style="margin-top:18px;">${renderAlertsPanel()}</div></div>`;
+
+      $("#content").querySelectorAll("[data-ticker]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const ticker = button.dataset.ticker;
+          const company = button.dataset.company;
+          const existing = getWatchlist();
+          const match = existing.find(item => item.ticker === ticker);
+          const next = match ? existing : [...existing, { ticker, company, score: state.results.find(item => item.ticker === ticker)?.scores?.global ?? null }];
+          setWatchlist(next);
+          button.textContent = "Ajouté";
+          button.disabled = true;
+          const watchlistContent = document.getElementById("watchlist-content");
+          if (watchlistContent) watchlistContent.innerHTML = renderWatchlist();
+        });
+      });
+
+      $('#addAlert')?.addEventListener('click', () => {
+        const threshold = Number($('#alertThreshold')?.value || 75);
+        const items = getAlerts();
+        const ticker = state.results[0]?.ticker || 'TICKER';
+        const next = [...items.filter(item => item.ticker !== ticker), { ticker, score: threshold }];
+        setAlerts(next);
+        $('#alertList').innerHTML = renderAlertsPanel();
+      });
+
+      $('#screenerMinScore')?.addEventListener('input', () => {
+        if (document.getElementById('screenerResults')) {
+          document.getElementById('screenerResults').innerHTML = screenerTable(state.results);
+        }
+      });
+      $('#screenerMinCap')?.addEventListener('input', () => {
+        if (document.getElementById('screenerResults')) {
+          document.getElementById('screenerResults').innerHTML = screenerTable(state.results);
+        }
+      });
+    }
+
+    function exportCsv() {
+      if (!state.results.length) return;
+      const rows = [
+        ["Ticker", "Entreprise", "Secteur", "Score global", "Score fondamental", "Score technique", "Prix", "Cap. boursière"],
+        ...state.results.map((result) => [result.ticker, result.company || "", result.sector || "", result.scores.global ?? "", result.scores.fundamental ?? "", result.scores.technical ?? "", result.price ?? "", result.market_cap ?? ""]),
+      ];
+      const csv = rows.map((row) => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "financeanalytics-export.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
     async function analyze() {
-      const button = $("#analyze"); const tickers = $("#tickers").value.split(",").map(value => value.trim()).filter(Boolean);
+      const button = $("#analyze");
+      const tickers = [...new Set(parseTickers($("#tickers").value).concat(parseTickers($("#compareTicker").value)))];
       button.disabled = true; button.textContent = "Analyse en cours…"; $("#message").innerHTML = "";
       try {
+        if (!tickers.length) throw new Error("Ajoutez au moins un ticker.");
         const response = await fetch("/api/analyze", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({tickers}) });
         const data = await response.json(); if (!response.ok) throw new Error(data.error || "La requête a échoué.");
-        if (data.errors && data.errors.length) $("#message").innerHTML = data.errors.map(error => `<div class="error">${error.ticker}: ${error.message}</div>`).join("");
-        if (data.results && data.results.length) render(data.results[0]);
-      } catch (error) { $("#message").innerHTML = `<div class="error">${error.message}</div>`; }
+        $("#message").innerHTML = `<div class="success">✅ Analyse terminée pour ${(data.results || []).length} valeur(s).</div>`;
+        if (data.errors && data.errors.length) $("#message").innerHTML += data.errors.map(error => `<div class="error">${formatText(error.ticker)}: ${formatText(error.message)}</div>`).join("");
+        if (data.results && data.results.length) render(data.results);
+      } catch (error) { $("#message").innerHTML = `<div class="error">${formatText(error.message)}</div>`; }
       finally { button.disabled = false; button.textContent = "Lancer l'analyse  →"; }
     }
-    $("#analyze").addEventListener("click", analyze); $("#tickers").addEventListener("keydown", event => { if (event.key === "Enter") analyze(); });
+
+    $("#analyze").addEventListener("click", analyze);
+    $("#exportCsv").addEventListener("click", exportCsv);
+    $("#printPdf").addEventListener("click", () => window.print());
+    $("#tickers").addEventListener("keydown", event => { if (event.key === "Enter") analyze(); });
+    $("#compareTicker").addEventListener("keydown", event => { if (event.key === "Enter") analyze(); });
   </script>
 </body>
 </html>

@@ -16,6 +16,29 @@ class TechnicalAnalysis:
         self.ticker_symbol = ticker_symbol
         self.evaluator = IndicatorEvaluator()
 
+    @staticmethod
+    def _safe_float(value, column_name, default=0.0):
+        """Convert a possibly missing indicator value to a float."""
+        if isinstance(value, pd.Series):
+            value = value.iloc[0] if not value.empty else None
+
+        try:
+            if value is None or pd.isna(value):
+                raise ValueError("valeur vide")
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    def _append_evaluation(self, results, name, value, evaluator, weight):
+        """Evaluate one indicator and append its report row if possible."""
+        try:
+            note, interpretation = evaluator()
+            results.append(
+                self._make_row(name, value, note, interpretation, weight)
+            )
+        except (TypeError, ValueError, KeyError) as error:
+            return
+
     def calculate_fibonacci_levels(self, data, period=63, atr=None):
         """
         Calcule les niveaux de Fibonacci basés sur le plus haut et le plus bas de la période.
@@ -84,7 +107,6 @@ class TechnicalAnalysis:
         try:
             trend = self._detect_trend(data, period)
         except Exception as e:
-            print(f"⚠️ Erreur détection tendance: {e}")
             trend = "neutre"
         
         # Niveaux de retracement de Fibonacci (corrigés)
@@ -176,7 +198,6 @@ class TechnicalAnalysis:
             else:
                 return "neutre"
         except Exception as e:
-            print(f"⚠️ Erreur dans _detect_trend: {e}")
             return "neutre"
     
     def _create_invalid_fibonacci_result(self, current_price, reason):
@@ -389,7 +410,7 @@ class TechnicalAnalysis:
             
             position_pct = ((price - low) / (high - low)) * 100
         except Exception as e:
-            print(f"⚠️ Erreur calcul position: {e}")
+            pass
             return 5.0, f"Erreur évaluation position: {str(e)}"
         
         # Évaluation selon la position et la tendance
@@ -503,44 +524,21 @@ class TechnicalAnalysis:
         ev = self.evaluator
         results = []
 
-        # --- Conversion robuste en float avec gestion complète des erreurs ---
-        def safe_float(value, column_name="unknown", default=0.0):
-            """Convertit une valeur en float de manière sécurisée."""
-            try:
-                if value is None:
-                    print(f"⚠️ Valeur None pour {column_name}, utilisation de {default}")
-                    return default
-                
-                if isinstance(value, pd.Series):
-                    if len(value) == 0:
-                        print(f"⚠️ Series vide pour {column_name}, utilisation de {default}")
-                        return default
-                    value = value.iloc[0]
-                
-                if pd.isna(value):
-                    print(f"⚠️ Valeur NaN pour {column_name}, utilisation de {default}")
-                    return default
-                
-                return float(value)
-            except (ValueError, TypeError, AttributeError) as e:
-                print(f"⚠️ Erreur conversion {column_name}: {e}, utilisation de {default}")
-                return default
-        
         try:
-            rsi = safe_float(last["RSI"], "RSI", 50.0)
-            stoch_k = safe_float(last["STOCH_K"], "STOCH_K", 50.0)
-            stoch_d = safe_float(last["STOCH_D"], "STOCH_D", 50.0)
-            close = safe_float(last["Close"], "Close")
-            bb_l = safe_float(last["BB_L"], "BB_L", close * 0.98)
-            bb_m = safe_float(last["BB_M"], "BB_M", close)
-            bb_h = safe_float(last["BB_H"], "BB_H", close * 1.02)
-            macd_val = safe_float(last["MACD"], "MACD", 0.0)
-            signal_val = safe_float(last["Signal"], "Signal", 0.0)
-            obv = safe_float(last["OBV"], "OBV", 0.0)
-            ema50 = safe_float(last["EMA50"], "EMA50", close)
-            ema200 = safe_float(last["EMA200"], "EMA200", close)
-            adx = safe_float(last["ADX"], "ADX", 25.0)
-            atr = safe_float(last["ATR"], "ATR", close * 0.02)
+            rsi = self._safe_float(last["RSI"], "RSI", 50.0)
+            stoch_k = self._safe_float(last["STOCH_K"], "STOCH_K", 50.0)
+            stoch_d = self._safe_float(last["STOCH_D"], "STOCH_D", 50.0)
+            close = self._safe_float(last["Close"], "Close")
+            bb_l = self._safe_float(last["BB_L"], "BB_L", close * 0.98)
+            bb_m = self._safe_float(last["BB_M"], "BB_M", close)
+            bb_h = self._safe_float(last["BB_H"], "BB_H", close * 1.02)
+            macd_val = self._safe_float(last["MACD"], "MACD")
+            signal_val = self._safe_float(last["Signal"], "Signal")
+            obv = self._safe_float(last["OBV"], "OBV")
+            ema50 = self._safe_float(last["EMA50"], "EMA50", close)
+            ema200 = self._safe_float(last["EMA200"], "EMA200", close)
+            adx = self._safe_float(last["ADX"], "ADX", 25.0)
+            atr = self._safe_float(last["ATR"], "ATR", close * 0.02)
         except KeyError as e:
             return pd.DataFrame(), 0, f"❌ Colonne manquante dans les données: {e}", None, None
         except Exception as e:
@@ -551,63 +549,62 @@ class TechnicalAnalysis:
             fib_data = self.calculate_fibonacci_levels(data, period=63, atr=atr)
             fib_analysis = fib_data["analysis"]
         except Exception as e:
-            print(f"⚠️ Erreur lors du calcul Fibonacci: {e}")
             fib_data = self._create_invalid_fibonacci_result(close, f"Erreur calcul: {str(e)}")
             fib_analysis = fib_data["analysis"]
 
-        # Évaluations avec gestion d'erreur
-        try:
-            results.append(self._make_row("RSI (14)", rsi, *ev.evaluate_rsi(rsi), ev.weights["RSI"]))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation RSI: {e}")
-        
-        try:
-            results.append(self._make_row("Stochastique K/D", f"{stoch_k:.2f}/{stoch_d:.2f}",
-                                        *ev.evaluate_stoch(stoch_k, stoch_d), ev.weights["Stochastique"]))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation Stochastique: {e}")
-        
-        try:
-            results.append(self._make_row("Bandes de Bollinger", close,
-                                        *ev.evaluate_bollinger(close, bb_l, bb_m, bb_h), ev.weights["Bollinger"]))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation Bollinger: {e}")
-        
-        try:
-            results.append(self._make_row("MACD", macd_val,
-                                        *ev.evaluate_macd(macd_val, signal_val), ev.weights["MACD"]))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation MACD: {e}")
-        
+        self._append_evaluation(
+            results, "RSI (14)", rsi, lambda: ev.evaluate_rsi(rsi), ev.weights["RSI"]
+        )
+        self._append_evaluation(
+            results,
+            "Stochastique K/D",
+            f"{stoch_k:.2f}/{stoch_d:.2f}",
+            lambda: ev.evaluate_stoch(stoch_k, stoch_d),
+            ev.weights["Stochastique"],
+        )
+        self._append_evaluation(
+            results,
+            "Bandes de Bollinger",
+            close,
+            lambda: ev.evaluate_bollinger(close, bb_l, bb_m, bb_h),
+            ev.weights["Bollinger"],
+        )
+        self._append_evaluation(
+            results,
+            "MACD",
+            macd_val,
+            lambda: ev.evaluate_macd(macd_val, signal_val),
+            ev.weights["MACD"],
+        )
+
         try:
             obv_recent = data["OBV"].iloc[-5:].mean() if len(data) >= 5 else obv
             obv_past = data["OBV"].iloc[-20:-5].mean() if len(data) >= 20 else obv
-            results.append(self._make_row("OBV", obv,
-                                        *ev.evaluate_obv(obv_recent, obv_past), ev.weights["OBV"]))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation OBV: {e}")
-        
-        try:
-            results.append(self._make_row("Décote vs EMA200", f"{(close - ema200) / ema200 * 100:.2f}%",
-                                        *ev.evaluate_ema200(close, ema200), ev.weights["EMA200"]))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation EMA200: {e}")
+            obv_evaluation = lambda: ev.evaluate_obv(obv_recent, obv_past)
+        except (KeyError, TypeError, ValueError) as error:
+            obv_evaluation = None
+        else:
+            self._append_evaluation(
+                results, "OBV", obv, obv_evaluation, ev.weights["OBV"]
+            )
 
-        try:
-            results.append(self._make_row(
-                "Alignement EMA50/EMA200",
-                f"{close:.2f}",
-                *ev.evaluate_trend_alignment(close, ema50, ema200),
-                ev.weights["Tendance"],
-            ))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation tendance: {e}")
-        
-        try:
-            results.append(self._make_row("ADX (14)", adx,
-                                        *ev.evaluate_adx(adx), ev.weights["ADX"]))
-        except Exception as e:
-            print(f"⚠️ Erreur évaluation ADX: {e}")
+        self._append_evaluation(
+            results,
+            "Décote vs EMA200",
+            f"{(close - ema200) / ema200 * 100:.2f}%",
+            lambda: ev.evaluate_ema200(close, ema200),
+            ev.weights["EMA200"],
+        )
+        self._append_evaluation(
+            results,
+            "Alignement EMA50/EMA200",
+            f"{close:.2f}",
+            lambda: ev.evaluate_trend_alignment(close, ema50, ema200),
+            ev.weights["Tendance"],
+        )
+        self._append_evaluation(
+            results, "ADX (14)", adx, lambda: ev.evaluate_adx(adx), ev.weights["ADX"]
+        )
         
         # Ajout de l'analyse Fibonacci (seulement si valide)
         try:
@@ -616,7 +613,7 @@ class TechnicalAnalysis:
                                             fib_analysis["score"], fib_analysis["interpretation"],
                                             ev.weights["Fibonacci"]))
         except Exception as e:
-            print(f"⚠️ Erreur ajout Fibonacci: {e}")
+            pass
 
         if len(results) == 0:
             return pd.DataFrame(), 0, "❌ Aucun indicateur n'a pu être calculé", None, None
@@ -641,112 +638,8 @@ class TechnicalAnalysis:
                 f"- Erreur interprétation: {e}"
             )
 
-        # Ajout des informations Fibonacci à la recommandation
-        try:
-            fib_info = self._format_fibonacci_info(fib_data)
-        except Exception as e:
-            fib_info = f"\n⚠️ Erreur formatage Fibonacci: {e}\n"
-
         llm_reco = close
-        print(f"Prix Actuel en bourse : {close}")
-        print(fib_info)
-        
         return df, score_total, reco, llm_reco, fib_data
-
-    def _format_fibonacci_info(self, fib_data):
-        """Formate les informations Fibonacci pour l'affichage."""
-        try:
-            if not fib_data.get("valid", True):
-                return f"\n⚠️ FIBONACCI NON APPLICABLE\n{fib_data['analysis']['interpretation']}\n"
-            
-            analysis = fib_data["analysis"]
-            trend_emoji = {"haussier": "📈", "baissier": "📉", "neutre": "➡️"}
-            
-            info = "\n" + "="*60
-            info += "\n📊 ANALYSE TECHNIQUE INTÉGRÉE (63 séances)\n"
-            info += "="*60 + "\n"
-            
-            info += f"\n📍 Prix actuel : {fib_data['current_price']:.2f}€"
-            info += f"\n{trend_emoji.get(fib_data['trend'], '📊')} Tendance : {fib_data['trend'].upper()}"
-            info += f"\n📈 Plus haut (63 séances) : {fib_data['high']:.2f}€"
-            info += f"\n📉 Plus bas (63 séances) : {fib_data['low']:.2f}€"
-            info += f"\n📏 Range : {fib_data['range']:.2f}€ ({(fib_data['range']/fib_data['current_price']*100):.1f}%)"
-            
-            # Position relative avec gestion d'erreur
-            try:
-                high = float(fib_data['high'])
-                low = float(fib_data['low'])
-                current = float(fib_data['current_price'])
-                if high != low:
-                    position_pct = ((current - low) / (high - low) * 100)
-            except Exception as e:
-                print(f"⚠️ Erreur calcul position relative: {e}")
-        except Exception as e:
-            return f"\n⚠️ Erreur formatage informations Fibonacci: {e}\n"
-        
-        info += "\n\n🎯 NIVEAUX DE RETRACEMENT FIBONACCI :"
-        for name, level in fib_data["levels"].items():
-            distance_pct = abs(level - fib_data['current_price']) / fib_data['range'] * 100
-            marker = " ← 🎯 PRIX ACTUEL ICI" if distance_pct < 2 else ""
-            info += f"\n  {name:15} : {level:.2f}€{marker}"
-        
-        if fib_data['trend'] == "haussier":
-            info += "\n\n🚀 EXTENSIONS FIBONACCI (Objectifs haussiers) :"
-            for name, level in fib_data["extensions"].items():
-                gain = ((level - fib_data['current_price']) / fib_data['current_price']) * 100
-                info += f"\n  {name:15} : {level:.2f}€ (+{gain:.1f}%)"
-        
-        info += "\n\n" + "-"*60
-        info += "\n💡 RECOMMANDATIONS DE TRADING :"
-        info += "\n" + "-"*60
-        
-        if analysis["support"]:
-            distance = ((fib_data['current_price'] - analysis['support']) / analysis['support']) * 100
-            info += f"\n🛡️  Support proche : {analysis['support']:.2f}€ ({analysis['support_name']}) [-{distance:.1f}%]"
-        if analysis["resistance"]:
-            distance = ((analysis['resistance'] - fib_data['current_price']) / fib_data['current_price']) * 100
-            info += f"\n⚔️  Résistance proche : {analysis['resistance']:.2f}€ ({analysis['resistance_name']}) [+{distance:.1f}%]"
-        
-        entry_low, entry_high = analysis["entry_zone"]
-        info += f"\n\n✅ Zone d'entrée recommandée : {entry_low:.2f}€ - {entry_high:.2f}€"
-        
-        # Indiquer si on est dans la zone
-        if entry_low <= fib_data['current_price'] <= entry_high:
-            info += " ✓ (DANS LA ZONE)"
-        elif fib_data['current_price'] < entry_low:
-            info += f" (attendre {((entry_low - fib_data['current_price'])/fib_data['current_price']*100):.1f}% de hausse)"
-        else:
-            info += f" (attendre {((fib_data['current_price'] - entry_high)/fib_data['current_price']*100):.1f}% de baisse)"
-        
-        info += f"\n🛑 Stop Loss recommandé : {analysis['stop_loss']:.2f}€"
-        stop_distance = abs(fib_data['current_price'] - analysis['stop_loss']) / fib_data['current_price'] * 100
-        info += f" ({stop_distance:.1f}% {'au-dessus' if analysis['stop_loss'] > fib_data['current_price'] else 'en dessous'})"
-        
-        if analysis["targets"]:
-            info += "\n\n🎯 Objectifs de sortie :"
-            for i, target in enumerate(analysis["targets"], 1):
-                info += f"\n   Objectif {i} : {target['level']:.2f}€ ({target['name']})"
-                info += f" | {target['type']} | Potentiel: {'+' if target['gain_potential'] > 0 else ''}{target['gain_potential']:.1f}%"
-        
-        if analysis["risk_reward"] and analysis["risk_reward"]["ratio"] > 0:
-            rr = analysis["risk_reward"]
-            info += f"\n\n⚖️  Ratio Risque/Récompense : 1:{rr['ratio']:.2f}"
-            info += f"\n   💸 Risque : {rr['risk']:.2f}€ | 💰 Récompense : {rr['reward']:.2f}€"
-            if rr['ratio'] >= 2:
-                info += " ✅ Excellent"
-            elif rr['ratio'] >= 1.5:
-                info += " ✓ Bon"
-            elif rr['ratio'] >= 1:
-                info += " ~ Acceptable"
-            else:
-                info += " ⚠️ Défavorable"
-        
-        info += f"\n\n📝 {analysis['interpretation']}"
-        info += f"\n⭐ Score Fibonacci : {analysis['score']:.1f}/10"
-        
-        info += "\n" + "="*60 + "\n"
-        
-        return info
 
     def _make_row(self, name, value, note, interp, weight):
         return {

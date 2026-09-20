@@ -29,7 +29,12 @@ python web_app.py
 Puis ouvrez [http://127.0.0.1:8765](http://127.0.0.1:8765). Saisissez un ou
 plusieurs tickers séparés par des virgules et cliquez sur **Lancer l'analyse**.
 Le dashboard réutilise les analyses existantes et affiche les scores, les
-indicateurs, la recommandation technique et les zones Fibonacci.
+indicateurs, la recommandation technique, les zones Fibonacci, ainsi qu'une
+comparaison côte à côte entre deux valeurs et une veille personnalisée.
+
+L'exécution CLI reste volontairement silencieuse : elle affiche uniquement la
+progression, les confirmations et les erreurs. Les données détaillées sont
+réservées au dashboard web.
 
 Le fichier de tickers accepte un symbole par ligne. Les lignes vides et les
 lignes dont le premier caractère utile est `#` sont ignorées.
@@ -143,11 +148,11 @@ portefeuille. Une notification échouée ne bloque pas le rapport local.
 
 - `main.py` : interface en ligne de commande et résolution des tickers.
 - `StockAnalyzer.py` : orchestration et restitution du rapport.
-- `StockAnalysisUtils.py` : rendu des tableaux, formatage des scores et
-  construction des notifications.
+- `core/presentation.py` : service unique de présentation, formatage, tableaux,
+  rapports et messages de notification.
 - `AnalyseFondamentale/` : métriques, pondérations sectorielles et
   interprétations.
 - `AnalyseTechnique/` : indicateurs, Fibonacci et scoring technique.
-- `Formatter.py` et `TablePrinter.py` : présentation uniquement.
+- `core/presentation.py` : service unique de présentation et de formatage.
 - `tests/` : tests de fiabilité des scores, des données manquantes et des
   notifications.

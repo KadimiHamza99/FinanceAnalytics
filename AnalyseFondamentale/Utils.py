@@ -1,7 +1,6 @@
 import math
 from numbers import Real
 
-from colorama import Fore
 
 class Utils:
     """
@@ -186,45 +185,6 @@ class Utils:
                 return sector_weights[sector_key]
 
         return sector_weights['Général']
-
-
-    @staticmethod
-    def print_company_info(info: dict, ticker_symbol: str):
-        """
-        Affiche les informations générales d'une entreprise à partir des données yfinance
-        """
-        company_name = info.get("shortName") or info.get("longName") or ticker_symbol
-        country = info.get("country", "N/A")
-        industry = info.get("industry", "N/A")
-        sector = info.get("sector", "N/A")
-        market_cap = info.get("marketCap", None)
-        currency = info.get("currency", "N/A")
-
-        # Conversion en milliards
-        if market_cap:
-            market_cap_display = f"{market_cap / 1e9:.2f} Milliard {currency}"
-        else:
-            market_cap_display = "N/A"
-
-        print(Fore.MAGENTA + "==================== INFOS ENTREPRISE ====================" + Fore.RESET)
-        print(f"Nom : {company_name}")
-        print(f"Ticker : {ticker_symbol}")
-        print(f"Pays : {country}")
-        print(f"Secteur : {sector}")
-        print(f"Industrie : {industry}")
-        print(f"Capitalisation boursière : {market_cap_display}")
-        print(Fore.MAGENTA + "==========================================================" + Fore.RESET)
-
-    @staticmethod
-    def print_yfinance_brut_data(info: dict):
-        """
-        Affiche les informations générales d'une entreprise à partir des données yfinance
-        """
-
-        print(Fore.RED + "==================== BRUT DATA ====================" + Fore.RED)
-        print(info)
-        print(Fore.RED + "==========================================================" + Fore.RED)
-
 
 
     @staticmethod
