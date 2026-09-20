@@ -1,0 +1,189 @@
+Objectif
+Produire une analyse comparative exhaustive, objective et critique entre SAP et capgemini afin d'émettre une recommandation d'investissement relative pour un horizon moyen terme (3–5 ans).
+
+Date de référence
+Considère que la date d’analyse est  13-04-2026. Toutes les données financières et actualités doivent être évaluées **par rapport à aujourd’hui**.
+
+Contraintes de données
+1. Priorité absolue aux données publiques les plus récentes (≤ 12 mois par rapport à la date du jour).
+2. Indique pour chaque donnée :
+   - la période de référence
+   - la source
+3. Cite au minimum 3 sources crédibles par entreprise (rapports annuels, résultats trimestriels, communiqués investisseurs, filings réglementaires, presse financière reconnue).
+4. Si certaines données ne sont pas directement comparables (normes comptables, devises, périmètre), indique l'écart et propose une normalisation.
+5. Si une donnée clé manque, fournis une estimation argumentée avec hypothèses et fourchette plausible.
+
+Méthodologie
+- Utilise les mêmes périodes et métriques pour les deux entreprises.
+- Analyse sur les **3 à 5 dernières années complètes + TTM (Trailing Twelve Months) si disponible**.
+- Fournis les formules exactes utilisées pour chaque ratio.
+
+Ratios minimum requis
+- Chiffre d'affaires
+- Croissance YoY
+- Marge EBITDA
+- Marge nette
+- ROE
+- Dette nette / EBITDA
+- Free Cash Flow
+- CAPEX
+- Rotation des actifs
+- PER
+- EV / EBITDA
+- EV / Sales
+
+Réalise également une **DCF indicative** pour chaque entreprise si les données le permettent :
+
+Scénarios :
+- Bear
+- Base
+- Bull
+
+Indique clairement :
+- WACC
+- croissance terminale
+- hypothèses de marge
+- capex
+- taux d’imposition
+
+Structure obligatoire de la réponse
+
+1. Résumé exécutif
+Maximum 200 mots.
+Inclure :
+- verdict d’investissement
+- 3 raisons principales
+
+2. Tableau de bord comparatif
+Tableau côte-à-côte avec :
+- 3 à 5 années
+- TTM si disponible
+
+Inclure aussi un export CSV simple dans un bloc de code.
+
+3. Analyse financière comparative
+Comparer :
+- croissance
+- rentabilité
+- génération de cash
+- solidité du bilan
+
+Identifier les tendances clés.
+
+4. Analyse stratégique et opérationnelle
+Comparer :
+- modèle économique
+- positionnement (leader / challenger)
+- chaîne de valeur
+- avantages concurrentiels
+
+Attribuer un score de moat de **1 à 5** avec justification.
+
+5. Analyse des risques comparée
+Créer un tableau listant 3 à 5 risques majeurs pour chaque entreprise.
+
+Pour chaque risque :
+- Probabilité : Faible / Modérée / Élevée
+- Impact : Faible / Modéré / Élevé
+
+6. Analyse des catalyseurs
+Lister 3 à 5 catalyseurs de croissance pour chaque entreprise.
+
+Pour chaque catalyseur :
+- Probabilité
+- Impact
+- horizon temporel
+
+7. Scénarios et sensibilités
+Présenter :
+
+Scénario Bear  
+Scénario Base  
+Scénario Bull
+
+Inclure une table de sensibilité :
+WACC × croissance terminale.
+
+8. Notation comparative
+
+Attribuer une note de 1 à 5 pour chaque critère :
+
+- Avantage concurrentiel
+- Santé financière
+- Qualité du management
+- Perspectives de croissance
+- Profil de risque
+
+9. Notes d'investissement
+
+Attribuer :
+
+Note de Confiance d’Investissement (NCI) /10 pour chaque entreprise.
+
+Puis :
+
+Note de Confiance Relative (NCR) de 1 à 10
+
+Interprétation :
+1 = forte préférence pour SAP
+10 = forte préférence pour capgemini  
+5 = équivalence
+
+10. Recommandation finale
+
+Indiquer clairement :
+
+Quelle entreprise est la plus attractive pour un investissement sur 3–5 ans.
+
+Justifier en 3 ou 4 points maximum.
+
+Inclure également :
+
+Dans quelles conditions l'entreprise non recommandée pourrait surperformer.
+
+11. Limites de l’analyse
+Lister :
+- hypothèses
+- limites de données
+- incertitudes macroéconomiques.
+
+12. Sources
+Lister toutes les sources utilisées avec :
+- nom
+- lien
+- date d’accès.
+
+Format de sortie
+- Sections clairement structurées
+- Tableaux comparatifs
+- Bullet points pour les conclusions
+
+Annexes techniques
+
+Inclure en fin de réponse :
+
+1. Bloc JSON contenant :
+- métriques clés
+- scores
+- NCI
+- NCR
+- hypothèses DCF
+- sources
+
+2. CSV exportable des données financières.
+
+3. Table de sensibilité WACC / croissance terminale si DCF réalisée.
+
+Règles strictes
+
+- Ne jamais inventer de données.
+- Toute estimation doit être explicitement signalée.
+- Privilégier les sources officielles (rapports annuels, publications investisseurs).
+
+Contexte macroéconomique à considérer
+
+Intégrer dans l’analyse :
+- taux d’intérêt
+- inflation
+- dynamique du secteur technologique et du luxe
+- évolution de la demande mondiale

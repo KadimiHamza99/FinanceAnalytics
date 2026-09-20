@@ -1,20 +1,35 @@
 import yfinance as yf
 import pandas as pd
-from colorama import Fore
-from Formatter import Formatter 
+
+from Formatter import Formatter
 from AnalyseFondamentale.IndicatorInterpreter import IndicatorInterpreter
 from AnalyseFondamentale.Utils import Utils
 
+
 class FundamentalAnalysis:
     """
-    Classe réalisant une analyse fondamentale complète sur un ticker boursier.
-    Calcule différents indicateurs classés par catégories :
+    Réalise une analyse fondamentale complète sur un ticker boursier.
+
+    Les indicateurs sont regroupés en cinq catégories et notés sur 10 avec
+    des seuils et des poids adaptés au secteur :
     - Rentabilité
     - Liquidité
     - Solvabilité
     - Valorisation
     - Risque & Marché
+
+    Le score final est une moyenne pondérée normalisée sur 100. Les champs
+    absents restent neutres et ne sont jamais remplacés par une estimation
+    silencieuse.
     """
+
+    CATEGORIES = (
+        "Rentabilité",
+        "Liquidité",
+        "Solvabilité",
+        "Valorisation",
+        "Risque & Marché",
+    )
 
     def __init__(self, ticker_symbol):
         self.ticker_symbol = ticker_symbol
@@ -28,14 +43,7 @@ class FundamentalAnalysis:
         info = Utils.normalize_financial_info(self.info)
         f = self.formatter
         
-        # Dictionnaire pour stocker les données par catégorie
-        data_by_category = {
-            "Rentabilité": [],
-            "Liquidité": [],
-            "Solvabilité": [],
-            "Valorisation": [],
-            "Risque & Marché": []
-        }
+        data_by_category = {category: [] for category in self.CATEGORIES}
 
 ################### PRINT BRUT DATA #########################
         # Utils.print_yfinance_brut_data(self.info)

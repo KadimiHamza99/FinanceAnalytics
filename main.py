@@ -1,12 +1,15 @@
 import argparse
-import sys
-from StockAnalyzer import StockAnalyzer
 import os
-from SendNotification import SendNotification
+import sys
+
+from StockAnalyzer import StockAnalyzer
+
+
+DEFAULT_TICKERS = ("CS.PA",)
 
 
 def configure_console_encoding():
-    """Évite qu'un terminal Windows non UTF-8 interrompe l'analyse sur un emoji."""
+    """Configure UTF-8 when the current terminal supports ``reconfigure``."""
     for stream in (sys.stdout, sys.stderr):
         try:
             stream.reconfigure(encoding="utf-8", errors="replace")
@@ -14,44 +17,58 @@ def configure_console_encoding():
             pass
 
 
-if __name__ == "__main__":
-    configure_console_encoding()
-
-    # Liste par défaut si aucun ticker n'est fourni
-    default_tickers = [
-        "CS.PA"
-    ]
-
-    parser = argparse.ArgumentParser(description="Analyse des actions.")
+def build_parser():
+    """Create the command-line parser used by the application."""
+    parser = argparse.ArgumentParser(
+        description="Analyse fondamentale et technique d'actions."
+    )
     parser.add_argument(
         "tickers",
         nargs="*",
-        default=default_tickers,
-        help="Liste des tickers à analyser"
+        default=list(DEFAULT_TICKERS),
+        help="Liste des tickers à analyser",
     )
     parser.add_argument(
-        "-f", "--file",
+        "-f",
+        "--file",
         type=str,
-        help="Fichier contenant une liste de tickers (un par ligne)"
+        help="Fichier contenant un ticker par ligne (les lignes # sont ignorées)",
     )
+    return parser
 
-    args = parser.parse_args()
 
-    tickers = args.tickers
+def load_tickers_from_file(path):
+    """Read non-empty ticker symbols from ``path``."""
+    with open(path, "r", encoding="utf-8") as ticker_file:
+        return [
+            line.strip()
+            for line in ticker_file
+            if line.strip() and not line.lstrip().startswith("#")
+        ]
 
-    # Si un fichier est fourni, on lit les tickers à partir de ce fichier
-    if args.file:
-        if os.path.exists(args.file):
-            with open(args.file, "r", encoding="utf-8") as f:
-                file_tickers = [
-                    line.strip() for line in f.readlines()
-                    if line.strip() and not line.startswith("#")
-                ]
-                tickers = file_tickers
-        else:
-            print(f"⚠️ Fichier '{args.file}' introuvable, utilisation des tickers par défaut.")
 
-    app = StockAnalyzer(tickers)
+def resolve_tickers(cli_tickers, file_path=None):
+    """Resolve CLI/file input while preserving the default fallback."""
+    if not file_path:
+        return cli_tickers
 
-    app.run()
-    
+    if not os.path.exists(file_path):
+        print(
+            f"⚠️ Fichier '{file_path}' introuvable, "
+            "utilisation des tickers fournis par défaut."
+        )
+        return cli_tickers
+
+    tickers = load_tickers_from_file(file_path)
+    return tickers or cli_tickers
+
+
+def main():
+    """Parse arguments and launch the portfolio analysis."""
+    configure_console_encoding()
+    args = build_parser().parse_args()
+    StockAnalyzer(resolve_tickers(args.tickers, args.file)).run()
+
+
+if __name__ == "__main__":
+    main()

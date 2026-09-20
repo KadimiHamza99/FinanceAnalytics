@@ -2,20 +2,22 @@ from colorama import Fore, Style
 
 class IndicatorEvaluator:
     """
-    Évalue les indicateurs techniques avec une approche équilibrée orientée détection d'opportunités
-    moyen-terme (2 ans). Combine prudence et flexibilité pour capter les retournements naissants.
+    Évalue les indicateurs techniques avec une approche prudente adaptée aux
+    actions liquides cotées en France et à un horizon de plusieurs semaines à
+    plusieurs mois. Un indicateur isolé ne suffit jamais à justifier un achat.
     """
 
     def __init__(self):
         self.weights = {
-            "RSI": 22,
+            "RSI": 14,
             "Stochastique": 5,
-            "Bollinger": 20,
-            "MACD": 22,
-            "OBV": 5,
-            "EMA200": 21,
-            "ADX": 5,
-            "Fibonacci": 10,  # Nouveau poids pour Fibonacci
+            "Bollinger": 11,
+            "MACD": 17,
+            "OBV": 9,
+            "EMA200": 17,
+            "ADX": 9,
+            "Tendance": 10,
+            "Fibonacci": 8,
         }
 
     # --- RSI ---
@@ -120,6 +122,16 @@ class IndicatorEvaluator:
         else:
             return 1, f"🔴 Prix {abs(discount):.1f}% au-dessus EMA200 → surévaluation du titre 🚨."
 
+    def evaluate_trend_alignment(self, close, ema50, ema200):
+        """Score la structure de tendance, sans confondre hausse et décote."""
+        if close > ema50 > ema200:
+            return 8, "🟢 Cours au-dessus des EMA50 et EMA200 : tendance haussière confirmée."
+        if close > ema200 and ema50 <= ema200:
+            return 5, "🟡 Reprise possible, mais les moyennes ne sont pas encore alignées."
+        if close < ema50 < ema200:
+            return 2, "🔴 Cours sous les EMA50 et EMA200 : tendance baissière confirmée."
+        return 4, "⚪ Structure neutre : attendre une confirmation avant d'entrer."
+
     # --- ADX ---
     def evaluate_adx(self, adx):
         if adx < 10:
@@ -150,7 +162,7 @@ class IndicatorEvaluator:
             tuple: (note sur 10, interprétation)
         """
         if not support or not resistance:
-            return 5.0, "⚪ Fibonacci neutre → niveaux non déterminés, attendre clarification 🔍."
+            return 4.0, "⚪ Fibonacci non exploitable : support ou résistance absent."
         
         # Calcul de la position relative dans le range
         total_range = resistance - support
@@ -175,29 +187,29 @@ class IndicatorEvaluator:
                 closest_level = level_name
         
         # Évaluation optimisée pour investisseur moyen-terme
-        if price_position <= 0.20:  # En dessous de Fib 23.6%
-            return 9, "🟢 Prix sous Fib 23.6% → zone de capitulation 💎. Opportunité rare mais volatile, renforcement progressif recommandé sur 2-3 mois ⚡."
+        if price_position <= 0.20:
+            return 6, "🟡 Prix très bas dans le range : potentiel rebond, mais risque de poursuite baissière élevé."
         
         elif price_position <= 0.30:  # Proche de Fib 23.6% - 30%
-            return 10, f"🟢 Prix à {closest_level} → zone idéale moyen-terme 🎯. Support historique fort, excellent point d'entrée avec horizon 12-24 mois 📊✨."
+            return 7, f"🟢 Prix à {closest_level} : zone intéressante uniquement avec confirmation du volume et du momentum."
         
         elif price_position <= 0.382:  # Au niveau Fib 38.2%
-            return 9, f"🟢 Prix à {closest_level} → zone privilégiée pour accumulation progressive 👀. Ratio risque/récompense optimal, idéal pour DCA sur 3-6 mois 📈."
+            return 7, f"🟢 Prix à {closest_level} : retracement surveillable pour une entrée progressive."
         
         elif price_position <= 0.45:  # Entre 38.2% et 50%
-            return 8, f"🟢 Prix vers {closest_level} → zone d'équilibre stratégique ⚖️. Bon compromis entre sécurité et potentiel, entrée échelonnée conseillée 🎯."
+            return 6, f"🟡 Prix vers {closest_level} : zone intermédiaire, attendre une réaction haussière."
         
         elif price_position <= 0.55:  # Au niveau Fib 50%
-            return 7, f"🟡 Prix à {closest_level} → zone neutre-favorable 🔶. Point médian, attendre confirmation ou renforcer progressivement si convictions fortes 💪."
+            return 5, f"🟡 Prix à {closest_level} : point médian sans avantage clair."
         
         elif price_position <= 0.618:  # Vers Fib 61.8%
-            return 5, f"🟡 Prix à {closest_level} → zone de prudence 🕰️. Potentiel limité à court terme, privilégier une correction vers 38.2%-50% avant d'entrer 📉."
+            return 4, f"🟡 Prix à {closest_level} : attendre un meilleur point d'entrée."
         
         elif price_position <= 0.75:  # Entre 61.8% et 78.6%
-            return 3, f"🟠 Prix vers {closest_level} → zone de résistance technique 📍. Position défavorable moyen-terme, attendre repli significatif ⚠️."
+            return 3, f"🟠 Prix vers {closest_level} : marge de sécurité limitée, prudence."
         
         else:  # Au dessus de 78.6%
-            return 1, f"🔴 Prix au-dessus de Fib 78.6% → zone de surachat majeur 🚨. Éviter toute entrée, risque de correction >20% à moyen terme 🛑."
+            return 2, f"🔴 Prix au-dessus de Fib 78.6% : entrée tardive, risque de correction."
 
     # --- INTERPRÉTATION GLOBALE ---
     def _global_interpretation(df, score):
@@ -205,19 +217,19 @@ class IndicatorEvaluator:
         bullish_signals = sum(df["Note (/10)"] >= 7)
 
         if score >= 90:
-            msg = Fore.GREEN + "💎 Exceptionnel : forte sous-évaluation confirmée 🔥 — opportunité rare à saisir."
+            msg = Fore.GREEN + "💎 Configuration technique très favorable, mais à confirmer par le volume et le contexte."
         elif score >= 80:
-            msg = Fore.GREEN + "🟢 Très bon niveau : marché nettement en décote, configuration favorable à l'achat."
+            msg = Fore.GREEN + "🟢 Configuration favorable : tendance et momentum cohérents, entrée progressive uniquement."
         elif score >= 70:
-            msg = Fore.CYAN + "🔵 Sous-évaluation modérée : tendance de reprise à confirmer par le volume ou le MACD."
+            msg = Fore.CYAN + "🔵 Configuration plutôt favorable : attendre une confirmation par le volume ou le MACD."
         elif score >= 60:
             msg = Fore.LIGHTBLUE_EX + "🔷 Neutre-haussier : signaux mitigés, attendre confirmation d'un retournement clair."
         elif score >= 50:
             msg = Fore.YELLOW + "🟠 Marché équilibré : peu de marge de sécurité, à surveiller sans se précipiter."
         elif score >= 40:
-            msg = Fore.MAGENTA + "🟣 Légère surévaluation : prudence, possible consolidation avant reprise."
+            msg = Fore.MAGENTA + "🟣 Signaux techniques fragiles : possible consolidation, prudence."
         else:
-            msg = Fore.RED + "🔴 Surévaluation marquée : tendance défavorable, aucun signal d'entrée."
+            msg = Fore.RED + "🔴 Configuration défavorable : tendance ou momentum faibles, pas de signal d'entrée."
 
         # ✅ Renforcement du message si plusieurs indicateurs convergent
         if bullish_signals >= 3 and score >= 70:
@@ -227,3 +239,64 @@ class IndicatorEvaluator:
             msg += Fore.RED + "\n⚠️ Peu ou pas de signaux positifs → risque élevé de poursuite baissière."
 
         return msg + Style.RESET_ALL
+
+    @staticmethod
+    def integrated_interpretation(score, fibonacci_data):
+        """Combine technical momentum and Fibonacci context into one decision.
+
+        Fibonacci is already one weighted component of ``score``. It is used
+        here as a confirmation and risk filter, not counted a second time.
+        """
+        if not fibonacci_data or not fibonacci_data.get("valid", False):
+            return (
+                Fore.YELLOW
+                + "🟠 Analyse technique partielle : Fibonacci n'est pas exploitable, "
+                "aucune entrée agressive."
+                + Style.RESET_ALL
+            )
+
+        analysis = fibonacci_data["analysis"]
+        trend = fibonacci_data.get("trend", "indéterminé")
+        fibonacci_score = analysis.get("score", 0)
+        risk_reward = analysis.get("risk_reward")
+
+        if trend == "baissier":
+            return (
+                Fore.RED
+                + "🔴 Pas de signal d'achat : tendance baissière confirmée. "
+                "Attendre un retournement et une clôture au-dessus d'une moyenne clé."
+                + Style.RESET_ALL
+            )
+
+        if fibonacci_score < 4 or (risk_reward and risk_reward["ratio"] < 1):
+            return (
+                Fore.YELLOW
+                + "🟠 Configuration défavorable : la zone Fibonacci n'offre pas "
+                "assez de marge de sécurité."
+                + Style.RESET_ALL
+            )
+
+        if score >= 70 and fibonacci_score >= 6 and (
+            risk_reward is None or risk_reward["ratio"] >= 1.5
+        ):
+            return (
+                Fore.GREEN
+                + "🟢 Signal technique confirmé : momentum, tendance et zone "
+                "Fibonacci convergent. Entrée progressive uniquement."
+                + Style.RESET_ALL
+            )
+
+        if score >= 55 and fibonacci_score >= 5:
+            return (
+                Fore.CYAN
+                + "🔵 Configuration surveillable : signaux partiellement alignés. "
+                "Attendre une confirmation avant toute entrée."
+                + Style.RESET_ALL
+            )
+
+        return (
+            Fore.YELLOW
+            + "🟠 Signal insuffisant : les indicateurs techniques et Fibonacci "
+            "ne convergent pas assez."
+            + Style.RESET_ALL
+        )

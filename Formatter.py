@@ -1,51 +1,63 @@
+"""Formatting helpers used by the console reports.
+
+The analysis layer keeps numeric values numeric.  This module is the only
+place responsible for turning them into display strings or ANSI-coloured
+values.
+"""
+
+import pandas as pd
+from colorama import Fore, Style
+
+
 class Formatter:
-    @staticmethod
-    def format_pourcentage(val):
-        import pandas as pd
-        if val is None or pd.isna(val):
-            return "N/A"
-        try:
-            return f"{val*100:.2f}%" if abs(val) < 1 else f"{val:.2f}%"
-        except:
-            return str(val)
+    """Format values consistently for the terminal output."""
 
     @staticmethod
-    def format_money(val):
-        import pandas as pd
-        if val is None or pd.isna(val):
+    def format_pourcentage(value):
+        """Format a ratio as a percentage, accepting ``0.12`` or ``12``."""
+        if value is None or pd.isna(value):
             return "N/A"
         try:
-            v = float(val)
-            if abs(v) >= 1e9:
-                return f"{v/1e9:.2f} B"
-            elif abs(v) >= 1e6:
-                return f"{v/1e6:.2f} M"
-            else:
-                return f"{v:,.2f}"
-        except:
-            return str(val)
+            return f"{value * 100:.2f}%" if abs(value) < 1 else f"{value:.2f}%"
+        except (TypeError, ValueError):
+            return str(value)
+
+    @staticmethod
+    def format_money(value):
+        """Format a monetary value using readable million/billion units."""
+        if value is None or pd.isna(value):
+            return "N/A"
+        try:
+            numeric_value = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+
+        if abs(numeric_value) >= 1e9:
+            return f"{numeric_value / 1e9:.2f} B"
+        if abs(numeric_value) >= 1e6:
+            return f"{numeric_value / 1e6:.2f} M"
+        return f"{numeric_value:,.2f}"
 
     @staticmethod
     def colorize_score(score):
-        from colorama import Fore, Style
+        """Colour a score expressed on a scale from 0 to 10."""
         if score >= 8:
             return Fore.GREEN + f"{score}/10" + Style.RESET_ALL
-        elif score >= 6:
+        if score >= 6:
             return Fore.YELLOW + f"{score}/10" + Style.RESET_ALL
-        elif score >= 4:
+        if score >= 4:
             return Fore.LIGHTYELLOW_EX + f"{score}/10" + Style.RESET_ALL
         else:
             return Fore.RED + f"{score}/10" + Style.RESET_ALL
 
     @staticmethod
     def colorize_percent_score(score):
-        from colorama import Fore, Style
+        """Colour a score expressed on a scale from 0 to 100."""
         if score >= 80:
             return Fore.GREEN + f"{score:.2f}/100" + Style.RESET_ALL
-        elif score >= 65:
+        if score >= 65:
             return Fore.CYAN + f"{score:.2f}/100" + Style.RESET_ALL
-        elif score >= 50:
+        if score >= 50:
             return Fore.YELLOW + f"{score:.2f}/100" + Style.RESET_ALL
         else:
             return Fore.RED + f"{score:.2f}/100" + Style.RESET_ALL
-

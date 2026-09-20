@@ -4,6 +4,7 @@ import ta
 from OllamaSession import OllamaSession
 
 class Utils:
+    """Download prices and compute causal indicators for daily data."""
 
     @staticmethod
     def fetch_data(ticker):
@@ -34,8 +35,7 @@ class Utils:
     @staticmethod
     def compute_indicators(data):
         """Ajoute les indicateurs techniques au DataFrame."""
-        open_, high, low, close, volume = (
-            Utils._to_series(data, "Open"),
+        high, low, close, volume = (
             Utils._to_series(data, "High"),
             Utils._to_series(data, "Low"),
             Utils._to_series(data, "Close"),
@@ -50,12 +50,14 @@ class Utils:
         data["OBV"] = ta.volume.OnBalanceVolumeIndicator(close, volume).on_balance_volume()
         bb = ta.volatility.BollingerBands(close, 20, 2)
         data["BB_H"], data["BB_L"], data["BB_M"] = bb.bollinger_hband(), bb.bollinger_lband(), bb.bollinger_mavg()
+        data["EMA50"] = ta.trend.EMAIndicator(close, 50).ema_indicator()
         data["EMA200"] = ta.trend.EMAIndicator(close, 200).ema_indicator()
         data["ADX"] = ta.trend.ADXIndicator(high, low, close, 14).adx()
+        data["ATR"] = ta.volatility.AverageTrueRange(high, low, close, 14).average_true_range()
+        data["Volume_MA20"] = volume.rolling(20).mean()
 
-        # Les premières lignes ne disposent pas de toutes les fenêtres de calcul
-        # (notamment l'EMA200). Les remplir avec des valeurs futures introduit
-        # un biais de regard vers l'avenir ; on les écarte donc explicitement.
+        # Les fenêtres incomplètes sont écartées pour éviter tout biais de
+        # regard vers l'avenir et garantir des signaux comparables.
         return data.dropna().copy()
     
 

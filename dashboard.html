@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinanceAnalytics — cockpit d'analyse</title>
+  <style>
+    :root {
+      --bg: #f4f7fb; --surface: #fff; --ink: #132238; --muted: #718096;
+      --line: #e5ebf3; --blue: #1769e0; --navy: #112a46; --green: #1d9b72;
+      --orange: #d9822b; --shadow: 0 12px 35px rgba(24, 54, 91, .08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 14px Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    .shell { display: grid; grid-template-columns: 245px 1fr; min-height: 100vh; }
+    aside { background: var(--navy); color: #dce8f7; padding: 27px 18px; }
+    .brand { display:flex; align-items:center; gap: 11px; color: white; font-weight: 750; font-size: 17px; margin: 0 10px 48px; }
+    .brand-mark { background: #2578ef; border-radius: 10px; padding: 8px; font-size: 17px; }
+    .nav-label { color: #8096b0; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin: 0 12px 12px; }
+    nav button { width:100%; border:0; background:transparent; color: #b7c9dd; text-align:left; padding: 12px; border-radius: 8px; margin-bottom: 5px; font: inherit; cursor:pointer; }
+    nav button.active, nav button:hover { color:white; background: #1c4169; }
+    .aside-note { border-top: 1px solid #294968; margin: 30px 10px 0; padding-top: 18px; color:#8da6c0; font-size:12px; line-height:1.6; }
+    main { max-width: 1500px; width:100%; padding: 30px 38px 55px; margin:auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap: 18px; margin-bottom:30px; }
+    h1 { font-size: 26px; letter-spacing:-.03em; margin: 0 0 6px; } .subtitle { color:var(--muted); margin:0; }
+    .status { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--green); }
+    .search { display:flex; gap:10px; background:var(--surface); border:1px solid var(--line); padding: 8px; border-radius:12px; box-shadow:var(--shadow); }
+    input { border:0; outline:0; padding: 10px 12px; width:260px; color:var(--ink); font:inherit; }
+    .primary { background:var(--blue); color:white; border:0; border-radius:8px; padding: 0 18px; font-weight:700; cursor:pointer; }
+    .primary:disabled { opacity:.65; cursor:wait; }
+    .overview { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; margin-bottom:24px; }
+    .card, .panel { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); }
+    .card { padding:19px; } .card-label { color:var(--muted); font-size:12px; } .card-value { font-size:25px; font-weight:750; margin-top:9px; }
+    .card-change { color:var(--green); font-size:12px; margin-top:6px; }
+    .layout { display:grid; grid-template-columns: 1.4fr .9fr; gap:18px; }
+    .panel { padding: 22px; margin-bottom:18px; } .panel h2 { font-size:15px; margin:0 0 18px; } .panel-head { display:flex; justify-content:space-between; align-items:center; }
+    .table-wrap { overflow-x:auto; } table { border-collapse:collapse; width:100%; } th, td { padding:11px 8px; border-bottom:1px solid var(--line); text-align:left; font-size:12px; white-space:nowrap; } th { color:var(--muted); font-weight:600; } td:first-child { font-weight:650; }
+    .score-pill { display:inline-block; min-width:54px; padding:5px 8px; border-radius:20px; text-align:center; background:#e8f7f1; color:#147553; font-weight:750; }
+    .bars { display:grid; gap:14px; } .bar-line { display:grid; grid-template-columns: 125px 1fr 45px; align-items:center; gap:10px; font-size:12px; } .bar { height:8px; background:#edf1f6; border-radius:8px; overflow:hidden; } .bar i { display:block; height:100%; background:linear-gradient(90deg, #1c72e8, #55a0ff); border-radius:8px; }
+    .fib-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .metric { background:#f7f9fc; border-radius:9px; padding:11px; } .metric small { color:var(--muted); display:block; margin-bottom:5px; } .metric strong { font-size:15px; }
+    .empty { text-align:center; color:var(--muted); padding: 45px 10px; } .error { background:#fff4f2; color:#ae4438; padding:12px; border-radius:8px; margin-bottom:18px; }
+    .tag { border-radius:20px; padding:5px 10px; background:#edf4ff; color:var(--blue); font-size:12px; font-weight:700; }
+    @media(max-width: 950px) { .shell { grid-template-columns:1fr; } aside { padding:14px 18px; } .brand { margin-bottom:15px; } nav { display:flex; gap:6px; overflow:auto; } nav button { white-space:nowrap; } .aside-note, .nav-label { display:none; } main { padding:24px 18px; } .layout { grid-template-columns:1fr; } }
+    @media(max-width: 650px) { .topbar { align-items:flex-start; flex-direction:column; } .search { width:100%; } input { width:100%; } .overview { grid-template-columns:1fr 1fr; } .primary { padding:0 12px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand"><span class="brand-mark">↗</span> FinanceAnalytics</div>
+      <div class="nav-label">Navigation</div>
+      <nav><button class="active">◉&nbsp; Vue d'ensemble</button><button>⌁&nbsp; Liste de suivi</button><button>◌&nbsp; Alertes</button></nav>
+      <div class="aside-note">Analyse fondamentale 75%<br>Analyse technique 25%<br><br><strong>Source</strong><br>Yahoo Finance · données indicatives</div>
+    </aside>
+    <main>
+      <div class="topbar">
+        <div><h1>Vue d'ensemble</h1><p class="subtitle">Votre cockpit d'analyse boursière</p></div>
+        <div class="status"><span class="dot"></span> Service local connecté</div>
+      </div>
+      <div class="search"><input id="tickers" value="CS.PA, TTE.PA, SAN.PA" aria-label="Tickers à analyser"><button class="primary" id="analyze">Lancer l'analyse&nbsp; →</button></div>
+      <div id="message"></div>
+      <section class="overview" id="overview"><div class="card"><div class="card-label">Sélectionnez un titre</div><div class="card-value">—</div></div><div class="card"><div class="card-label">Score global</div><div class="card-value">—</div></div><div class="card"><div class="card-label">Score fondamental</div><div class="card-value">—</div></div><div class="card"><div class="card-label">Score technique</div><div class="card-value">—</div></div></section>
+      <div id="content"><div class="panel empty">Lancez une analyse pour afficher les données de votre service.</div></div>
+    </main>
+  </div>
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const formatScore = (value) => value == null ? "N/A" : `${Number(value).toFixed(1)}/100`;
+    const formatValue = (value) => value == null ? "N/A" : (typeof value === "number" ? value.toFixed(2) : value);
+    function scoreBar(name, value) { return `<div class="bar-line"><span>${name}</span><div class="bar"><i style="width:${Math.max(0, Math.min(100, value || 0))}%"></i></div><strong>${formatScore(value)}</strong></div>`; }
+    function render(result) {
+      const s = result.scores;
+      $("#overview").innerHTML = [
+        ["Titre suivi", result.ticker, result.company],
+        ["Score global", formatScore(s.global), result.interpretation || "Score indisponible"],
+        ["Score fondamental", formatScore(s.fundamental), `${result.sector || "Secteur non renseigné"}`],
+        ["Score technique", formatScore(s.technical), result.recommendation || "Recommandation indisponible"]
+      ].map(([label, value, note]) => `<div class="card"><div class="card-label">${label}</div><div class="card-value">${value}</div><div class="card-change">${note}</div></div>`).join("");
+      const fundamentalRows = Object.entries(result.fundamental || {}).flatMap(([category, rows]) => rows.map(row => `<tr><td>${category}</td><td>${row.Indicateur || "—"}</td><td>${row.Valeur || "—"}</td><td><span class="score-pill">${row["Note (/10)"]}/10</span></td></tr>`)).join("");
+      const technicalRows = (result.technical || []).map(row => `<tr><td>${row.Indicateur || "—"}</td><td>${formatValue(row.Valeur)}</td><td><span class="score-pill">${row["Note (/10)"]}/10</span></td><td>${row.Interprétation || "—"}</td></tr>`).join("");
+      const fib = result.fibonacci || {}; const fa = fib.analysis || {};
+      $("#content").innerHTML = `<div class="layout">
+        <div><div class="panel"><div class="panel-head"><h2>Indicateurs fondamentaux</h2><span class="tag">${result.ticker}</span></div><div class="table-wrap"><table><thead><tr><th>Catégorie</th><th>Indicateur</th><th>Valeur</th><th>Note</th></tr></thead><tbody>${fundamentalRows || "<tr><td colspan=4>Aucune donnée disponible</td></tr>"}</tbody></table></div></div>
+        <div class="panel"><div class="panel-head"><h2>Lecture technique</h2><span class="tag">${fib.trend || "neutre"}</span></div><div class="table-wrap"><table><thead><tr><th>Indicateur</th><th>Valeur</th><th>Note</th><th>Lecture</th></tr></thead><tbody>${technicalRows || "<tr><td colspan=4>Aucune donnée disponible</td></tr>"}</tbody></table></div></div></div>
+        <div><div class="panel"><h2>Scores par catégorie</h2><div class="bars">${Object.entries(s.categories || {}).map(([name, value]) => scoreBar(name, value)).join("")}</div></div>
+        <div class="panel"><h2>Zones clés & Fibonacci</h2><div class="fib-grid">${[["Cours actuel", result.price],["Support",fa.support],["Résistance",fa.resistance],["Stop-loss",fa.stop_loss],["Zone d'entrée",Array.isArray(fa.entry_zone) ? fa.entry_zone.map(formatValue).join(" – ") : fa.entry_zone],["Ratio R/R",fa.risk_reward]].map(([label,value]) => `<div class="metric"><small>${label}</small><strong>${formatValue(value)}</strong></div>`).join("")}</div><p class="subtitle" style="margin-top:15px">${fa.interpretation || "Analyse Fibonacci non disponible."}</p></div></div></div>`;
+    }
+    async function analyze() {
+      const button = $("#analyze"); const tickers = $("#tickers").value.split(",").map(value => value.trim()).filter(Boolean);
+      button.disabled = true; button.textContent = "Analyse en cours…"; $("#message").innerHTML = "";
+      try {
+        const response = await fetch("/api/analyze", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({tickers}) });
+        const data = await response.json(); if (!response.ok) throw new Error(data.error || "La requête a échoué.");
+        if (data.errors && data.errors.length) $("#message").innerHTML = data.errors.map(error => `<div class="error">${error.ticker}: ${error.message}</div>`).join("");
+        if (data.results && data.results.length) render(data.results[0]);
+      } catch (error) { $("#message").innerHTML = `<div class="error">${error.message}</div>`; }
+      finally { button.disabled = false; button.textContent = "Lancer l'analyse  →"; }
+    }
+    $("#analyze").addEventListener("click", analyze); $("#tickers").addEventListener("keydown", event => { if (event.key === "Enter") analyze(); });
+  </script>
+</body>
+</html>
