@@ -29,7 +29,8 @@ python web_app.py
 Puis ouvrez [http://127.0.0.1:8765](http://127.0.0.1:8765). Saisissez un ou
 plusieurs tickers séparés par des virgules et cliquez sur **Lancer l'analyse**.
 Le dashboard réutilise les analyses existantes et affiche les scores, les
-indicateurs, la recommandation technique, les zones Fibonacci, ainsi qu'une
+indicateurs, la recommandation technique, les zones Fibonacci, une droite de
+régression calculée sur l'historique maximal disponible, ainsi qu'une
 comparaison côte à côte entre deux valeurs et une veille personnalisée.
 
 L'exécution CLI reste volontairement silencieuse : elle affiche uniquement la

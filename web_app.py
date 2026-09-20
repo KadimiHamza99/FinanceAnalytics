@@ -9,6 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
@@ -57,6 +58,109 @@ def json_safe(value):
         return str(value)
 
 
+def build_fundamental_summary(categories, scores_by_category):
+    """Return a short qualitative summary for the web dashboard."""
+    if not categories:
+        return {"headline": "Aucune donnée fondamentale disponible.", "bullets": []}
+
+    items = []
+    for category, rows in categories.items():
+        if not rows:
+            continue
+        score = scores_by_category.get(category, 0) if scores_by_category else 0
+        numeric_notes = []
+        for row in rows:
+            try:
+                numeric_notes.append(float(row.get("Note (/10)", 0)))
+            except (TypeError, ValueError):
+                numeric_notes.append(0.0)
+        best = max(rows, key=lambda row: float(row.get("Note (/10)", 0)) if row.get("Note (/10)") is not None else 0.0, default={"Indicateur": "N/A"})
+        worst = min(rows, key=lambda row: float(row.get("Note (/10)", 0)) if row.get("Note (/10)") is not None else 10.0, default={"Indicateur": "N/A"})
+        items.append({
+            "category": category,
+            "score": float(score),
+            "best": best.get("Indicateur", "N/A"),
+            "worst": worst.get("Indicateur", "N/A"),
+            "average": sum(numeric_notes) / len(numeric_notes) if numeric_notes else 0.0,
+        })
+
+    if not items:
+        return {"headline": "Aucune donnée fondamentale disponible.", "bullets": []}
+
+    avg_score = sum(item["score"] for item in items) / len(items)
+    if avg_score >= 75:
+        headline = "Profil fondamental très solide, avec une qualité globale de l'entreprise favorable."
+    elif avg_score >= 60:
+        headline = "Profil fondamental correct, mais quelques éléments de vigilance méritent une surveillance."
+    elif avg_score >= 50:
+        headline = "Profil fondamental moyen : l'équilibre est acceptable, mais la marge de sécurité reste limitée."
+    else:
+        headline = "Profil fondamental fragile : les fondamentaux restent faibles ou instables."
+
+    strengths = []
+    risks = []
+    for item in sorted(items, key=lambda entry: entry["score"], reverse=True):
+        if item["score"] >= 65:
+            strengths.append(f"{item['category']} : {item['best']} est le point fort.")
+        elif item["score"] < 50:
+            risks.append(f"{item['category']} : {item['worst']} reste le point faible.")
+
+    bullets = []
+    for bullet in strengths[:2] + risks[:2]:
+        if bullet not in bullets:
+            bullets.append(bullet)
+    if len(bullets) < 2:
+        for item in sorted(items, key=lambda entry: entry["average"], reverse=True)[:2]:
+            bullets.append(f"{item['category']} : le signal moyen est {item['average']:.1f}/10.")
+    if len(bullets) > 4:
+        bullets = bullets[:4]
+
+    return {"headline": headline, "bullets": bullets}
+
+
+def build_technical_summary(technical_rows, recommendation=None):
+    """Return a short qualitative summary for technical reading."""
+    if not technical_rows:
+        return {"headline": "Analyse technique indisponible.", "bullets": []}
+
+    notes = []
+    for row in technical_rows:
+        try:
+            notes.append(float(row.get("Note (/10)", 0)))
+        except (TypeError, ValueError):
+            pass
+
+    if not notes:
+        return {"headline": "Analyse technique non exploitable.", "bullets": ["Aucun signal technique fiable n'a été calculé."]}
+
+    avg_note = sum(notes) / len(notes)
+    best = max(technical_rows, key=lambda row: float(row.get("Note (/10)", 0)) if row.get("Note (/10)") is not None else 0.0)
+    worst = min(technical_rows, key=lambda row: float(row.get("Note (/10)", 0)) if row.get("Note (/10)") is not None else 10.0)
+
+    if avg_note >= 7:
+        headline = "Tendance technique favorable : le momentum et la structure du prix sont alignés."
+    elif avg_note >= 5:
+        headline = "Structure technique acceptable, mais la confirmation reste nécessaire avant une entrée."
+    elif avg_note >= 4:
+        headline = "Technique fragile : quelques signes positifs existent, mais le risque de rebond incomplet demeure."
+    else:
+        headline = "Technique défavorable : le marché reste sous pression et l'entrée est peu crédible."
+
+    bullets = []
+    if best:
+        bullets.append(f"Point fort : {best.get('Indicateur', 'N/A')} affiche une lecture de {best.get('Note (/10)', 'N/A')}/10.")
+    if worst:
+        bullets.append(f"Point de vigilance : {worst.get('Indicateur', 'N/A')} est le plus faible avec {worst.get('Note (/10)', 'N/A')}/10.")
+
+    if recommendation:
+        bullets.append(f"Conclusion : {recommendation}")
+
+    if len(bullets) > 4:
+        bullets = bullets[:4]
+
+    return {"headline": headline, "bullets": bullets}
+
+
 def get_ticker_performance(symbol):
     """Return price performance for several horizons when available."""
     try:
@@ -94,6 +198,111 @@ def get_ticker_performance(symbol):
     }
 
 
+def get_regression_analysis(symbol):
+    """Analyse la tendance linéaire du cours sur tout l'historique disponible."""
+    invalid = {
+        "valid": False,
+        "source": "Yahoo Finance via yfinance",
+        "observations": 0,
+        "years": None,
+        "start_date": None,
+        "end_date": None,
+        "slope_per_year": None,
+        "r_squared": None,
+        "current_vs_line_pct": None,
+        "residual_std": None,
+        "current_leverage": None,
+        "current_sigma": None,
+        "trend": None,
+        "error": "Historique maximal indisponible.",
+        "interpretation": "Droite de régression indisponible.",
+    }
+    try:
+        history = yf.Ticker(symbol).history(period="max", auto_adjust=True)
+        if history is None or history.empty:
+            invalid["error"] = "yfinance n'a renvoyé aucune séance pour ce ticker."
+            return invalid
+
+        close = history["Close"]
+        if isinstance(close, pd.DataFrame):
+            close = close.iloc[:, 0]
+        close = pd.to_numeric(close, errors="coerce").dropna()
+        if len(close) < 30:
+            invalid["error"] = (
+                f"Historique insuffisant ({len(close)} séance(s), minimum 30)."
+            )
+            return invalid
+
+        dates = pd.DatetimeIndex(close.index)
+        values = close.to_numpy(dtype=float)
+        valid_rows = np.isfinite(values) & (values > 0) & ~dates.isna()
+        dates = dates[valid_rows]
+        values = values[valid_rows]
+        if len(values) < 30:
+            invalid["error"] = "Pas assez de cours de clôture valides."
+            return invalid
+
+        x = np.arange(len(values), dtype=float)
+        slope, intercept = np.polyfit(x, values, 1)
+        fitted = slope * x + intercept
+        residuals = values - fitted
+        degrees_of_freedom = len(values) - 2
+        residual_std = float(
+            np.sqrt(np.sum(residuals**2) / degrees_of_freedom)
+        )
+        total_variation = float(np.sum((values - values.mean()) ** 2))
+        r_squared = (
+            1.0 - float(np.sum(residuals**2)) / total_variation
+            if total_variation > 0
+            else 1.0
+        )
+        current_vs_line_pct = float((values[-1] - fitted[-1]) / fitted[-1] * 100)
+        x_mean = float(x.mean())
+        sum_x2 = float(np.sum((x - x_mean) ** 2))
+        current_leverage = (
+            1.0 / len(values)
+            + ((x[-1] - x_mean) ** 2 / sum_x2 if sum_x2 > 0 else 0.0)
+        )
+        residual_scale = residual_std * np.sqrt(max(0.0, 1.0 - current_leverage))
+        current_sigma = float(residuals[-1] / residual_scale) if residual_scale > 0 else 0.0
+        years = float((dates[-1] - dates[0]).days / 365.25)
+        slope_per_year = float(slope * 252)
+    except Exception as error:
+        invalid["error"] = f"Erreur yfinance/régression : {error}"
+        return invalid
+
+    if slope_per_year > 0:
+        trend = "haussière"
+    elif slope_per_year < 0:
+        trend = "baissière"
+    else:
+        trend = "neutre"
+
+    return {
+        "valid": True,
+        "source": "Yahoo Finance via yfinance",
+        "observations": len(values),
+        "years": max(years, 0.0),
+        "start_date": dates[0].date().isoformat(),
+        "end_date": dates[-1].date().isoformat(),
+        "slope_per_year": slope_per_year,
+        "r_squared": max(0.0, min(1.0, r_squared)),
+        "current_vs_line_pct": current_vs_line_pct,
+        "residual_std": residual_std,
+        "current_leverage": current_leverage,
+        "current_sigma": current_sigma,
+        "trend": trend,
+        "error": None,
+        "interpretation": (
+            f"Tendance {trend} sur {max(years, 0.0):.1f} an(s), "
+            f"avec une pente de {slope_per_year:.2f} par an. "
+            f"La droite explique {max(0.0, min(1.0, r_squared)):.0%} "
+            f"de la variation du cours. Le dernier cours est à "
+            f"{current_sigma:+.2f} sigma standardisé de la droite."
+        ),
+    }
+
+
 def analyze_ticker(ticker):
     """Run both existing services and return presentation-ready data."""
     symbol = ticker.strip().upper()
@@ -109,8 +318,13 @@ def analyze_ticker(ticker):
         market_cap,
         category_scores,
     ) = fundamental.run()
+    fundamental_summary = build_fundamental_summary(categories, category_scores)
     technical_df, technical_score, recommendation, price, fibonacci = (
         TechnicalAnalysis(symbol).run()
+    )
+    technical_summary = build_technical_summary(
+        technical_df.to_dict(orient="records") if technical_df is not None else [],
+        recommendation,
     )
 
     global_score = None
@@ -141,6 +355,8 @@ def analyze_ticker(ticker):
         },
         "interpretation": interpretation,
         "recommendation": recommendation,
+        "fundamental_summary": fundamental_summary,
+        "technical_summary": technical_summary,
         "fundamental": categories,
         "technical": technical_df.to_dict(orient="records")
         if technical_df is not None
@@ -152,6 +368,7 @@ def analyze_ticker(ticker):
             "analysis": analysis,
         },
         "performance": get_ticker_performance(symbol),
+        "regression": get_regression_analysis(symbol),
     }
 
 
