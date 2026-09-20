@@ -1,26 +1,41 @@
 import yfinance as yf
 import pandas as pd
-from colorama import Fore
-from Formatter import Formatter 
+
+from core.presentation import Presentation
 from AnalyseFondamentale.IndicatorInterpreter import IndicatorInterpreter
 from AnalyseFondamentale.Utils import Utils
 
+
 class FundamentalAnalysis:
     """
-    Classe réalisant une analyse fondamentale complète sur un ticker boursier.
-    Calcule différents indicateurs classés par catégories :
+    Réalise une analyse fondamentale complète sur un ticker boursier.
+
+    Les indicateurs sont regroupés en cinq catégories et notés sur 10 avec
+    des seuils et des poids adaptés au secteur :
     - Rentabilité
     - Liquidité
     - Solvabilité
     - Valorisation
     - Risque & Marché
+
+    Le score final est une moyenne pondérée normalisée sur 100. Les champs
+    absents restent neutres et ne sont jamais remplacés par une estimation
+    silencieuse.
     """
+
+    CATEGORIES = (
+        "Rentabilité",
+        "Liquidité",
+        "Solvabilité",
+        "Valorisation",
+        "Risque & Marché",
+    )
 
     def __init__(self, ticker_symbol):
         self.ticker_symbol = ticker_symbol
         self.ticker = yf.Ticker(ticker_symbol)
         self.info = self.ticker.info
-        self.formatter = Formatter()
+        self.formatter = Presentation()
         self.sector = self.info.get('sector', 'Général')
         self.interpreter = IndicatorInterpreter()
 
@@ -28,24 +43,13 @@ class FundamentalAnalysis:
         info = Utils.normalize_financial_info(self.info)
         f = self.formatter
         
-        # Dictionnaire pour stocker les données par catégorie
-        data_by_category = {
-            "Rentabilité": [],
-            "Liquidité": [],
-            "Solvabilité": [],
-            "Valorisation": [],
-            "Risque & Marché": []
-        }
+        data_by_category = {category: [] for category in self.CATEGORIES}
 
 ################### PRINT BRUT DATA #########################
         # Utils.print_yfinance_brut_data(self.info)
 #############################################################
 
-################### PRINT COMPANY DATA ###########################
-        Utils.print_company_info(info, self.ticker_symbol)
-##################################################################
-        
-        # Récupère les poids selon le secteur
+# Récupère les poids selon le secteur
         weights = Utils.get_sector_weights(self.sector)
 
         # ==================== RENTABILITÉ ====================
@@ -116,7 +120,7 @@ class FundamentalAnalysis:
         current_ratio = info.get("currentRatio")
         note, interp = self.interpreter.interpret_current_ratio(current_ratio, self.sector)
         Utils.add_indicator(data_by_category["Liquidité"], weights, "Current Ratio", 
-            f"{current_ratio:.2f}" if current_ratio is not None else "N/A", note, interp, 
+            f.format_ratio(current_ratio), note, interp,
             "Capacité à rembourser dettes court terme",
             "Liquidité générale")
 
@@ -124,7 +128,7 @@ class FundamentalAnalysis:
         quick_ratio = info.get("quickRatio")
         note, interp = self.interpreter.interpret_quick_ratio(quick_ratio, self.sector)
         Utils.add_indicator(data_by_category["Liquidité"], weights, "Quick Ratio", 
-            f"{quick_ratio:.2f}" if quick_ratio is not None else "N/A", note, interp, 
+            f.format_ratio(quick_ratio), note, interp,
             "Liquidité immédiate (sans stocks)",
             "Test de liquidité stricte")
 
@@ -136,7 +140,7 @@ class FundamentalAnalysis:
             ocf_ratio = op_cashflow / current_liabilities
             note, interp = self.interpreter.interpret_ocf_ratio(ocf_ratio, self.sector)
             Utils.add_indicator(data_by_category["Liquidité"], weights, "Operating Cash Flow", 
-                f"{ocf_ratio:.2f}", note, interp, 
+                f.format_ratio(ocf_ratio), note, interp,
                 "Cash opérationnel vs dettes court terme",
                 "Flux de trésorerie opérationnel")
 
@@ -146,7 +150,7 @@ class FundamentalAnalysis:
         debt = info.get("debtToEquity")
         note, interp = self.interpreter.interpret_debt_to_equity(debt, self.sector)
         Utils.add_indicator(data_by_category["Solvabilité"], weights, "Dette/Equity", 
-            f"{debt:.2f}" if debt is not None else "N/A", note, interp, 
+            f.format_ratio(debt), note, interp,
             "Endettement vs capitaux propres",
             "Levier financier")
 
@@ -157,7 +161,7 @@ class FundamentalAnalysis:
             debt_ebitda = total_debt / ebitda
             note, interp = self.interpreter.interpret_debt_ebitda(debt_ebitda, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Dette/EBITDA", 
-                f"{debt_ebitda:.2f}x", note, interp, 
+                f.format_ratio(debt_ebitda, "x"), note, interp,
                 "Années nécessaires pour rembourser la dette",
                 "Capacité de remboursement")
 
@@ -167,7 +171,7 @@ class FundamentalAnalysis:
             debt_to_assets = total_debt / total_assets
             note, interp = self.interpreter.interpret_debt_to_assets(debt_to_assets, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Dette/Actifs", 
-                f"{debt_to_assets*100:.1f}%", note, interp, 
+                f.format_pourcentage(debt_to_assets), note, interp,
                 "Part des actifs financée par la dette",
                 "Taux d'endettement global")
 
@@ -179,7 +183,7 @@ class FundamentalAnalysis:
                 and book_value > 0 and current_price > 0):
             note, interp = self.interpreter.interpret_book_value(book_value, current_price, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Valeur comptable", 
-                f"{book_value:.2f} {currency}".strip(), note, interp, 
+                f"{f.format_ratio(book_value)} {currency}".strip(), note, interp,
                 "Valeur nette par action",
                 "Matelas de sécurité")
 
@@ -192,7 +196,7 @@ class FundamentalAnalysis:
             interest_coverage = ebit / abs(interest_expense)
             note, interp = self.interpreter.interpret_interest_coverage(interest_coverage, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Couverture intérêts", 
-                f"{interest_coverage:.2f}x", note, interp, 
+                f.format_ratio(interest_coverage, "x"), note, interp,
                 "Capacité à payer les intérêts de la dette",
                 "Solvabilité à court terme")
 
@@ -204,7 +208,7 @@ class FundamentalAnalysis:
             equity_ratio = stockholder_equity / total_assets
             note, interp = self.interpreter.interpret_equity_ratio(equity_ratio, self.sector)
             Utils.add_indicator(data_by_category["Solvabilité"], weights, "Equity Ratio", 
-                f"{equity_ratio*100:.1f}%", note, interp, 
+                f.format_pourcentage(equity_ratio), note, interp,
                 "Part des actifs financée par capitaux propres",
                 "Indépendance financière")
 
@@ -245,7 +249,7 @@ class FundamentalAnalysis:
         trailing_pe = info.get("trailingPE")
         note, interp = self.interpreter.interpret_trailing_pe(trailing_pe, self.sector)
         Utils.add_indicator(data_by_category["Valorisation"], weights, "Trailing PE", 
-            f"{trailing_pe:.2f}" if trailing_pe is not None else "N/A", note, interp,
+            f.format_ratio(trailing_pe), note, interp,
             "Valorisation sur bénéfices passés",
             "PER sur 12 mois")
 
@@ -253,7 +257,7 @@ class FundamentalAnalysis:
         pb = info.get("priceToBook")
         note, interp = self.interpreter.interpret_price_to_book(pb, self.sector)
         Utils.add_indicator(data_by_category["Valorisation"], weights, "Price to Book", 
-            f"{pb:.2f}" if pb is not None else "N/A", note, interp, 
+            f.format_ratio(pb), note, interp,
             "Prix vs valeur comptable",
             "Valorisation des actifs")
 
@@ -261,7 +265,7 @@ class FundamentalAnalysis:
         peg = info.get("trailingPegRatio")
         note, interp = self.interpreter.interpret_peg_ratio(peg, self.sector)
         Utils.add_indicator(data_by_category["Valorisation"], weights, "PEG Ratio", 
-            f"{peg:.2f}" if peg is not None else "N/A", note, interp, 
+            f.format_ratio(peg), note, interp,
             "PER ajusté de la croissance",
             "Valorisation vs croissance")
 
@@ -288,7 +292,7 @@ class FundamentalAnalysis:
         beta = info.get("beta")
         note, interp = self.interpreter.interpret_beta(beta, self.sector)
         Utils.add_indicator(data_by_category["Risque & Marché"], weights, "Beta", 
-            f"{beta:.2f}" if beta is not None else "N/A", note, interp,
+            f.format_ratio(beta), note, interp,
             "Volatilité vs marché",
             "Risque systématique")
 
