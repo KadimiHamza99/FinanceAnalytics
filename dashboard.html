@@ -57,8 +57,10 @@
       padding: var(--pad) var(--pad-sm);
       display: flex; flex-direction: column; gap: var(--gap-sm);
       position: sticky; top: 0; align-self: start;
-      max-height: 100svh; overflow-y: auto;
+      height: 100vh; height: 100svh;
+      max-height: 100vh; max-height: 100svh; overflow-y: auto;
       overscroll-behavior: contain;
+      border-right: 1px solid rgba(255,255,255,.06);
     }
     .brand {
       display: flex; align-items: center; gap: 9px;
@@ -81,8 +83,13 @@
       font: inherit; font-size: var(--fs-md); cursor: pointer;
       transition: background .18s ease, color .18s ease;
       white-space: nowrap; min-height: 40px;
+      position: relative;
     }
     nav button.active, nav button:hover { color: #fff; background: #1c4169; }
+    nav button.active::before {
+      content: ''; position: absolute; left: 0; top: 9px; bottom: 9px;
+      width: 3px; border-radius: 3px; background: #55a0ff;
+    }
     nav button:focus-visible { outline: 2px solid #55a0ff; outline-offset: 2px; }
     .aside-note {
       border-top: 1px solid #294968;
@@ -138,6 +145,8 @@
     .primary:disabled { opacity: .65; cursor: wait; transform: none; }
     .secondary { background: var(--blue-soft); color: var(--blue); }
     .secondary:hover { background: #dfeeff; }
+    .secondary.danger { color: #ae4438; background: #fff1ef; }
+    .secondary.danger:hover { background: #fde2de; }
     .primary:focus-visible, .secondary:focus-visible { outline: 2px solid #55a0ff; outline-offset: 2px; }
     .actions { display: flex; flex-wrap: wrap; gap: var(--gap-sm); justify-content: flex-end; }
 
@@ -146,6 +155,22 @@
        ============================================================ */
     .section { margin-bottom: clamp(22px, 2.4vw, 36px); }
     .section:last-child { margin-bottom: 0; }
+    .results-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--gap);
+    }
+    .results-grid > .panel { margin: 0; }
+    #results-section, #details-section, #watch-section, #alerts-section {
+      scroll-margin-top: 108px;
+    }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--gap);
+    }
+    .portfolio-grid > .panel { margin: 0; }
+    #screener-section { margin-top: var(--gap); }
 
     .section-title {
       display: flex; align-items: center; gap: 12px;
@@ -167,6 +192,7 @@
       border-radius: var(--radius); box-shadow: var(--shadow);
       padding: var(--pad); margin-bottom: var(--gap);
       min-width: 0;
+      scroll-margin-top: 92px;
     }
     .panel:last-child { margin-bottom: 0; }
     .panel-head {
@@ -193,6 +219,7 @@
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
       gap: var(--gap);
       margin-bottom: clamp(20px, 2.2vw, 32px);
+      scroll-margin-top: 92px;
     }
     .card {
       position: relative; overflow: hidden;
@@ -273,6 +300,7 @@
       border-radius: var(--radius); box-shadow: var(--shadow);
       margin-bottom: var(--gap); overflow: hidden;
       transition: box-shadow .2s ease;
+      scroll-margin-top: 92px;
     }
     .company-card:hover { box-shadow: var(--shadow-lg); }
     .company-head {
@@ -313,20 +341,90 @@
     }
     .company-body {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+      grid-template-columns: minmax(0, 1fr);
     }
-    .company-col {
-      padding: var(--pad);
+    .detail-section {
+      min-width: 0; padding: var(--pad);
+    }
+    .detail-section + .detail-section { border-top: 1px solid var(--line); }
+    .detail-section-heading {
+      display: flex; align-items: flex-start; gap: 11px;
+      margin-bottom: 14px;
+    }
+    .detail-section-number {
+      display: grid; place-items: center; flex: 0 0 28px;
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--blue-soft); color: var(--blue);
+      font-size: var(--fs-xs); font-weight: 800;
+    }
+    .detail-section-heading h4 {
+      margin: 1px 0 3px; color: var(--ink);
+      font-size: var(--fs-md); font-weight: 750;
+    }
+    .detail-section-heading p {
+      margin: 0; color: var(--muted); font-size: var(--fs-sm);
+    }
+    .detail-section-content {
       display: flex; flex-direction: column; gap: var(--gap);
       min-width: 0;
     }
-    .company-col + .company-col { border-left: 1px solid var(--line); }
     @media (max-width: 720px) {
-      .company-col + .company-col { border-left: 0; border-top: 1px solid var(--line); }
+      .detail-section { padding: var(--pad-sm); }
     }
+    .detail-disclosure {
+      border: 1px solid var(--line); border-radius: var(--radius-sm);
+      background: #fff; overflow: hidden;
+    }
+    .detail-disclosure > summary {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 13px 15px; cursor: pointer;
+      color: var(--ink); font-size: var(--fs-sm); font-weight: 700;
+      list-style: none;
+    }
+    .detail-disclosure > summary::-webkit-details-marker { display: none; }
+    .detail-disclosure > summary::after {
+      content: "+"; color: var(--blue); font-size: 20px; line-height: 1;
+    }
+    .detail-disclosure[open] > summary::after { content: "−"; }
+    .detail-disclosure > summary:focus-visible {
+      outline: 2px solid var(--blue); outline-offset: -2px;
+    }
+    .detail-disclosure-content {
+      padding: 0 15px 14px; border-top: 1px solid var(--line);
+    }
+    .detail-disclosure-content .table-wrap { margin-top: 8px; }
+    .history-disclosure {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--surface); overflow: hidden;
+    }
+    .history-disclosure > summary {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: var(--pad-sm) var(--pad);
+      cursor: pointer; list-style: none;
+    }
+    .history-disclosure > summary::-webkit-details-marker { display: none; }
+    .history-disclosure > summary:focus-visible {
+      outline: 2px solid var(--blue); outline-offset: -2px;
+    }
+    .history-summary-title {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--ink); font-size: var(--fs-sm); font-weight: 750;
+    }
+    .history-summary-hint { color: var(--muted); font-size: var(--fs-xs); }
+    .history-disclosure > summary::after {
+      content: "Afficher"; color: var(--blue); font-size: var(--fs-xs);
+      font-weight: 700; white-space: nowrap;
+    }
+    .history-disclosure[open] > summary::after { content: "Masquer"; }
+    .history-disclosure-content {
+      display: flex; flex-direction: column; gap: var(--gap);
+      padding: var(--pad); border-top: 1px solid var(--line);
+    }
+    .history-disclosure-content .mini-panel { min-width: 0; }
     .mini-panel h4 {
       margin: 0 0 12px; font-size: var(--fs-xs); font-weight: 700;
       color: var(--muted); text-transform: uppercase; letter-spacing: .08em;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
 
     /* ============================================================
@@ -370,11 +468,48 @@
     .summary-box {
       background: linear-gradient(180deg, #f8fbff, #ffffff);
     }
+    .summary-scoreline {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding-bottom: 12px; margin-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .summary-scoreline strong { font-size: var(--fs-xl); line-height: 1; }
+    .summary-scoreline span { color: var(--muted); font-size: var(--fs-sm); }
+    .summary-kpis {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px; margin-bottom: 12px;
+    }
+    .summary-kpi {
+      background: #f7f9fc; border: 1px solid var(--line);
+      border-radius: var(--radius-sm); padding: 8px; min-width: 0;
+    }
+    .summary-kpi small {
+      display: block; color: var(--muted); font-size: var(--fs-xs);
+      margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .summary-kpi strong { font-size: var(--fs-md); }
+    .summary-callout {
+      border-left: 3px solid var(--blue); background: var(--blue-soft);
+      padding: 9px 11px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: var(--fs-sm); line-height: 1.45; margin-top: 12px;
+    }
     .summary-list {
       margin: 0; padding-left: 1.2rem; color: var(--ink);
       display: grid; gap: 6px; line-height: 1.55;
       font-size: var(--fs-sm);
     }
+    .history-chart { margin: 0 0 14px; }
+    .history-chart svg { display: block; width: 100%; height: auto; }
+    .history-legend {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      color: var(--muted); font-size: var(--fs-xs);
+    }
+    .history-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .history-legend i { width: 9px; height: 9px; border-radius: 50%; }
+    .history-delta { font-size: var(--fs-xs); font-weight: 700; white-space: nowrap; }
+    .history-delta.positive { color: var(--green); }
+    .history-delta.negative { color: var(--red); }
+    .history-delta.neutral { color: var(--muted); }
 
     /* ============================================================
        9. TABLES (desktop) / CARTES (mobile)
@@ -416,6 +551,22 @@
     }
     .score-pill.score-high {
       background: #e8f7f1; color: #147553; border-color: rgba(20, 117, 83, 0.18);
+    }
+    .reliability-badge {
+      display: inline-block; margin-left: 6px; padding: .25em .5em;
+      border-radius: 12px; font-size: var(--fs-xs); font-weight: 750;
+      cursor: help; vertical-align: middle;
+    }
+    .reliability-badge.reliable {
+      color: #147553; background: #e8f7f1;
+      border: 1px solid rgba(20, 117, 83, 0.18);
+    }
+    .reliability-badge.unreliable {
+      color: #b42318; background: #fde9e9;
+      border: 1px solid rgba(180, 35, 24, 0.2);
+    }
+    .reliability-badge.unavailable {
+      color: #718096; background: #f1f4f8; border: 1px solid #dce4ee;
     }
 
     /* ============================================================
@@ -527,6 +678,17 @@
        12. ÉTATS
        ============================================================ */
     .empty { text-align: center; color: var(--muted); padding: clamp(28px, 5vw, 46px) 10px; }
+    .section-intro {
+      display: flex; align-items: end; justify-content: space-between;
+      gap: var(--gap); margin-bottom: var(--gap);
+    }
+    .section-intro .section-title { margin-bottom: 0; }
+    .section-hint { color: var(--muted); font-size: var(--fs-sm); margin: 0; }
+    .data-legend {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      color: var(--muted); font-size: var(--fs-xs); margin-top: -8px;
+    }
+    .data-legend .reliability-badge { margin-left: 0; }
     .error   { background: #fff4f2; color: #ae4438; padding: var(--pad-sm); border-radius: var(--radius-sm); margin-bottom: var(--gap); overflow-wrap: anywhere; }
     .success { background: #edfdf7; color: #127d5d; padding: var(--pad-sm); border-radius: var(--radius-sm); margin-bottom: var(--gap); }
     .tag {
@@ -548,7 +710,7 @@
       .shell { grid-template-columns: minmax(0, 1fr); }
       aside {
         position: sticky; top: 0; z-index: 40;
-        max-height: none; overflow: visible;
+        height: auto; max-height: none; overflow: visible;
         flex-direction: row; align-items: center; flex-wrap: wrap;
         gap: var(--gap-sm);
         padding: 10px clamp(12px, 3vw, 20px);
@@ -564,15 +726,22 @@
       nav button { width: auto; margin: 0; flex: 0 0 auto; }
       .nav-label, .aside-note { display: none; }
     }
+    @media (max-width: 1050px) {
+      .results-grid { grid-template-columns: minmax(0, 1fr); }
+    }
     @media (max-width: 820px) {
       .overview { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+      .portfolio-grid { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 700px) {
+      .search { position: static; }
       .search-row { align-items: stretch; }
       .input-fill { flex: 1 1 100%; }
       .search-row .primary { flex: 1 1 100%; }
       .actions { justify-content: stretch; }
       .actions .secondary { flex: 1 1 calc(50% - var(--gap-sm)); }
+      .summary-kpis { grid-template-columns: repeat(3, minmax(80px, 1fr)); }
+      .section-intro { align-items: flex-start; flex-direction: column; }
 
       .table-wrap { overflow-x: visible; margin-inline: 0; padding-inline: 0; }
       .table-wrap table, .table-wrap thead, .table-wrap tbody,
@@ -636,9 +805,11 @@
       <div class="brand"><span class="brand-mark">↗</span> FinanceAnalytics</div>
       <div class="nav-label">Navigation</div>
       <nav>
-        <button class="active">◉&nbsp; Vue d'ensemble</button>
-        <button>⌁&nbsp; Liste de suivi</button>
-        <button>◌&nbsp; Alertes</button>
+        <button class="active" data-target="overview">◉&nbsp; Vue d'ensemble</button>
+        <button data-target="results-section">▦&nbsp; Synthèse</button>
+        <button data-target="details-section">⌕&nbsp; Analyses détaillées</button>
+        <button data-target="watch-section">⌁&nbsp; Liste de suivi</button>
+        <button data-target="alerts-section">◌&nbsp; Alertes</button>
       </nav>
       <div class="aside-note">Analyse fondamentale 75%<br>Analyse technique 25%<br><br><strong>Source</strong><br>Yahoo Finance · données indicatives</div>
     </aside>
@@ -646,8 +817,8 @@
     <main>
       <div class="topbar">
         <div>
-          <h1>Vue d'ensemble</h1>
-          <p class="subtitle">Votre cockpit d'analyse boursière</p>
+          <h1>Tableau de bord</h1>
+          <p class="subtitle">Analysez vos titres, comparez les signaux et suivez leur évolution.</p>
         </div>
         <div class="status"><span class="dot"></span> Service local connecté</div>
       </div>
@@ -726,6 +897,19 @@
     };
     const formatPct = (value) => value == null ? "N/A" : `${Number(value).toFixed(1)}%`;
     const formatText = (value) => stripAnsi(value ?? "");
+    function reliabilityBadge(quality, technical = true) {
+      if (!technical) {
+        return '<span class="reliability-badge unavailable" title="Les fondamentaux sont fournis par Yahoo Finance ; Alpha Vantage ne les compare pas ici." aria-label="Comparaison indisponible">—</span>';
+      }
+      if (!quality || !quality.available) {
+        return '<span class="reliability-badge unavailable" title="Comparaison Yahoo Finance / Alpha Vantage indisponible." aria-label="Fiabilité indisponible">?</span>';
+      }
+      const difference = Number(quality.difference_pct).toFixed(3);
+      if (quality.reliable) {
+        return `<span class="reliability-badge reliable" title="Cours Yahoo/Alpha Vantage concordants le ${quality.date} (écart ${difference} %)." aria-label="Indicateur confirmé par deux sources">✓</span>`;
+      }
+      return `<span class="reliability-badge unreliable" title="Écart Yahoo/Alpha Vantage de ${difference} % le ${quality.date}." aria-label="Écart entre les sources">!</span>`;
+    }
     const safeTicker = (value) => (value || "").trim().toUpperCase();
     const fibonacciHelp = {
       "Support": "Niveau où la pression acheteuse peut freiner ou arrêter une baisse.",
@@ -773,6 +957,144 @@
       const v = Math.max(0, Math.min(100, Number(score) || 0));
       const color = v >= 70 ? 'var(--green)' : v >= 50 ? 'var(--orange)' : 'var(--red)';
       return `<div class="score-ring" style="--v:${v};--ring-color:${color};--ring-size:${size}px" title="${v.toFixed(1)}/100"><span>${v.toFixed(0)}</span></div>`;
+    }
+    function historyDate(value) {
+      return new Date(value).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+    }
+    function historyValue(snapshot, field) {
+      if (field === "price") return snapshot.price;
+      return snapshot.scores?.[field] ?? null;
+    }
+    function historyDelta(current, previous, field, currency) {
+      const currentValue = historyValue(current, field);
+      const previousValue = historyValue(previous, field);
+      if (currentValue == null || previousValue == null) return "";
+      const difference = Number(currentValue) - Number(previousValue);
+      if (!Number.isFinite(difference)) return "";
+      const positive = difference > 0;
+      const negative = difference < 0;
+      const amount = field === "price"
+        ? `${difference > 0 ? "+" : ""}${difference.toFixed(2)} ${currency || ""}`
+        : `${difference > 0 ? "+" : ""}${difference.toFixed(1)} pts`;
+      const className = positive ? "positive" : negative ? "negative" : "neutral";
+      return `<span class="history-delta ${className}">${amount}</span>`;
+    }
+    function scoreHistoryChart(history, ticker) {
+      const points = history.slice(-50);
+      const width = 720, height = 220, left = 38, right = 14, top = 16, bottom = 32;
+      const plotWidth = width - left - right, plotHeight = height - top - bottom;
+      const x = (index) => left + (points.length < 2 ? plotWidth / 2 : index * plotWidth / (points.length - 1));
+      const y = (value) => top + (100 - Number(value)) * plotHeight / 100;
+      const series = [
+        ["global", "Global", "#1769e0"],
+        ["fundamental", "Fondamental", "#1d9b72"],
+        ["technical", "Technique", "#d9822b"],
+      ];
+      const grid = [0, 50, 100].map((value) => {
+        const yPos = y(value);
+        return `<line x1="${left}" y1="${yPos}" x2="${width - right}" y2="${yPos}" stroke="#e5ebf3" />
+          <text x="${left - 8}" y="${yPos + 4}" text-anchor="end" fill="#718096" font-size="11">${value}</text>`;
+      }).join("");
+      const lines = series.map(([key, label, color]) => {
+        const values = points.map((item, index) => {
+          const value = item.scores?.[key];
+          return value == null || !Number.isFinite(Number(value))
+            ? null : `${x(index)},${y(Number(value))}`;
+        }).filter(Boolean);
+        if (!values.length) return "";
+        const circles = points.map((item, index) => {
+          const value = item.scores?.[key];
+          return value == null || !Number.isFinite(Number(value)) ? ""
+            : `<circle cx="${x(index)}" cy="${y(Number(value))}" r="3" fill="${color}" />`;
+        }).join("");
+        return `<polyline points="${values.join(" ")}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />${circles}`;
+      }).join("");
+      const dates = points.length ? [
+        `<text x="${left}" y="${height - 7}" fill="#718096" font-size="11">${historyDate(points[0].analyzed_at)}</text>`,
+        points.length > 1 ? `<text x="${width - right}" y="${height - 7}" text-anchor="end" fill="#718096" font-size="11">${historyDate(points[points.length - 1].analyzed_at)}</text>` : "",
+      ].join("") : "";
+      const legend = series.map(([, label, color]) =>
+        `<span><i style="background:${color}"></i>${label}</span>`
+      ).join("");
+      return `<div class="history-chart">
+        <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Évolution des scores de ${ticker}">
+          <title>Évolution des scores de ${ticker}</title>${grid}${lines}${dates}
+        </svg><div class="history-legend">${legend}</div>
+      </div>`;
+    }
+    function fundamentalMetricMap(snapshot) {
+      const metrics = new Map();
+      for (const [category, rows] of Object.entries(snapshot.fundamental || {})) {
+        for (const row of rows || []) {
+          const label = String(row.Indicateur || "").trim();
+          const value = parseComparableValue(row.Valeur);
+          if (label && value != null) metrics.set(`${category} · ${label}`, { value, display: row.Valeur });
+        }
+      }
+      return metrics;
+    }
+    function changedFundamentalMetrics(current, previous) {
+      const currentMetrics = fundamentalMetricMap(current);
+      const previousMetrics = fundamentalMetricMap(previous);
+      const rows = [];
+      for (const [label, metric] of currentMetrics) {
+        const oldMetric = previousMetrics.get(label);
+        if (!oldMetric || Math.abs(metric.value - oldMetric.value) < 0.000001) continue;
+        rows.push(`<tr>
+          <td data-label="Indicateur">${formatText(label)}</td>
+          <td data-label="Précédent">${formatText(oldMetric.display)}</td>
+          <td data-label="Actuel">${formatText(metric.display)}</td>
+        </tr>`);
+      }
+      if (!rows.length) return '<p class="subtitle">Aucun indicateur fondamental chiffré n’a changé depuis la dernière analyse.</p>';
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>Indicateur modifié</th><th>Précédent</th><th>Actuel</th></tr></thead>
+        <tbody>${rows.slice(0, 10).join("")}</tbody>
+      </table></div>`;
+    }
+    function renderHistoryPanel(result) {
+      const history = result.history || [];
+      const ticker = formatText(result.ticker);
+      if (!history.length) {
+        return `<div class="mini-panel"><h4>Historique des analyses</h4><p class="subtitle">Aucun relevé enregistré pour le moment.</p></div>`;
+      }
+      const latest = history[history.length - 1];
+      const previous = history.length > 1 ? history[history.length - 2] : null;
+      const entries = history.slice(-10).reverse().map((item) => {
+        const prior = history[history.indexOf(item) - 1];
+        const scores = item.scores || {};
+        return `<tr>
+          <td data-label="Date">${historyDate(item.analyzed_at)}</td>
+          <td data-label="Score global">${formatScore(scores.global)} ${prior ? historyDelta(item, prior, "global", result.currency) : ""}</td>
+          <td data-label="Fondamental">${formatScore(scores.fundamental)}</td>
+          <td data-label="Technique">${formatScore(scores.technical)}</td>
+          <td data-label="Cours">${item.price == null ? "N/A" : `${Number(item.price).toFixed(2)} ${formatText(result.currency || "")}`}
+            ${prior ? historyDelta(item, prior, "price", result.currency) : ""}</td>
+        </tr>`;
+      }).join("");
+      return `<details class="history-disclosure">
+        <summary>
+          <span class="history-summary-title">Historique des analyses <span class="tag">${history.length} relevé(s)</span></span>
+          <span class="history-summary-hint">Scores, cours et indicateurs</span>
+        </summary>
+        <div class="history-disclosure-content">
+          ${scoreHistoryChart(history, ticker)}
+          ${previous ? `<div class="mini-panel"><h4>Évolution depuis la dernière analyse</h4><p class="subtitle" style="margin:0">
+            Global ${historyDelta(latest, previous, "global", result.currency) || "inchangé"} ·
+            Fondamental ${historyDelta(latest, previous, "fundamental", result.currency) || "inchangé"} ·
+            Technique ${historyDelta(latest, previous, "technical", result.currency) || "inchangé"} ·
+            Cours ${historyDelta(latest, previous, "price", result.currency) || "inchangé"}
+          </p></div>` : '<p class="subtitle">Cette première analyse est enregistrée. Les suivantes apparaîtront ici.</p>'}
+          ${previous ? `<div class="mini-panel"><h4>Indicateurs fondamentaux modifiés</h4>${changedFundamentalMetrics(latest, previous)}</div>` : ""}
+          <div class="mini-panel">
+            <h4>Relevés récents <span class="tag">10 derniers</span></h4>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Date</th><th>Score global</th><th>Fondamental</th><th>Technique</th><th>Cours</th></tr></thead>
+              <tbody>${entries}</tbody>
+            </table></div>
+          </div>
+        </div>
+      </details>`;
     }
     function panelHead(icon, title, extra = '') {
       return `<div class="panel-head"><h2><span class="panel-icon">${icon}</span>${title}</h2>${extra}</div>`;
@@ -920,6 +1242,13 @@
         const marketCap = Number(item.market_cap || 0);
         return score >= minScore && marketCap >= minMarketCap;
       });
+      document.querySelectorAll("nav button[data-target]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll("nav button").forEach(item => item.classList.remove("active"));
+          button.classList.add("active");
+          document.getElementById(button.dataset.target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
       if (!matches.length) return '<div class="empty">Aucun titre ne correspond aux filtres du scanner.</div>';
       return `<div class="table-wrap"><table>
         <thead><tr><th>Ticker</th><th>Secteur</th><th>Score</th><th>Prix</th><th>Cap. boursière</th></tr></thead>
@@ -940,6 +1269,7 @@
       const fa = fib.analysis || {};
       const perf = result.performance || {};
       const regression = result.regression || {};
+      const quality = result.data_quality || {};
       const summary = result.fundamental_summary || { headline: "Aucun résumé fondamental disponible.", bullets: [] };
       const techSummary = result.technical_summary || { headline: "Aucune lecture technique disponible.", bullets: [] };
 
@@ -948,7 +1278,7 @@
           const note = Number(row["Note (/10)"] ?? 0);
           return `<tr>
             <td data-label="Catégorie">${category}</td>
-            <td data-label="Indicateur">${row.Indicateur || "—"}</td>
+            <td data-label="Indicateur">${row.Indicateur || "—"}${reliabilityBadge(quality, false)}</td>
             <td data-label="Valeur">${row.Valeur || "—"}</td>
             <td data-label="Note"><span class="score-pill ${scoreBadgeClass(note)}">${note}/10</span></td>
           </tr>`;
@@ -957,12 +1287,15 @@
       const technicalRows = (result.technical || []).map(row => {
         const note = Number(row["Note (/10)"] ?? 0);
         return `<tr>
-          <td data-label="Indicateur">${row.Indicateur || "—"}</td>
+          <td data-label="Indicateur">${row.Indicateur || "—"}${reliabilityBadge(quality)}</td>
           <td data-label="Valeur">${formatValue(row.Valeur)}</td>
           <td data-label="Note"><span class="score-pill ${scoreBadgeClass(note)}">${note}/10</span></td>
           <td data-label="Lecture">${row.Interprétation || "—"}</td>
         </tr>`;
       }).join("");
+      const fundamentalCount = Object.values(result.fundamental || {})
+        .reduce((count, rows) => count + rows.length, 0);
+      const technicalCount = (result.technical || []).length;
 
       const perfChips = ["1M", "3M", "1Y"].map((label) => {
         const v = perf[label];
@@ -998,10 +1331,32 @@
       const regressionExplanation = regressionInterpretation(regression);
 
       const sectorBadge = result.sector ? `<span class="sector-badge">${result.sector}</span>` : '';
+      const qualityBadge = quality.available
+        ? reliabilityBadge(quality)
+        : '<span class="reliability-badge unavailable" title="La comparaison Yahoo Finance / Alpha Vantage est indisponible.">? Fiabilité indisponible</span>';
 
       const summaryBullets = (summary.bullets || []).slice(0, 4).map((bullet) => `<li>${formatText(bullet)}</li>`).join("");
       const techSummaryBullets = (techSummary.bullets || []).slice(0, 4).map((bullet) => `<li>${formatText(bullet)}</li>`).join("");
       const globalInterpretation = formatText(result.interpretation || "Analyse globale non disponible.");
+      const scoreValue = (value) => value == null ? "N/A" : `${Number(value).toFixed(1)}/100`;
+      const summaryKpis = (items) => `<div class="summary-kpis">${items.map(([label, value]) =>
+        `<div class="summary-kpi"><small>${label}</small><strong>${value}</strong></div>`
+      ).join("")}</div>`;
+      const fundamentalKpis = summaryKpis([
+        ["Score", scoreValue(s.fundamental)],
+        ["Secteur", formatText(result.sector || "N/A")],
+        ["Devise", formatText(result.currency || "N/A")],
+      ]);
+      const technicalKpis = summaryKpis([
+        ["Score", scoreValue(s.technical)],
+        ["Cours", result.price == null ? "N/A" : formatValue(result.price)],
+        ["Tendance", regressionTrend.replace("Tendance ", "")],
+      ]);
+      const detailSectionHeading = (number, title, description) => `
+        <header class="detail-section-heading">
+          <span class="detail-section-number">${number}</span>
+          <div><h4>${title}</h4><p>${description}</p></div>
+        </header>`;
 
       return `<article class="company-card">
         <header class="company-head">
@@ -1009,6 +1364,7 @@
             <h3>${formatText(result.company || result.ticker)}</h3>
             <span class="ticker-badge">${result.ticker}</span>
             ${sectorBadge}
+            ${qualityBadge}
           </div>
           <div class="company-actions">
             <div class="score-cluster">
@@ -1017,52 +1373,95 @@
               <div class="score-item">${scoreRing(s.technical)}<small>Tech.</small></div>
             </div>
             <button class="secondary" data-ticker="${result.ticker}" data-company="${result.company || result.ticker}" style="height:36px;padding:0 14px;">+ Veille</button>
+            <button class="secondary danger" data-purge-history="${result.ticker}" type="button" style="height:36px;padding:0 14px;">Purger l'historique</button>
           </div>
         </header>
         <div class="company-body">
-          <div class="company-col">
-            <div class="mini-panel summary-box">
-              <h4>Résumé fondamental</h4>
-              <p class="subtitle" style="margin:0 0 8px"><strong>${formatText(summary.headline || "Aucun résumé fondamental disponible.")}</strong></p>
-              ${summaryBullets ? `<ul class="summary-list">${summaryBullets}</ul>` : '<p class="subtitle">Aucune lecture qualitative disponible.</p>'}
-              <p class="subtitle" style="margin-top:12px">${globalInterpretation}</p>
+          <section class="detail-section">
+            ${detailSectionHeading("01", "Lecture rapide", "Les points essentiels des analyses fondamentale et technique.")}
+            <div class="detail-section-content">
+              <div class="mini-panel summary-box">
+                <h4>Fondamentaux <span class="tag">Qualité entreprise</span></h4>
+                <div class="summary-scoreline"><span>Score fondamental</span><strong>${scoreValue(s.fundamental)}</strong></div>
+                ${fundamentalKpis}
+                <p class="subtitle" style="margin:0 0 8px"><strong>${formatText(summary.headline || "Aucun résumé fondamental disponible.")}</strong></p>
+                ${summaryBullets ? `<ul class="summary-list">${summaryBullets}</ul>` : '<p class="subtitle">Aucune lecture qualitative disponible.</p>'}
+                <div class="summary-callout">${globalInterpretation}</div>
+              </div>
+              <div class="mini-panel summary-box">
+                <h4>Technique <span class="tag">Timing</span></h4>
+                <div class="summary-scoreline"><span>Force du signal</span><strong>${scoreValue(s.technical)}</strong></div>
+                ${technicalKpis}
+                <p class="subtitle" style="margin:0 0 8px"><strong>${formatText(techSummary.headline || "Aucune lecture technique disponible.")}</strong></p>
+                ${techSummaryBullets ? `<ul class="summary-list">${techSummaryBullets}</ul>` : '<p class="subtitle">Aucune lecture technique disponible.</p>'}
+                <div class="summary-callout">${formatText(result.recommendation || "Recommandation non disponible.")}</div>
+              </div>
             </div>
-            <div class="mini-panel summary-box">
-              <h4>Résumé technique</h4>
-              <p class="subtitle" style="margin:0 0 8px"><strong>${formatText(techSummary.headline || "Aucune lecture technique disponible.")}</strong></p>
-              ${techSummaryBullets ? `<ul class="summary-list">${techSummaryBullets}</ul>` : '<p class="subtitle">Aucune lecture technique disponible.</p>'}
+          </section>
+          <section class="detail-section">
+            ${detailSectionHeading("02", "Évolution", "Performance du cours et comparaison avec vos analyses précédentes.")}
+            <div class="detail-section-content">
+              <div class="mini-panel">
+                <h4>Performance du cours</h4>
+                <div class="perf-row">${perfChips}</div>
+              </div>
+            ${renderHistoryPanel(result)}
             </div>
-            <div class="mini-panel">
-              <h4>Performance</h4>
-              <div class="perf-row">${perfChips}</div>
+          </section>
+          <section class="detail-section">
+            ${detailSectionHeading("03", "Détail fondamental", "Consultez les valeurs et notes utilisées pour évaluer l’entreprise.")}
+            <div class="detail-section-content">
+              <details class="detail-disclosure">
+                <summary>Indicateurs fondamentaux <span class="tag">${fundamentalCount} indicateur(s)</span></summary>
+                <div class="detail-disclosure-content">
+                  <p class="subtitle" style="margin:10px 0 0">
+                    Les données fondamentales proviennent de Yahoo Finance.
+                    <span class="reliability-badge unavailable" title="Les fondamentaux ne sont pas comparés avec Alpha Vantage.">Yahoo uniquement</span>
+                  </p>
+                  <div class="table-wrap"><table>
+                    <thead><tr><th>Catégorie</th><th>Indicateur</th><th>Valeur</th><th>Note</th></tr></thead>
+                    <tbody>${fundamentalRows || '<tr><td colspan="4">Aucune donnée disponible</td></tr>'}</tbody>
+                  </table></div>
+                </div>
+              </details>
             </div>
-            <div class="mini-panel">
-              <h4>Indicateurs fondamentaux</h4>
-              <div class="table-wrap"><table>
-                <thead><tr><th>Catégorie</th><th>Indicateur</th><th>Valeur</th><th>Note</th></tr></thead>
-                <tbody>${fundamentalRows || '<tr><td colspan="4">Aucune donnée disponible</td></tr>'}</tbody>
-              </table></div>
+          </section>
+          <section class="detail-section">
+            ${detailSectionHeading("04", "Analyse technique", "Indicateurs de marché, niveaux clés et scénario de prix.")}
+            <div class="detail-section-content">
+              <details class="detail-disclosure">
+                <summary>Indicateurs techniques <span class="tag">${technicalCount} indicateur(s)</span></summary>
+                <div class="detail-disclosure-content">
+                  <p class="subtitle" style="margin:10px 0 0">Fiabilité des cours : ${reliabilityBadge(quality)}</p>
+                  <div class="table-wrap"><table>
+                    <thead><tr><th>Indicateur</th><th>Valeur</th><th>Note</th><th>Lecture</th></tr></thead>
+                    <tbody>${technicalRows || '<tr><td colspan="4">Aucune donnée disponible</td></tr>'}</tbody>
+                  </table></div>
+                </div>
+              </details>
+              <div class="mini-panel">
+                <h4>Zones clés & Fibonacci</h4>
+                <div class="fib-grid">${zones}</div>
+                <p class="subtitle" style="margin-top:14px">${formatText(fa.interpretation || "Analyse Fibonacci non disponible.")}</p>
+              </div>
             </div>
-          </div>
-          <div class="company-col">
-            <div class="mini-panel">
-              <h4>Lecture technique</h4>
-              <div class="table-wrap"><table>
-                <thead><tr><th>Indicateur</th><th>Valeur</th><th>Note</th><th>Lecture</th></tr></thead>
-                <tbody>${technicalRows || '<tr><td colspan="4">Aucune donnée disponible</td></tr>'}</tbody>
-              </table></div>
+          </section>
+          <section class="detail-section">
+            ${detailSectionHeading("05", "Tendance long terme", "Lecture statistique de l’historique maximal disponible.")}
+            <div class="detail-section-content">
+              <details class="detail-disclosure">
+                <summary>Droite de régression <span class="tag">${regressionTrend}</span></summary>
+                <div class="detail-disclosure-content">
+                  <p class="subtitle" style="margin:10px 0 12px">
+                    ${regression.start_date && regression.end_date ? `Du ${regression.start_date} au ${regression.end_date}` : ""}
+                    ${regression.observations ? ` · ${regression.observations} séances` : ""}
+                  </p>
+                  <div class="fib-grid">${regressionMetrics}</div>
+                  <p class="regression-note">${formatText(regressionExplanation)}<br><small>${formatText(regression.source || "Source indisponible")}</small></p>
+                </div>
+              </details>
             </div>
-            <div class="mini-panel">
-              <h4>Zones clés & Fibonacci</h4>
-              <div class="fib-grid">${zones}</div>
-              <p class="subtitle" style="margin-top:14px">${formatText(fa.interpretation || "Analyse Fibonacci non disponible.")}</p>
-            </div>
-            <div class="mini-panel">
-              <h4>Droite de régression · historique maximal</h4>
-              <div class="fib-grid">${regressionMetrics}</div>
-              <p class="regression-note"><strong>${regressionTrend}</strong>${regression.start_date && regression.end_date ? ` · du ${regression.start_date} au ${regression.end_date}` : ""}${regression.observations ? ` · ${regression.observations} séances` : ""}<br>${formatText(regressionExplanation)}<br><small>${formatText(regression.source || "Source indisponible")}</small></p>
-            </div>
-          </div>
+          </section>
         </div>
       </article>`;
     }
@@ -1147,7 +1546,7 @@
         </div>`;
 
       const alertes = `
-        <div class="panel">
+        <div class="panel" id="alerts-section">
           ${panelHead('🔔', 'Alertes automatiques')}
           <div class="filter-grid">
             <div class="field"><label for="alertThreshold">Score de déclenchement</label><input id="alertThreshold" type="number" min="0" max="100" value="75"></div>
@@ -1157,17 +1556,35 @@
         </div>`;
 
       $("#content").innerHTML = `
-        <section class="section">${comparison}</section>
-        <section class="section">${sector}</section>
-        <section class="section">${screener}</section>
-        <section class="section">
-          <h2 class="section-title">Analyse détaillée <span class="count">${state.results.length} titre(s)</span></h2>
+        <section class="section results-section" id="results-section">
+          <div class="section-intro">
+            <h2 class="section-title">Synthèse des titres <span class="count">${state.results.length} valeur(s)</span></h2>
+            <p class="section-hint">Comparaison, répartition sectorielle et sélection rapide.</p>
+          </div>
+          <div class="results-grid">${comparison}${sector}</div>
+          <div id="screener-section">${screener}</div>
+        </section>
+        <section class="section" id="details-section">
+          <div class="section-intro">
+            <h2 class="section-title">Analyse détaillée <span class="count">${state.results.length} titre(s)</span></h2>
+            <p class="section-hint">Survolez les indicateurs pour voir leur définition.</p>
+          </div>
+          <div class="data-legend">
+            Fiabilité des cours :
+            <span class="reliability-badge reliable">✓ Confirmé</span>
+            <span class="reliability-badge unreliable">! Écart</span>
+            <span class="reliability-badge unavailable">? Indisponible</span>
+          </div>
           ${details}
         </section>
-        <section class="section">
-          <h2 class="section-title">Veille & Alertes</h2>
-          <div class="dual-panel">${veille}${alertes}</div>
+        <section class="section" id="watch-section">
+          <div class="section-intro">
+            <h2 class="section-title">Suivi du portefeuille</h2>
+            <p class="section-hint">Gérez votre veille et vos seuils d'alerte.</p>
+          </div>
+          <div class="portfolio-grid">${veille}${alertes}</div>
         </section>`;
+      observeNavigationTargets();
 
       /* --- Événements --- */
       $("#content").querySelectorAll("[data-ticker]").forEach((button) => {
@@ -1182,6 +1599,35 @@
           button.disabled = true;
           const wl = document.getElementById("watchlist-content");
           if (wl) wl.innerHTML = renderWatchlist();
+        });
+      });
+
+      $("#content").querySelectorAll("[data-purge-history]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const ticker = button.dataset.purgeHistory;
+          if (!ticker || !window.confirm(
+            `Supprimer définitivement tout l'historique enregistré pour ${ticker} ?`
+          )) return;
+
+          button.disabled = true;
+          try {
+            const response = await fetch("/api/history/purge", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ticker }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "La purge a échoué.");
+
+            state.results = state.results.map((item) =>
+              item.ticker === ticker ? { ...item, history: [] } : item
+            );
+            render(state.results);
+            $("#message").innerHTML = `<div class="success">Historique de ${formatText(ticker)} supprimé (${data.deleted} relevé(s)).</div>`;
+          } catch (error) {
+            button.disabled = false;
+            $("#message").innerHTML = `<div class="error">${formatText(error.message)}</div>`;
+          }
         });
       });
 
@@ -1250,6 +1696,55 @@
     $("#printPdf").addEventListener("click", () => window.print());
     $("#tickers").addEventListener("keydown", e => { if (e.key === "Enter") analyze(); });
     $("#compareTicker").addEventListener("keydown", e => { if (e.key === "Enter") analyze(); });
+    $("nav").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-target]");
+      if (!button) return;
+      document.querySelectorAll("nav [data-target]").forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("active", active);
+        if (active) item.setAttribute("aria-current", "location");
+        else item.removeAttribute("aria-current");
+      });
+      document.getElementById(button.dataset.target)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+    let sectionObserver = null;
+    function observeNavigationTargets() {
+      sectionObserver?.disconnect();
+      if (!("IntersectionObserver" in window)) return;
+      const buttons = [...document.querySelectorAll("nav [data-target]")];
+      sectionObserver = new IntersectionObserver(() => {
+        const bandTop = innerHeight * 0.3;
+        const bandBottom = innerHeight * 0.7;
+        const visible = buttons
+          .map(button => ({
+            button,
+            target: document.getElementById(button.dataset.target),
+          }))
+          .filter(item => {
+            if (!item.target) return false;
+            const bounds = item.target.getBoundingClientRect();
+            return bounds.top <= bandBottom && bounds.bottom >= bandTop;
+          })
+          .sort((left, right) =>
+            right.target.getBoundingClientRect().top - left.target.getBoundingClientRect().top
+          )[0];
+        if (!visible) return;
+        buttons.forEach((button) => {
+          const active = button === visible.button;
+          button.classList.toggle("active", active);
+          if (active) button.setAttribute("aria-current", "location");
+          else button.removeAttribute("aria-current");
+        });
+      }, { rootMargin: "-30% 0px -30% 0px", threshold: 0 });
+      buttons.forEach((button) => {
+        const target = document.getElementById(button.dataset.target);
+        if (target) sectionObserver.observe(target);
+      });
+    }
+    observeNavigationTargets();
   </script>
 </body>
 </html>

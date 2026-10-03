@@ -2,27 +2,25 @@ import yfinance as yf
 import pandas as pd
 import ta
 
+from core.data_models import MarketData
+from data_sources import DataSourceManager
+
 class Utils:
     """Download prices and compute causal indicators for daily data."""
 
     @staticmethod
+    def fetch_market_data(ticker):
+        """Return normalized data, trying Yahoo Finance then Stooq."""
+        return DataSourceManager().fetch(ticker, period="12mo")
+
+    @staticmethod
     def fetch_data(ticker):
-        try:
-            data = yf.download(
-                ticker,
-                period="12mo",
-                interval="1d",
-                auto_adjust=True,
-                progress=False
-            )
-
-            if data.empty:
-                raise ValueError("Données historiques non disponibles")
-
-            return data
-
-        except Exception as e:
-            raise RuntimeError(f"Erreur de téléchargement : {e}")
+        """Backward-compatible DataFrame view for the analysis engine."""
+        market_data = Utils.fetch_market_data(ticker)
+        history = market_data.history.copy()
+        history.attrs["market_data_source"] = market_data.source
+        history.attrs["market_data_symbol"] = market_data.symbol
+        return history
         
     @staticmethod
     def _to_series(data, col):

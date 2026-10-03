@@ -7,19 +7,27 @@ import re
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 import pandas as pd
+import requests
 import yfinance as yf
 
 from AnalyseFondamentale.FundamentalAnalysis import FundamentalAnalysis
 from AnalyseTechnique.TechnicalAnalysis import TechnicalAnalysis
 from StockAnalyzer import StockAnalyzer
+from core.analysis_history import AnalysisHistory
+from data_sources import DataSourceManager
 
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_TICKERS = ["CS.PA", "TTE.PA", "SAN.PA"]
+configured_history_database = os.getenv("FINANCE_ANALYTICS_DB", "").strip()
+history_database = Path(configured_history_database or ROOT / "financeanalytics.sqlite3")
+if not history_database.is_absolute():
+    history_database = ROOT / history_database
+analysis_history = AnalysisHistory(history_database)
 
 
 ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*m")
@@ -319,13 +327,40 @@ def analyze_ticker(ticker):
         category_scores,
     ) = fundamental.run()
     fundamental_summary = build_fundamental_summary(categories, category_scores)
+    technical_analysis = TechnicalAnalysis(symbol)
     technical_df, technical_score, recommendation, price, fibonacci = (
-        TechnicalAnalysis(symbol).run()
+        technical_analysis.run()
     )
     technical_summary = build_technical_summary(
         technical_df.to_dict(orient="records") if technical_df is not None else [],
         recommendation,
     )
+    data_quality = {
+        "available": False,
+        "reliable": None,
+        "sources": ["Yahoo Finance"],
+        "difference_pct": None,
+        "date": None,
+        "message": "Comparaison Alpha Vantage indisponible.",
+    }
+    try:
+        comparison = DataSourceManager().compare(symbol, period="12mo")
+        data_quality.update(
+            {
+                "available": True,
+                "reliable": comparison["reliable"],
+                "sources": ["Yahoo Finance", "Alpha Vantage"],
+                "difference_pct": comparison["difference_pct"],
+                "date": comparison["date"],
+                "message": (
+                    "Cours confirmé par deux sources."
+                    if comparison["reliable"]
+                    else "Écart supérieur à 1 % entre les sources."
+                ),
+            }
+        )
+    except (ValueError, RuntimeError, OSError, requests.RequestException) as error:
+        data_quality["message"] = str(error)
 
     global_score = None
     interpretation = None
@@ -345,6 +380,8 @@ def analyze_ticker(ticker):
         "company": company_name or symbol,
         "sector": fundamental.sector,
         "currency": fundamental.info.get("currency", ""),
+        "data_source": getattr(technical_analysis, "data_source", ""),
+        "data_quality": data_quality,
         "market_cap": market_cap,
         "price": price,
         "scores": {
@@ -384,7 +421,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        if urlparse(self.path).path != "/":
+        parsed_url = urlparse(self.path)
+        if parsed_url.path == "/api/history":
+            ticker = parse_qs(parsed_url.query).get("ticker", [""])[0]
+            try:
+                history = analysis_history.for_ticker(ticker)
+            except ValueError as error:
+                self._send_json({"error": str(error)}, status=400)
+                return
+            self._send_json({"ticker": ticker.strip().upper(), "history": history})
+            return
+        if parsed_url.path != "/":
             self.send_error(404)
             return
         dashboard = (ROOT / "dashboard.html").read_bytes()
@@ -395,12 +442,25 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.wfile.write(dashboard)
 
     def do_POST(self):
-        if urlparse(self.path).path != "/api/analyze":
+        path = urlparse(self.path).path
+        if path not in {"/api/analyze", "/api/history/purge"}:
             self.send_error(404)
             return
         try:
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length))
+            if not isinstance(payload, dict):
+                raise ValueError("Le corps de la requête doit être un objet JSON.")
+            if path == "/api/history/purge":
+                ticker = payload.get("ticker")
+                if not isinstance(ticker, str):
+                    raise ValueError("Le champ ticker doit être une chaîne.")
+                deleted = analysis_history.delete_ticker(ticker)
+                self._send_json(
+                    {"ticker": ticker.strip().upper(), "deleted": deleted}
+                )
+                return
+
             tickers = payload.get("tickers", [])
             if not isinstance(tickers, list):
                 raise ValueError("Le champ tickers doit être une liste.")
@@ -412,7 +472,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
             errors = []
             for ticker in tickers:
                 try:
-                    results.append(analyze_ticker(ticker))
+                    result = json_safe(analyze_ticker(ticker))
+                    analysis_history.save_if_changed(result)
+                    result["history"] = analysis_history.for_ticker(result["ticker"])
+                    results.append(result)
                 except Exception as error:
                     errors.append({"ticker": ticker, "message": str(error)})
             print(

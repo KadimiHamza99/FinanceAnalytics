@@ -16,3 +16,5 @@ tabulate
 
 # Requêtes HTTP pour les notifications
 requests
+
+# Source historique de secours (Stooq utilise l'API HTTP standard)
