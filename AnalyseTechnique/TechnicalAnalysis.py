@@ -12,8 +12,9 @@ class TechnicalAnalysis:
     calculés afin qu'une donnée absente ne crée pas de bonus artificiel.
     """
 
-    def __init__(self, ticker_symbol):
+    def __init__(self, ticker_symbol, market_data=None):
         self.ticker_symbol = ticker_symbol
+        self.market_data = market_data
         self.evaluator = IndicatorEvaluator()
 
     @staticmethod
@@ -508,7 +509,12 @@ class TechnicalAnalysis:
 
     def run(self):
         try:
-            data = Utils.fetch_data(self.ticker_symbol)
+            if self.market_data is None:
+                data = Utils.fetch_data(self.ticker_symbol)
+                self.data_source = data.attrs.get("market_data_source", "")
+            else:
+                data = self.market_data.history
+                self.data_source = self.market_data.source
             data = Utils.compute_indicators(data)
         except Exception as e:
             return pd.DataFrame(), 0, f"❌ {e}", None, None

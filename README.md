@@ -31,7 +31,11 @@ plusieurs tickers séparés par des virgules et cliquez sur **Lancer l'analyse**
 Le dashboard réutilise les analyses existantes et affiche les scores, les
 indicateurs, la recommandation technique, les zones Fibonacci, une droite de
 régression calculée sur l'historique maximal disponible, ainsi qu'une
-comparaison côte à côte entre deux valeurs et une veille personnalisée.
+comparaison côte à côte entre deux valeurs et une veille personnalisée. Chaque
+analyse réussie est enregistrée dans `financeanalytics.sqlite3` à la racine du
+projet. La fiche de chaque titre présente l'évolution des scores, du cours et
+des indicateurs fondamentaux par rapport aux analyses précédentes. La base est
+créée automatiquement et peut être déplacée avec `FINANCE_ANALYTICS_DB`.
 
 L'exécution CLI reste volontairement silencieuse : elle affiche uniquement la
 progression, les confirmations et les erreurs. Les données détaillées sont
@@ -45,11 +49,19 @@ lignes dont le premier caractère utile est `#` sont ignorées.
 ### 1. Collecte et préparation
 
 `yfinance` fournit les informations financières de l'entreprise et un
-historique quotidien sur douze mois. Les champs absents ne sont pas remplacés
+historique quotidien sur douze mois. Alpha Vantage est utilisé automatiquement
+comme seconde source de prix si Yahoo Finance est indisponible. Stooq reste un
+dernier repli. Les trois adaptateurs
+produisent le même objet canonique `MarketData` avant l'analyse. Les champs absents ne sont pas remplacés
 par une valeur optimiste : l'indicateur est affiché comme indisponible et sa
 pondération est retirée du calcul concerné. Pour les cours, les colonnes
 multi-indexées éventuellement renvoyées par Yahoo sont normalisées en séries
 numériques simples.
+
+La source peut être imposée avec `FINANCE_DATA_SOURCE=yahoo`,
+`FINANCE_DATA_SOURCE=alpha` ou `FINANCE_DATA_SOURCE=stooq`; la valeur `auto`
+(par défaut) essaie Yahoo puis Alpha Vantage et Stooq. La clé est lue depuis
+`ALPHAVANTAGE_API_KEY` et ne doit jamais être commitée.
 
 ### 2. Analyse fondamentale
 
@@ -151,6 +163,8 @@ portefeuille. Une notification échouée ne bloque pas le rapport local.
 - `StockAnalyzer.py` : orchestration et restitution du rapport.
 - `core/presentation.py` : service unique de présentation, formatage, tableaux,
   rapports et messages de notification.
+- `core/data_models.py` et `data_sources/` : modèle canonique `MarketData`,
+  adaptateur Yahoo Finance, adaptateur Stooq et sélection/fallback des sources.
 - `AnalyseFondamentale/` : métriques, pondérations sectorielles et
   interprétations.
 - `AnalyseTechnique/` : indicateurs, Fibonacci et scoring technique.
